@@ -1,0 +1,152 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  deployments: write
+  pull-requests: write
+
+jobs:
+  benchmark:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-registry-
+          
+    - name: Install hyperfine
+      run: |
+        wget https://github.com/sharkdp/hyperfine/releases/download/v1.18.0/hyperfine_1.18.0_amd64.deb
+        sudo dpkg -i hyperfine_1.18.0_amd64.deb
+        
+    - name: Build release binary
+      run: cargo build --release
+      
+    - name: Prepare test data
+      run: |
+        # Create test directory structure
+        mkdir -p bench_data/{small,medium,large}
+        
+        # Small files (100 files, 1KB each)
+        for i in {1..100}; do
+          printf "line %s\n" {1..50} > bench_data/small/file_$i.txt
+        done
+        
+        # Medium files (100 files, 100KB each)
+        for i in {1..100}; do
+          printf "line %s\n" {1..5000} > bench_data/medium/file_$i.txt
+        done
+        
+        # Large files (10 files, 10MB each)
+        for i in {1..10}; do
+          printf "line %s\n" {1..500000} > bench_data/large/file_$i.txt
+        done
+        
+        # Add some files with issues
+        echo -n "no newline" > bench_data/small/no_newline.txt
+        echo "trailing spaces  " > bench_data/small/trailing.txt
+        
+    - name: Run benchmarks
+      run: |
+        # Benchmark different scenarios
+        hyperfine \
+          --warmup 3 \
+          --min-runs 10 \
+          --export-json benchmark_results.json \
+          --export-markdown benchmark_results.md \
+          './target/release/lineguard bench_data/small' \
+          './target/release/lineguard bench_data/medium' \
+          './target/release/lineguard bench_data/large' \
+          './target/release/lineguard bench_data --recursive' \
+          './target/release/lineguard bench_data/**/*.txt'
+          
+    - name: Store benchmark result
+      uses: benchmark-action/github-action-benchmark@v1
+      if: github.event_name != 'pull_request'
+      with:
+        tool: 'hyperfine'
+        output-file-path: benchmark_results.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
+        
+    - name: Comment PR with results
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const markdown = fs.readFileSync('benchmark_results.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## Benchmark Results\n\n${markdown}`
+          })
+
+  size-check:
+    name: Binary Size Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Build binaries
+      run: |
+        # Build different configurations
+        cargo build --release
+        cargo build --release --no-default-features
+        
+    - name: Check binary sizes
+      run: |
+        ls -lh target/release/lineguard
+        size target/release/lineguard
+        
+        # Create size report
+        cat << EOF > size_report.md
+        ## Binary Size Report
+        
+        | Configuration | Size |
+        |--------------|------|
+        | Release | $(ls -lh target/release/lineguard | awk '{print $5}') |
+        | Stripped | $(strip target/release/lineguard && ls -lh target/release/lineguard | awk '{print $5}') |
+        EOF
+        
+    - name: Comment PR with size report
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('size_report.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: report
+          })

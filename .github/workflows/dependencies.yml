@@ -1,0 +1,87 @@
+name: Dependencies
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Install cargo-edit
+      run: cargo install cargo-edit
+      
+    - name: Update dependencies
+      run: |
+        # Update all dependencies to latest versions
+        cargo upgrade --workspace --incompatible
+        
+    - name: Check if updates available
+      id: check
+      run: |
+        if git diff --quiet Cargo.lock; then
+          echo "No updates available"
+          echo "has_updates=false" >> $GITHUB_OUTPUT
+        else
+          echo "Updates available"
+          echo "has_updates=true" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Run tests
+      if: steps.check.outputs.has_updates == 'true'
+      run: |
+        cargo test --all-features
+        cargo clippy --all-targets --all-features -- -D warnings
+        
+    - name: Create Pull Request
+      if: steps.check.outputs.has_updates == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: update dependencies"
+        title: "chore: update dependencies"
+        body: |
+          ## Automated Dependency Update
+          
+          This PR updates the project dependencies to their latest versions.
+          
+          ### Changes
+          ```
+          ${{ steps.check.outputs.changes }}
+          ```
+          
+          ### Checklist
+          - [x] All tests pass
+          - [x] Clippy checks pass
+          - [ ] Manual testing completed
+          
+          Please review the changes and test manually before merging.
+        branch: deps/update-dependencies
+        delete-branch: true
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Run security audit
+      uses: rustsec/audit-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}

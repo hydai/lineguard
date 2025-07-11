@@ -1,5 +1,10 @@
 # LineGuard
 
+[![CI](https://github.com/hydai/lineguard/workflows/CI/badge.svg)](https://github.com/hydai/lineguard/actions/workflows/ci.yml)
+[![Release](https://github.com/hydai/lineguard/workflows/Release/badge.svg)](https://github.com/hydai/lineguard/actions/workflows/release.yml)
+[![Crates.io](https://img.shields.io/crates/v/lineguard.svg)](https://crates.io/crates/lineguard)
+[![License](https://img.shields.io/crates/l/lineguard.svg)](LICENSE)
+
 A fast and reliable file linter that ensures proper line endings and clean formatting.
 
 ## Features
@@ -19,6 +24,25 @@ A fast and reliable file linter that ensures proper line endings and clean forma
 - 📝 **File Extension Filtering**: Check only specific file types
 
 ## Installation
+
+### From Crates.io
+
+```bash
+cargo install lineguard
+```
+
+### From GitHub Releases
+
+Download pre-built binaries from the [latest release](https://github.com/hydai/lineguard/releases/latest):
+
+```bash
+# Linux/macOS
+curl -L https://github.com/hydai/lineguard/releases/latest/download/lineguard-{VERSION}-{TARGET}.tar.gz | tar xz
+sudo mv lineguard /usr/local/bin/
+
+# Windows
+# Download the .zip file and extract lineguard.exe to a directory in your PATH
+```
 
 ### From Source
 

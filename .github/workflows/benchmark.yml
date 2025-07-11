@@ -68,26 +68,66 @@ jobs:
         
     - name: Run benchmarks
       run: |
-        # Benchmark different scenarios
+        # Benchmark different scenarios and create custom output
         hyperfine \
           --warmup 3 \
           --min-runs 10 \
-          --export-json benchmark_results.json \
+          --export-json hyperfine_results.json \
           --export-markdown benchmark_results.md \
           './target/release/lineguard bench_data/small' \
           './target/release/lineguard bench_data/medium' \
           './target/release/lineguard bench_data/large' \
           './target/release/lineguard bench_data --recursive' \
           './target/release/lineguard bench_data/**/*.txt'
+        
+        # Convert hyperfine output to custom benchmark format
+        python3 << 'EOF'
+        import json
+        import sys
+
+        with open('hyperfine_results.json', 'r') as f:
+            hyperfine_data = json.load(f)
+
+        benchmarks = []
+        for result in hyperfine_data['results']:
+            command = result['command']
+            # Extract scenario name from command
+            if 'small' in command:
+                name = 'Small files (100x1KB)'
+            elif 'medium' in command:
+                name = 'Medium files (100x100KB)'
+            elif 'large' in command:
+                name = 'Large files (10x10MB)'
+            elif '--recursive' in command:
+                name = 'Recursive scan'
+            else:
+                name = 'Glob pattern'
+            
+            benchmarks.append({
+                'name': name,
+                'unit': 'seconds',
+                'value': result['mean']
+            })
+
+        output = {
+            'name': 'LineGuard Performance',
+            'unit': 'seconds',
+            'benchmarks': benchmarks
+        }
+
+        with open('benchmark_results.json', 'w') as f:
+            json.dump(output, f, indent=2)
+        EOF
           
     - name: Store benchmark result
       uses: benchmark-action/github-action-benchmark@v1
       if: github.event_name != 'pull_request'
       with:
-        tool: 'hyperfine'
+        tool: 'customSmallerIsBetter'
         output-file-path: benchmark_results.json
         github-token: ${{ secrets.GITHUB_TOKEN }}
         auto-push: true
+        benchmark-data-dir-path: 'dev/bench'
         
     - name: Comment PR with results
       uses: actions/github-script@v7

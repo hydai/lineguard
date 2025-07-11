@@ -7,9 +7,13 @@ use std::path::{Path, PathBuf};
 pub fn discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, anyhow::Error> {
     let mut files = Vec::new();
 
-    // Create config with ignore patterns from CLI
+    // Create config with ignore patterns and extensions from CLI
     let config = Config {
         ignore_patterns: args.ignore.clone(),
+        file_extensions: args
+            .extensions
+            .as_ref()
+            .map_or_else(Vec::new, |v| v.clone()),
         ..Config::default()
     };
 

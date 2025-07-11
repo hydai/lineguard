@@ -46,7 +46,11 @@ pub struct CliArgs {
     #[arg(long, help = "Ignore files matching pattern")]
     pub ignore: Vec<String>,
 
-    #[arg(long, help = "File extensions to check (comma-separated)")]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        help = "File extensions to check (comma-separated)"
+    )]
     pub extensions: Option<Vec<String>>,
 
     #[arg(long, help = "Disable newline ending check")]

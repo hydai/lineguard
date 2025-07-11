@@ -1,11 +1,17 @@
 use crate::{CliArgs, Config};
-use glob::glob;
+use glob::{Pattern, glob};
 use std::fs;
 use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
 pub fn discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, anyhow::Error> {
     let mut files = Vec::new();
+
+    // Create config with ignore patterns from CLI
+    let config = Config {
+        ignore_patterns: args.ignore.clone(),
+        ..Config::default()
+    };
 
     if args.stdin {
         // Read file paths from stdin
@@ -17,12 +23,12 @@ pub fn discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, anyhow::Error> {
             let line = line.trim();
             if !line.is_empty() {
                 let path = PathBuf::from(line);
-                if path.exists() && path.is_file() {
-                    // Load config to check if file should be processed
-                    let config = Config::default();
-                    if should_check_file(&path, &config) {
-                        files.push(path);
-                    }
+                if path.exists()
+                    && path.is_file()
+                    && should_check_file(&path, &config)
+                    && !is_ignored(&path, &config.ignore_patterns)?
+                {
+                    files.push(path);
                 }
             }
         }
@@ -33,14 +39,16 @@ pub fn discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, anyhow::Error> {
 
             // Check if it's a directory
             if path.is_dir() {
-                discover_files_in_dir(&path, args.recursive, &mut files)?;
+                discover_files_in_dir(&path, args.recursive, &mut files, &config)?;
             } else {
                 // Try glob pattern first
                 if let Ok(paths) = glob(pattern) {
                     let mut found_any = false;
-                    let config = Config::default();
                     for path in paths.flatten() {
-                        if path.is_file() && should_check_file(&path, &config) {
+                        if path.is_file()
+                            && should_check_file(&path, &config)
+                            && !is_ignored(&path, &config.ignore_patterns)?
+                        {
                             files.push(path);
                             found_any = true;
                         }
@@ -49,17 +57,21 @@ pub fn discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, anyhow::Error> {
                     // If glob didn't find anything, try as literal path
                     if !found_any {
                         let path = PathBuf::from(pattern);
-                        if path.exists() && path.is_file() {
-                            let config = Config::default();
-                            if should_check_file(&path, &config) {
-                                files.push(path);
-                            }
+                        if path.exists()
+                            && path.is_file()
+                            && should_check_file(&path, &config)
+                            && !is_ignored(&path, &config.ignore_patterns)?
+                        {
+                            files.push(path);
                         }
                     }
                 } else {
                     // If glob pattern is invalid, treat as literal path
                     let path = PathBuf::from(pattern);
-                    if path.exists() && path.is_file() {
+                    if path.exists()
+                        && path.is_file()
+                        && !is_ignored(&path, &config.ignore_patterns)?
+                    {
                         files.push(path);
                     }
                 }
@@ -74,17 +86,19 @@ fn discover_files_in_dir(
     dir: &Path,
     recursive: bool,
     files: &mut Vec<PathBuf>,
+    config: &Config,
 ) -> Result<(), anyhow::Error> {
-    let config = Config::default();
-
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
         let path = entry.path();
 
-        if path.is_file() && should_check_file(&path, &config) {
+        if path.is_file()
+            && should_check_file(&path, config)
+            && !is_ignored(&path, &config.ignore_patterns)?
+        {
             files.push(path);
-        } else if path.is_dir() && recursive {
-            discover_files_in_dir(&path, recursive, files)?;
+        } else if path.is_dir() && recursive && !is_ignored(&path, &config.ignore_patterns)? {
+            discover_files_in_dir(&path, recursive, files, config)?;
         }
     }
 
@@ -133,4 +147,56 @@ pub fn should_check_file(path: &Path, config: &Config) -> bool {
     }
 
     true
+}
+
+fn is_ignored(path: &Path, ignore_patterns: &[String]) -> Result<bool, anyhow::Error> {
+    if ignore_patterns.is_empty() {
+        return Ok(false);
+    }
+
+    for pattern_str in ignore_patterns {
+        // Check if any parent directory matches the pattern
+        let mut current_path = path;
+        loop {
+            // Try to compile as a glob pattern
+            if let Ok(pattern) = Pattern::new(pattern_str) {
+                // Check absolute path
+                if pattern.matches_path(current_path) {
+                    return Ok(true);
+                }
+
+                // Check relative path from current directory
+                if let Ok(current_dir) = std::env::current_dir() {
+                    if let Ok(relative_path) = current_path.strip_prefix(&current_dir) {
+                        if pattern.matches_path(relative_path) {
+                            return Ok(true);
+                        }
+
+                        // Also check if pattern matches any parent component
+                        let relative_str = relative_path.to_string_lossy();
+                        if pattern.matches(&relative_str) {
+                            return Ok(true);
+                        }
+                    }
+                }
+
+                // Check just the filename
+                if let Some(file_name) = current_path.file_name() {
+                    if let Some(file_name_str) = file_name.to_str() {
+                        if pattern.matches(file_name_str) {
+                            return Ok(true);
+                        }
+                    }
+                }
+            }
+
+            // Move to parent directory
+            match current_path.parent() {
+                Some(parent) if parent != current_path => current_path = parent,
+                _ => break,
+            }
+        }
+    }
+
+    Ok(false)
 }

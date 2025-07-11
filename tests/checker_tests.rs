@@ -86,11 +86,11 @@ fn test_trailing_tabs() {
 fn test_crlf_line_endings() {
     // File with CRLF line endings should be treated correctly
     let content = "line 1\r\nline 2\r\nline 3\r\n";
-    
+
     // Should not detect trailing spaces from \r
     let issues = check_trailing_spaces(content);
     assert!(issues.is_empty());
-    
+
     // Should not detect missing newline
     let newline_issue = check_newline_ending(content);
     assert!(newline_issue.is_none());
@@ -100,7 +100,7 @@ fn test_crlf_line_endings() {
 fn test_crlf_with_trailing_spaces() {
     let content = "line 1  \r\nline 2\r\nline 3\r\n";
     let issues = check_trailing_spaces(content);
-    
+
     assert_eq!(issues.len(), 1);
     assert_eq!(issues[0].line, Some(1));
 }
@@ -109,7 +109,7 @@ fn test_crlf_with_trailing_spaces() {
 fn test_crlf_missing_final_newline() {
     let content = "line 1\r\nline 2\r\nline 3";
     let issue = check_newline_ending(content);
-    
+
     assert!(issue.is_some());
     assert_eq!(issue.unwrap().issue_type, IssueType::MissingNewline);
 }

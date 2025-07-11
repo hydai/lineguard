@@ -3,13 +3,18 @@ use predicates::prelude::*;
 
 #[test]
 fn test_cli_accepts_single_file_path() {
+    use tempfile::NamedTempFile;
+
+    let temp_file = NamedTempFile::new().unwrap();
+    std::fs::write(temp_file.path(), "test content\n").unwrap();
+
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg("test.txt");
+    cmd.arg(temp_file.path());
     cmd.arg("--format").arg("json");
     cmd.assert()
         .success()
         .stdout(predicate::str::contains("{"))
-        .stdout(predicate::str::contains("}"));
+        .stdout(predicate::str::contains("\"files_checked\": 1"));
 }
 
 #[test]

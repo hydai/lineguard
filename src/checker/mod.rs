@@ -1,3 +1,4 @@
+use std::fs;
 use std::path::Path;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -20,8 +21,34 @@ pub enum IssueType {
     TrailingSpace,
 }
 
-pub fn check_file(_path: &Path) -> CheckResult {
-    todo!("Implement file checking")
+pub fn check_file(path: &Path) -> CheckResult {
+    let mut issues = Vec::new();
+
+    // Read file content
+    let content = match fs::read_to_string(path) {
+        Ok(content) => content,
+        Err(_) => {
+            // If we can't read the file, return empty result
+            return CheckResult {
+                file_path: path.to_path_buf(),
+                issues,
+            };
+        },
+    };
+
+    // Check newline ending
+    if let Some(issue) = check_newline_ending(&content) {
+        issues.push(issue);
+    }
+
+    // Check trailing spaces
+    let mut trailing_space_issues = check_trailing_spaces(&content);
+    issues.append(&mut trailing_space_issues);
+
+    CheckResult {
+        file_path: path.to_path_buf(),
+        issues,
+    }
 }
 
 pub fn check_newline_ending(content: &str) -> Option<Issue> {

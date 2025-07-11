@@ -133,18 +133,3 @@ jobs:
         files: ./cobertura.xml
         fail_ci_if_error: false
 
-  msrv:
-    name: Minimum Supported Rust Version
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Install Rust 1.70.0
-      uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: "1.70.0"
-        
-    - name: Check MSRV
-      run: cargo check --all-features

@@ -174,7 +174,7 @@ fn report_fix_results(
             Err(e) => {
                 error_count += 1;
                 if args.format == OutputFormat::Human {
-                    eprintln!("Error: {}", e);
+                    eprintln!("Error: {e}");
                 }
             },
             _ => {},

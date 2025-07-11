@@ -44,7 +44,7 @@ fn test_extensions_parameter_multiple() {
 }
 
 #[test]
-fn test_extensions_ignores_hidden_files() {
+fn test_extensions_includes_hidden_files_by_default() {
     let temp_dir = TempDir::new().unwrap();
 
     // Create test files
@@ -58,9 +58,9 @@ fn test_extensions_ignores_hidden_files() {
     cmd.arg("--format").arg("json");
 
     cmd.assert()
-        .success()
-        .stdout(predicate::str::contains("\"files_checked\": 1"))  // Hidden file ignored
-        .stdout(predicate::str::contains(".hidden.txt").not());
+        .failure()  // Should fail because .hidden.txt has issues
+        .stdout(predicate::str::contains("\"files_checked\": 2"))  // Both files checked
+        .stdout(predicate::str::contains(".hidden.txt")); // Hidden file is checked
 }
 
 #[test]

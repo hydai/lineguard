@@ -24,11 +24,13 @@ fn test_should_check_with_extensions_filter() {
 }
 
 #[test]
-fn test_should_skip_hidden_files() {
+fn test_should_check_file_does_not_filter_hidden_files() {
     let config = Config::default();
 
-    assert!(!should_check_file(Path::new(".gitignore"), &config));
-    assert!(!should_check_file(Path::new(".hidden"), &config));
+    // should_check_file no longer filters hidden files
+    // That's handled by the --no-hidden flag in discover_files
+    assert!(should_check_file(Path::new(".gitignore"), &config));
+    assert!(should_check_file(Path::new(".hidden"), &config));
     assert!(should_check_file(Path::new("visible.txt"), &config));
 }
 

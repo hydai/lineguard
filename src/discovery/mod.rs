@@ -50,6 +50,7 @@ pub fn discover_files(
                     && path.is_file()
                     && should_check_file(&path, &config)
                     && !is_ignored(&path, &config.ignore_patterns)?
+                    && !(args.no_hidden && is_hidden_file(&path))
                 {
                     files.push(path);
                 }
@@ -62,7 +63,7 @@ pub fn discover_files(
 
             // Check if it's a directory
             if path.is_dir() {
-                discover_files_in_dir(&path, args.recursive, &mut files, &config)?;
+                discover_files_in_dir(&path, args.recursive, &mut files, &config, args.no_hidden)?;
             } else {
                 // Try glob pattern first
                 if let Ok(paths) = glob(pattern) {
@@ -71,6 +72,7 @@ pub fn discover_files(
                         if path.is_file()
                             && should_check_file(&path, &config)
                             && !is_ignored(&path, &config.ignore_patterns)?
+                            && !(args.no_hidden && is_hidden_file(&path))
                         {
                             files.push(path);
                             found_any = true;
@@ -84,6 +86,7 @@ pub fn discover_files(
                             && path.is_file()
                             && should_check_file(&path, &config)
                             && !is_ignored(&path, &config.ignore_patterns)?
+                            && !(args.no_hidden && is_hidden_file(&path))
                         {
                             files.push(path);
                         }
@@ -95,6 +98,7 @@ pub fn discover_files(
                         && path.is_file()
                         && should_check_file(&path, &config)
                         && !is_ignored(&path, &config.ignore_patterns)?
+                        && !(args.no_hidden && is_hidden_file(&path))
                     {
                         files.push(path);
                     }
@@ -150,6 +154,7 @@ fn discover_files_in_dir(
     recursive: bool,
     files: &mut Vec<PathBuf>,
     config: &Config,
+    no_hidden: bool,
 ) -> Result<(), anyhow::Error> {
     let entries = match fs::read_dir(dir) {
         Ok(entries) => entries,
@@ -169,29 +174,40 @@ fn discover_files_in_dir(
         };
         let path = entry.path();
 
+        // Skip hidden files if no_hidden is true
+        if no_hidden {
+            if let Some(file_name) = path.file_name() {
+                if let Some(name_str) = file_name.to_str() {
+                    if name_str.starts_with('.') {
+                        continue;
+                    }
+                }
+            }
+        }
+
         if path.is_file()
             && should_check_file(&path, config)
             && !is_ignored(&path, &config.ignore_patterns)?
         {
             files.push(path);
         } else if path.is_dir() && recursive && !is_ignored(&path, &config.ignore_patterns)? {
-            discover_files_in_dir(&path, recursive, files, config)?;
+            discover_files_in_dir(&path, recursive, files, config, no_hidden)?;
         }
     }
 
     Ok(())
 }
 
-pub fn should_check_file(path: &Path, config: &Config) -> bool {
-    // Skip hidden files (starting with .)
+fn is_hidden_file(path: &Path) -> bool {
     if let Some(file_name) = path.file_name() {
         if let Some(name_str) = file_name.to_str() {
-            if name_str.starts_with('.') {
-                return false;
-            }
+            return name_str.starts_with('.');
         }
     }
+    false
+}
 
+pub fn should_check_file(path: &Path, config: &Config) -> bool {
     // Get file extension
     let extension = match path.extension() {
         Some(ext) => match ext.to_str() {

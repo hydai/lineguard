@@ -26,7 +26,7 @@ ignore_patterns = ["ignore.txt"]
 
     cmd.assert()
         .failure()  // Should fail due to bad.txt
-        .stdout(predicate::str::contains("\"files_checked\": 2"))  // Only good.txt and bad.txt
+        .stdout(predicate::str::contains("\"files_checked\": 3"))  // good.txt, bad.txt, and .lineguardrc
         .stdout(predicate::str::contains("bad.txt"))
         .stdout(predicate::str::contains("ignore.txt").not());
 }
@@ -55,7 +55,7 @@ file_extensions = ["txt", "py"]
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("\"files_checked\": 2")); // Only .txt and .py files
+        .stdout(predicate::str::contains("\"files_checked\": 3")); // .txt, .py files, and .lineguardrc
 }
 
 #[test]
@@ -138,5 +138,5 @@ ignore_patterns = []
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("\"files_checked\": 2")); // Both .txt and .rs, but not ignore.txt
+        .stdout(predicate::str::contains("\"files_checked\": 3")); // Both .txt and .rs, and .lineguardrc, but not ignore.txt
 }

@@ -26,6 +26,7 @@ fn test_discover_single_file() {
         dry_run: false,
         from: None,
         to: None,
+        no_hidden: false,
     };
 
     let config = Config::default();
@@ -66,6 +67,7 @@ fn test_discover_multiple_files() {
         dry_run: false,
         from: None,
         to: None,
+        no_hidden: false,
     };
 
     let config = Config::default();
@@ -105,6 +107,7 @@ fn test_discover_files_with_glob_pattern() {
         dry_run: false,
         from: None,
         to: None,
+        no_hidden: false,
     };
 
     let config = Config::default();
@@ -156,6 +159,7 @@ fn test_discover_files_in_directory() {
         dry_run: false,
         from: None,
         to: None,
+        no_hidden: false,
     };
 
     let config = Config::default();
@@ -196,6 +200,7 @@ fn test_discover_files_recursive() {
         dry_run: false,
         from: None,
         to: None,
+        no_hidden: false,
     };
 
     let config = Config::default();

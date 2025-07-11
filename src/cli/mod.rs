@@ -73,6 +73,9 @@ pub struct CliArgs {
         help = "Check files changed until this commit (Git only, default: HEAD)"
     )]
     pub to: Option<String>,
+
+    #[arg(long, help = "Skip hidden files (files starting with .)")]
+    pub no_hidden: bool,
 }
 
 pub fn parse_args() -> CliArgs {

@@ -21,6 +21,7 @@ fn test_discover_files_from_stdin_empty() {
         dry_run: false,
         from: None,
         to: None,
+        no_hidden: false,
     };
 
     // With stdin flag but no actual stdin, should return empty

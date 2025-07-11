@@ -98,3 +98,69 @@ fn test_discover_files_with_glob_pattern() {
     assert!(result.iter().any(|p| p.file_name().unwrap() == "file2.txt"));
     assert!(!result.iter().any(|p| p.file_name().unwrap() == "file1.rs"));
 }
+
+#[test]
+fn test_discover_files_in_directory() {
+    let temp_dir = TempDir::new().unwrap();
+    let file1 = temp_dir.path().join("file1.txt");
+    let file2 = temp_dir.path().join("file2.rs");
+
+    std::fs::write(&file1, "content").unwrap();
+    std::fs::write(&file2, "content").unwrap();
+
+    let args = CliArgs {
+        files: vec![temp_dir.path().to_string_lossy().to_string()],
+        stdin: false,
+        recursive: false,
+        format: lineguard::cli::OutputFormat::Human,
+        quiet: false,
+        verbose: false,
+        no_color: false,
+        config: None,
+        ignore: vec![],
+        extensions: None,
+        no_newline_check: false,
+        no_trailing_space: false,
+    };
+
+    let result = discover_files(&args).unwrap();
+    assert_eq!(result.len(), 2);
+    assert!(result.contains(&file1));
+    assert!(result.contains(&file2));
+}
+
+#[test]
+fn test_discover_files_recursive() {
+    let temp_dir = TempDir::new().unwrap();
+    let subdir = temp_dir.path().join("subdir");
+    std::fs::create_dir(&subdir).unwrap();
+
+    let file1 = temp_dir.path().join("file1.txt");
+    let file2 = subdir.join("file2.txt");
+    let file3 = subdir.join("file3.rs");
+
+    std::fs::write(&file1, "content").unwrap();
+    std::fs::write(&file2, "content").unwrap();
+    std::fs::write(&file3, "content").unwrap();
+
+    let args = CliArgs {
+        files: vec![temp_dir.path().to_string_lossy().to_string()],
+        stdin: false,
+        recursive: true,
+        format: lineguard::cli::OutputFormat::Human,
+        quiet: false,
+        verbose: false,
+        no_color: false,
+        config: None,
+        ignore: vec![],
+        extensions: None,
+        no_newline_check: false,
+        no_trailing_space: false,
+    };
+
+    let result = discover_files(&args).unwrap();
+    assert_eq!(result.len(), 3);
+    assert!(result.contains(&file1));
+    assert!(result.contains(&file2));
+    assert!(result.contains(&file3));
+}

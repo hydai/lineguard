@@ -235,7 +235,7 @@ CLI flags always override configuration file settings.
 
 ## Development
 
-This project follows strict Test-Driven Development (TDD) practices. See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for development guidelines.
+This project follows strict Test-Driven Development (TDD) practices. See [IMPLEMENTATION_PLAN.md](docs/planning/IMPLEMENTATION_PLAN.md) for development guidelines.
 
 ### Building
 

@@ -77,7 +77,7 @@ tests/
 
 ## Current Implementation Status
 
-The project is in the planning phase with complete specifications. Implementation follows the plan in IMPLEMENTATION_PLAN.md with 6 phases:
+The project is in the planning phase with complete specifications. Implementation follows the plan in docs/planning/IMPLEMENTATION_PLAN.md with 6 phases:
 1. Project Setup
 2. File Discovery and CLI
 3. Core Checking Logic

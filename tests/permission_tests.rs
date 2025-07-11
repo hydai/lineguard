@@ -192,24 +192,23 @@ fn test_readonly_file_on_windows() {
 #[cfg(windows)]
 fn test_permission_error_handling_windows() {
     let temp_dir = TempDir::new().unwrap();
-    
+
     // On Windows, we can test with read-only files
     let readonly_file = temp_dir.path().join("readonly.txt");
     fs::write(&readonly_file, "content\n").unwrap();
-    
+
     // Make file read-only
     let mut permissions = fs::metadata(&readonly_file).unwrap().permissions();
     permissions.set_readonly(true);
     fs::set_permissions(&readonly_file, permissions).unwrap();
-    
+
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
     cmd.current_dir(&temp_dir);
     cmd.arg("readonly.txt");
-    
+
     // The tool should handle read-only files gracefully
-    cmd.assert()
-        .success(); // Read-only files can still be read on Windows
-    
+    cmd.assert().success(); // Read-only files can still be read on Windows
+
     // Clean up
     let mut permissions = fs::metadata(&readonly_file).unwrap().permissions();
     permissions.set_readonly(false);

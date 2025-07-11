@@ -17,7 +17,7 @@ check: fmt clippy build test
 
 # Format code
 fmt:
-	cargo fmt
+	cargo fmt --all
 
 # Run clippy
 clippy:

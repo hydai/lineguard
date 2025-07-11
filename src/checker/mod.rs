@@ -24,10 +24,42 @@ pub fn check_file(_path: &Path) -> CheckResult {
     todo!("Implement file checking")
 }
 
-pub fn check_newline_ending(_content: &str) -> Option<Issue> {
-    todo!("Implement newline ending check")
+pub fn check_newline_ending(content: &str) -> Option<Issue> {
+    if content.is_empty() {
+        // Empty files are considered valid
+        return None;
+    }
+
+    if !content.ends_with('\n') {
+        Some(Issue {
+            issue_type: IssueType::MissingNewline,
+            line: None,
+            message: "Missing newline at end of file".to_string(),
+        })
+    } else if content.ends_with("\n\n") {
+        Some(Issue {
+            issue_type: IssueType::MultipleNewlines,
+            line: None,
+            message: "Multiple newlines at end of file".to_string(),
+        })
+    } else {
+        None
+    }
 }
 
-pub fn check_trailing_spaces(_content: &str) -> Vec<Issue> {
-    todo!("Implement trailing spaces check")
+pub fn check_trailing_spaces(content: &str) -> Vec<Issue> {
+    let mut issues = Vec::new();
+
+    for (line_num, line) in content.lines().enumerate() {
+        let trimmed = line.trim_end();
+        if trimmed.len() < line.len() {
+            issues.push(Issue {
+                issue_type: IssueType::TrailingSpace,
+                line: Some(line_num + 1), // Line numbers are 1-based
+                message: "Trailing spaces found".to_string(),
+            });
+        }
+    }
+
+    issues
 }

@@ -30,13 +30,33 @@ fn main() {
     }
 
     // Discover files to check
-    let files = match discover_files(&args, &config) {
-        Ok(files) => files,
+    let discovery_result = match discover_files(&args, &config) {
+        Ok(result) => result,
         Err(e) => {
             eprintln!("Error: {e}");
             process::exit(3);
         },
     };
+
+    let files = discovery_result.files;
+
+    // Show git range info in verbose mode
+    if args.verbose && discovery_result.git_range.is_some() {
+        if let Some(git_info) = &discovery_result.git_range {
+            println!(
+                "Git range: {}..{}",
+                &git_info.from[0..7.min(git_info.from.len())],
+                &git_info.to[0..7.min(git_info.to.len())]
+            );
+            println!("Changed files: {}", git_info.changed_files.len());
+            if !args.quiet {
+                for file in &git_info.changed_files {
+                    println!("  - {}", file.display());
+                }
+                println!();
+            }
+        }
+    }
 
     if files.is_empty() && !args.quiet {
         eprintln!("No files found to check");

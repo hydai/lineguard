@@ -242,3 +242,59 @@ fn test_from_option_with_json_output() {
         .stdout(predicate::str::contains("\"files_checked\": 1"))
         .stdout(predicate::str::contains("file2.txt"));
 }
+
+#[test]
+fn test_verbose_mode_shows_git_range_info() {
+    let temp_dir = TempDir::new().unwrap();
+    init_git_repo(&temp_dir).unwrap();
+
+    // Create commits
+    let commit1 = create_commit(
+        &temp_dir,
+        &[
+            ("file1.txt", "line 1\nline 2\n"),
+            ("file2.txt", "line 1\nline 2\n"),
+        ],
+        "Initial commit",
+    )
+    .unwrap();
+
+    let _commit2 = create_commit(
+        &temp_dir,
+        &[
+            ("file3.txt", "line 1\nline 2\n"),
+            ("file4.txt", "line 1  \nline 2"), // Has issues
+        ],
+        "Add more files",
+    )
+    .unwrap();
+
+    let commit3 = create_commit(
+        &temp_dir,
+        &[
+            ("file5.txt", "line 1\nline 2\n"),
+            ("file6.txt", "line 1\nline 2"), // Has issues
+        ],
+        "Add even more files",
+    )
+    .unwrap();
+
+    // Run with verbose mode
+    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("--verbose");
+    cmd.arg("--from").arg(&commit1);
+    cmd.arg("--to").arg(&commit3);
+    cmd.arg(".");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("Git range:"))
+        .stdout(predicate::str::contains(&commit1[0..7]))  // Short hash
+        .stdout(predicate::str::contains(&commit3[0..7]))  // Short hash
+        .stdout(predicate::str::contains("Changed files: 4"))
+        .stdout(predicate::str::contains("file3.txt"))
+        .stdout(predicate::str::contains("file4.txt"))
+        .stdout(predicate::str::contains("file5.txt"))
+        .stdout(predicate::str::contains("file6.txt"));
+}

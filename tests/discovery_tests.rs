@@ -30,8 +30,8 @@ fn test_discover_single_file() {
 
     let config = Config::default();
     let result = discover_files(&args, &config).unwrap();
-    assert_eq!(result.len(), 1);
-    assert_eq!(result[0], file_path);
+    assert_eq!(result.files.len(), 1);
+    assert_eq!(result.files[0], file_path);
 }
 
 #[test]
@@ -70,10 +70,10 @@ fn test_discover_multiple_files() {
 
     let config = Config::default();
     let result = discover_files(&args, &config).unwrap();
-    assert_eq!(result.len(), 3);
-    assert!(result.contains(&file1));
-    assert!(result.contains(&file2));
-    assert!(result.contains(&file3));
+    assert_eq!(result.files.len(), 3);
+    assert!(result.files.contains(&file1));
+    assert!(result.files.contains(&file2));
+    assert!(result.files.contains(&file3));
 }
 
 #[test]
@@ -109,10 +109,25 @@ fn test_discover_files_with_glob_pattern() {
 
     let config = Config::default();
     let result = discover_files(&args, &config).unwrap();
-    assert_eq!(result.len(), 2);
-    assert!(result.iter().any(|p| p.file_name().unwrap() == "file1.txt"));
-    assert!(result.iter().any(|p| p.file_name().unwrap() == "file2.txt"));
-    assert!(!result.iter().any(|p| p.file_name().unwrap() == "file1.rs"));
+    assert_eq!(result.files.len(), 2);
+    assert!(
+        result
+            .files
+            .iter()
+            .any(|p| p.file_name().unwrap() == "file1.txt")
+    );
+    assert!(
+        result
+            .files
+            .iter()
+            .any(|p| p.file_name().unwrap() == "file2.txt")
+    );
+    assert!(
+        !result
+            .files
+            .iter()
+            .any(|p| p.file_name().unwrap() == "file1.rs")
+    );
 }
 
 #[test]
@@ -145,9 +160,9 @@ fn test_discover_files_in_directory() {
 
     let config = Config::default();
     let result = discover_files(&args, &config).unwrap();
-    assert_eq!(result.len(), 2);
-    assert!(result.contains(&file1));
-    assert!(result.contains(&file2));
+    assert_eq!(result.files.len(), 2);
+    assert!(result.files.contains(&file1));
+    assert!(result.files.contains(&file2));
 }
 
 #[test]
@@ -185,8 +200,8 @@ fn test_discover_files_recursive() {
 
     let config = Config::default();
     let result = discover_files(&args, &config).unwrap();
-    assert_eq!(result.len(), 3);
-    assert!(result.contains(&file1));
-    assert!(result.contains(&file2));
-    assert!(result.contains(&file3));
+    assert_eq!(result.files.len(), 3);
+    assert!(result.files.contains(&file1));
+    assert!(result.files.contains(&file2));
+    assert!(result.files.contains(&file3));
 }

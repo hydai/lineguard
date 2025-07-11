@@ -5,8 +5,23 @@ use std::fs;
 use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
-pub fn discover_files(args: &CliArgs, base_config: &Config) -> Result<Vec<PathBuf>, anyhow::Error> {
+pub struct DiscoveryResult {
+    pub files: Vec<PathBuf>,
+    pub git_range: Option<GitRangeInfo>,
+}
+
+pub struct GitRangeInfo {
+    pub from: String,
+    pub to: String,
+    pub changed_files: Vec<PathBuf>,
+}
+
+pub fn discover_files(
+    args: &CliArgs,
+    base_config: &Config,
+) -> Result<DiscoveryResult, anyhow::Error> {
     let mut files = Vec::new();
+    let mut git_range_info = None;
 
     // Merge CLI arguments with config file settings (CLI takes precedence)
     let mut config = base_config.clone();
@@ -94,7 +109,15 @@ pub fn discover_files(args: &CliArgs, base_config: &Config) -> Result<Vec<PathBu
         let cwd = std::env::current_dir()?;
 
         // Get list of changed files from git
+        let to_commit = args.to.as_deref().unwrap_or("HEAD");
         let changed_files = git::get_changed_files(from_commit, args.to.as_deref(), &cwd)?;
+
+        // Store git range info
+        git_range_info = Some(GitRangeInfo {
+            from: from_commit.clone(),
+            to: to_commit.to_string(),
+            changed_files: changed_files.clone(),
+        });
 
         // Filter discovered files to only include changed files
         files.retain(|file| {
@@ -116,7 +139,10 @@ pub fn discover_files(args: &CliArgs, base_config: &Config) -> Result<Vec<PathBu
         });
     }
 
-    Ok(files)
+    Ok(DiscoveryResult {
+        files,
+        git_range: git_range_info,
+    })
 }
 
 fn discover_files_in_dir(

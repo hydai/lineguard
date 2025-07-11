@@ -27,4 +27,5 @@ fn test_discover_files_from_stdin_empty() {
     let config = Config::default();
     let result = discover_files(&args, &config);
     assert!(result.is_ok());
+    assert_eq!(result.unwrap().files.len(), 0);
 }

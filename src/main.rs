@@ -1,6 +1,7 @@
 use indicatif::{ProgressBar, ProgressStyle};
 use lineguard::checker::check_file;
 use lineguard::cli::{OutputFormat, parse_args};
+use lineguard::config::load_config;
 use lineguard::discovery::discover_files;
 use lineguard::reporter::{GitHubReporter, HumanReporter, JsonReporter, Reporter};
 use rayon::prelude::*;
@@ -10,8 +11,17 @@ use std::sync::Mutex;
 fn main() {
     let args = parse_args();
 
+    // Load configuration
+    let config = match load_config(args.config.as_deref()) {
+        Ok(config) => config,
+        Err(e) => {
+            eprintln!("Error loading configuration: {e}");
+            process::exit(4);
+        },
+    };
+
     // Discover files to check
-    let files = match discover_files(&args) {
+    let files = match discover_files(&args, &config) {
         Ok(files) => files,
         Err(e) => {
             eprintln!("Error: {e}");
@@ -49,7 +59,7 @@ fn main() {
     let all_results: Vec<_> = files
         .par_iter()
         .map(|file_path| {
-            let result = check_file(file_path);
+            let result = check_file(file_path, &config);
             if let Some(pb) = &pb_mutex {
                 if let Ok(pb) = pb.lock() {
                     pb.inc(1);

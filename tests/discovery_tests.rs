@@ -1,4 +1,5 @@
 use lineguard::cli::CliArgs;
+use lineguard::config::Config;
 use lineguard::discovery::discover_files;
 use tempfile::TempDir;
 
@@ -23,7 +24,8 @@ fn test_discover_single_file() {
         no_trailing_space: false,
     };
 
-    let result = discover_files(&args).unwrap();
+    let config = Config::default();
+    let result = discover_files(&args, &config).unwrap();
     assert_eq!(result.len(), 1);
     assert_eq!(result[0], file_path);
 }
@@ -58,7 +60,8 @@ fn test_discover_multiple_files() {
         no_trailing_space: false,
     };
 
-    let result = discover_files(&args).unwrap();
+    let config = Config::default();
+    let result = discover_files(&args, &config).unwrap();
     assert_eq!(result.len(), 3);
     assert!(result.contains(&file1));
     assert!(result.contains(&file2));
@@ -92,7 +95,8 @@ fn test_discover_files_with_glob_pattern() {
         no_trailing_space: false,
     };
 
-    let result = discover_files(&args).unwrap();
+    let config = Config::default();
+    let result = discover_files(&args, &config).unwrap();
     assert_eq!(result.len(), 2);
     assert!(result.iter().any(|p| p.file_name().unwrap() == "file1.txt"));
     assert!(result.iter().any(|p| p.file_name().unwrap() == "file2.txt"));
@@ -123,7 +127,8 @@ fn test_discover_files_in_directory() {
         no_trailing_space: false,
     };
 
-    let result = discover_files(&args).unwrap();
+    let config = Config::default();
+    let result = discover_files(&args, &config).unwrap();
     assert_eq!(result.len(), 2);
     assert!(result.contains(&file1));
     assert!(result.contains(&file2));
@@ -158,7 +163,8 @@ fn test_discover_files_recursive() {
         no_trailing_space: false,
     };
 
-    let result = discover_files(&args).unwrap();
+    let config = Config::default();
+    let result = discover_files(&args, &config).unwrap();
     assert_eq!(result.len(), 3);
     assert!(result.contains(&file1));
     assert!(result.contains(&file2));

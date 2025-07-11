@@ -1,3 +1,4 @@
+use crate::config::Config;
 use std::fs;
 use std::path::Path;
 
@@ -21,7 +22,7 @@ pub enum IssueType {
     TrailingSpace,
 }
 
-pub fn check_file(path: &Path) -> CheckResult {
+pub fn check_file(path: &Path, config: &Config) -> CheckResult {
     let mut issues = Vec::new();
 
     // Read file content
@@ -36,14 +37,18 @@ pub fn check_file(path: &Path) -> CheckResult {
         },
     };
 
-    // Check newline ending
-    if let Some(issue) = check_newline_ending(&content) {
-        issues.push(issue);
+    // Check newline ending if enabled
+    if config.checks.newline_ending {
+        if let Some(issue) = check_newline_ending(&content) {
+            issues.push(issue);
+        }
     }
 
-    // Check trailing spaces
-    let mut trailing_space_issues = check_trailing_spaces(&content);
-    issues.append(&mut trailing_space_issues);
+    // Check trailing spaces if enabled
+    if config.checks.trailing_spaces {
+        let mut trailing_space_issues = check_trailing_spaces(&content);
+        issues.append(&mut trailing_space_issues);
+    }
 
     CheckResult {
         file_path: path.to_path_buf(),

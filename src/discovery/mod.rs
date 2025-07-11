@@ -4,18 +4,21 @@ use std::fs;
 use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
-pub fn discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, anyhow::Error> {
+pub fn discover_files(args: &CliArgs, base_config: &Config) -> Result<Vec<PathBuf>, anyhow::Error> {
     let mut files = Vec::new();
 
-    // Create config with ignore patterns and extensions from CLI
-    let config = Config {
-        ignore_patterns: args.ignore.clone(),
-        file_extensions: args
-            .extensions
-            .as_ref()
-            .map_or_else(Vec::new, |v| v.clone()),
-        ..Config::default()
-    };
+    // Merge CLI arguments with config file settings (CLI takes precedence)
+    let mut config = base_config.clone();
+
+    // CLI ignore patterns override/extend config patterns
+    if !args.ignore.is_empty() {
+        config.ignore_patterns = args.ignore.clone();
+    }
+
+    // CLI extensions override config extensions
+    if let Some(ref extensions) = args.extensions {
+        config.file_extensions = extensions.clone();
+    }
 
     if args.stdin {
         // Read file paths from stdin

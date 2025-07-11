@@ -1,4 +1,5 @@
 use lineguard::checker::{IssueType, check_file};
+use lineguard::config::Config;
 use std::fs;
 use tempfile::TempDir;
 
@@ -10,7 +11,8 @@ fn test_check_file_with_issues() {
     // File with both missing newline and trailing spaces
     fs::write(&file_path, "line 1  \nline 2\nline 3").unwrap();
 
-    let result = check_file(&file_path);
+    let config = Config::default();
+    let result = check_file(&file_path, &config);
 
     assert_eq!(result.file_path, file_path);
     assert_eq!(result.issues.len(), 2);
@@ -40,7 +42,8 @@ fn test_check_file_no_issues() {
     // Perfect file
     fs::write(&file_path, "line 1\nline 2\nline 3\n").unwrap();
 
-    let result = check_file(&file_path);
+    let config = Config::default();
+    let result = check_file(&file_path, &config);
 
     assert_eq!(result.file_path, file_path);
     assert!(result.issues.is_empty());

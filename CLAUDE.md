@@ -16,7 +16,7 @@ Every development cycle MUST follow this exact sequence:
 4. **Refactor** - Only allowed AFTER git commit
 5. **Quality Checks** - Run ALL of these after each implementation:
    ```bash
-   cargo fmt                                      # Format code
+   cargo fmt --all                                # Format code
    cargo clippy --all-targets --all-features -- -D warnings  # Run linter
    cargo build                                    # Ensure compilation
    cargo test                                     # Run all tests

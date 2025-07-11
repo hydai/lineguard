@@ -113,6 +113,26 @@ jobs:
         with open('benchmark_results.json', 'w') as f:
             json.dump(benchmarks, f, indent=2)
         EOF
+    
+    # Setup Pages deployment
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+      if: github.event_name != 'pull_request'
+      
+    - name: Setup gh-pages branch
+      if: github.event_name != 'pull_request'
+      run: |
+        git fetch origin gh-pages:gh-pages || true
+        if ! git show-ref --verify --quiet refs/heads/gh-pages; then
+          echo "Creating gh-pages branch"
+          git checkout --orphan gh-pages
+          git rm -rf .
+          echo "# Benchmark Results" > README.md
+          git add README.md
+          git commit -m "Initial gh-pages commit"
+          git push origin gh-pages
+          git checkout master
+        fi
           
     - name: Store benchmark result
       uses: benchmark-action/github-action-benchmark@v1

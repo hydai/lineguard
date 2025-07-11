@@ -1,10 +1,13 @@
 use assert_cmd::Command;
 use predicates::prelude::*;
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
 use tempfile::TempDir;
 
+#[cfg(target_family = "unix")]
+use std::os::unix::fs::PermissionsExt;
+
 #[test]
+#[cfg(target_family = "unix")]
 fn test_unreadable_file_error_message() {
     let temp_dir = TempDir::new().unwrap();
     let file_path = temp_dir.path().join("unreadable.txt");
@@ -32,6 +35,7 @@ fn test_unreadable_file_error_message() {
 }
 
 #[test]
+#[cfg(target_family = "unix")]
 fn test_unwritable_file_fix_error() {
     let temp_dir = TempDir::new().unwrap();
     let file_path = temp_dir.path().join("readonly.txt");
@@ -62,6 +66,7 @@ fn test_unwritable_file_fix_error() {
 }
 
 #[test]
+#[cfg(target_family = "unix")]
 fn test_unreadable_directory_error() {
     let temp_dir = TempDir::new().unwrap();
     let sub_dir = temp_dir.path().join("subdir");
@@ -93,6 +98,7 @@ fn test_unreadable_directory_error() {
 }
 
 #[test]
+#[cfg(target_family = "unix")]
 fn test_permission_error_json_format() {
     let temp_dir = TempDir::new().unwrap();
     let file_path = temp_dir.path().join("unreadable.txt");
@@ -121,6 +127,7 @@ fn test_permission_error_json_format() {
 }
 
 #[test]
+#[cfg(target_family = "unix")]
 fn test_multiple_files_with_permission_errors() {
     let temp_dir = TempDir::new().unwrap();
 
@@ -149,4 +156,62 @@ fn test_multiple_files_with_permission_errors() {
     let mut permissions = fs::metadata(&unreadable).unwrap().permissions();
     permissions.set_mode(0o644);
     fs::set_permissions(&unreadable, permissions).unwrap();
+}
+
+// Windows-specific permission tests
+#[test]
+#[cfg(windows)]
+fn test_readonly_file_on_windows() {
+    let temp_dir = TempDir::new().unwrap();
+    let file_path = temp_dir.path().join("readonly.txt");
+
+    // Create a file with trailing spaces
+    fs::write(&file_path, "content  \n").unwrap();
+
+    // Make it read-only using Windows-specific permissions
+    let mut permissions = fs::metadata(&file_path).unwrap().permissions();
+    permissions.set_readonly(true);
+    fs::set_permissions(&file_path, permissions).unwrap();
+
+    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("readonly.txt");
+    cmd.arg("--fix");
+
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("denied").or(predicate::str::contains("read-only")));
+
+    // Clean up - restore permissions
+    let mut permissions = fs::metadata(&file_path).unwrap().permissions();
+    permissions.set_readonly(false);
+    fs::set_permissions(&file_path, permissions).unwrap();
+}
+
+#[test]
+#[cfg(windows)]
+fn test_permission_error_handling_windows() {
+    let temp_dir = TempDir::new().unwrap();
+    
+    // On Windows, we can test with read-only files
+    let readonly_file = temp_dir.path().join("readonly.txt");
+    fs::write(&readonly_file, "content\n").unwrap();
+    
+    // Make file read-only
+    let mut permissions = fs::metadata(&readonly_file).unwrap().permissions();
+    permissions.set_readonly(true);
+    fs::set_permissions(&readonly_file, permissions).unwrap();
+    
+    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("readonly.txt");
+    
+    // The tool should handle read-only files gracefully
+    cmd.assert()
+        .success(); // Read-only files can still be read on Windows
+    
+    // Clean up
+    let mut permissions = fs::metadata(&readonly_file).unwrap().permissions();
+    permissions.set_readonly(false);
+    fs::set_permissions(&readonly_file, permissions).unwrap();
 }

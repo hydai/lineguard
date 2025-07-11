@@ -2,6 +2,7 @@ use lineguard::checker::check_file;
 use lineguard::cli::{OutputFormat, parse_args};
 use lineguard::discovery::discover_files;
 use lineguard::reporter::{GitHubReporter, HumanReporter, JsonReporter, Reporter};
+use rayon::prelude::*;
 use std::process;
 
 fn main() {
@@ -21,12 +22,11 @@ fn main() {
         process::exit(0);
     }
 
-    // Check each file
-    let mut all_results = Vec::new();
-    for file_path in &files {
-        let result = check_file(file_path);
-        all_results.push(result);
-    }
+    // Check each file in parallel
+    let all_results: Vec<_> = files
+        .par_iter()
+        .map(|file_path| check_file(file_path))
+        .collect();
 
     // Create appropriate reporter
     let reporter: Box<dyn Reporter> = match args.format {

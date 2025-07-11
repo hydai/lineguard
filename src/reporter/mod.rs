@@ -111,7 +111,19 @@ impl Reporter for JsonReporter {
 }
 
 impl Reporter for GitHubReporter {
-    fn report(&self, _results: &[CheckResult]) {
-        todo!("Implement GitHub Actions reporting")
+    fn report(&self, results: &[CheckResult]) {
+        for result in results {
+            for issue in &result.issues {
+                let file = result.file_path.display();
+                match issue.line {
+                    Some(line) => {
+                        println!("::error file={},line={}::{}", file, line, issue.message);
+                    },
+                    None => {
+                        println!("::error file={}::{}", file, issue.message);
+                    },
+                }
+            }
+        }
     }
 }

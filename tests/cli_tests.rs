@@ -3,13 +3,14 @@ use predicates::prelude::*;
 
 #[test]
 fn test_cli_accepts_single_file_path() {
-    use tempfile::NamedTempFile;
+    use tempfile::TempDir;
 
-    let temp_file = NamedTempFile::new().unwrap();
-    std::fs::write(temp_file.path(), "test content\n").unwrap();
+    let temp_dir = TempDir::new().unwrap();
+    let temp_path = temp_dir.path().join("test.txt");
+    std::fs::write(&temp_path, "test content\n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_file.path());
+    cmd.arg(&temp_path);
     cmd.arg("--format").arg("json");
     cmd.assert()
         .success()

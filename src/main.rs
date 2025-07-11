@@ -24,6 +24,11 @@ fn main() {
         process::exit(0);
     }
 
+    // Show checking message for human format
+    if !args.quiet && args.format == OutputFormat::Human && files.len() > 1 {
+        println!("Checking {} files...", files.len());
+    }
+
     // Set up progress bar for large file sets
     let progress_bar = if files.len() > 10 && !args.quiet && args.format == OutputFormat::Human {
         let pb = ProgressBar::new(files.len() as u64);
@@ -67,10 +72,13 @@ fn main() {
         }),
     };
 
-    // Report results
-    reporter.report(&all_results);
-
     // Exit with appropriate code
     let has_issues = all_results.iter().any(|r| !r.issues.is_empty());
+
+    // Report results (skip for quiet mode if no issues)
+    if !args.quiet || has_issues {
+        reporter.report(&all_results);
+    }
+
     process::exit(if has_issues { 1 } else { 0 });
 }

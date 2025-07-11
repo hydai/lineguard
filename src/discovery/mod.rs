@@ -1,40 +1,59 @@
 use crate::{CliArgs, Config};
 use glob::glob;
 use std::fs;
+use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
 pub fn discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, anyhow::Error> {
     let mut files = Vec::new();
 
-    for pattern in &args.files {
-        let path = PathBuf::from(pattern);
+    if args.stdin {
+        // Read file paths from stdin
+        let stdin = io::stdin();
+        let reader = BufReader::new(stdin.lock());
 
-        // Check if it's a directory
-        if path.is_dir() {
-            discover_files_in_dir(&path, args.recursive, &mut files)?;
-        } else {
-            // Try glob pattern first
-            if let Ok(paths) = glob(pattern) {
-                let mut found_any = false;
-                for path in paths.flatten() {
-                    if path.is_file() {
-                        files.push(path);
-                        found_any = true;
-                    }
+        for line in reader.lines() {
+            let line = line?;
+            let line = line.trim();
+            if !line.is_empty() {
+                let path = PathBuf::from(line);
+                if path.exists() && path.is_file() {
+                    files.push(path);
                 }
+            }
+        }
+    } else {
+        // Process files from command line arguments
+        for pattern in &args.files {
+            let path = PathBuf::from(pattern);
 
-                // If glob didn't find anything, try as literal path
-                if !found_any {
+            // Check if it's a directory
+            if path.is_dir() {
+                discover_files_in_dir(&path, args.recursive, &mut files)?;
+            } else {
+                // Try glob pattern first
+                if let Ok(paths) = glob(pattern) {
+                    let mut found_any = false;
+                    for path in paths.flatten() {
+                        if path.is_file() {
+                            files.push(path);
+                            found_any = true;
+                        }
+                    }
+
+                    // If glob didn't find anything, try as literal path
+                    if !found_any {
+                        let path = PathBuf::from(pattern);
+                        if path.exists() && path.is_file() {
+                            files.push(path);
+                        }
+                    }
+                } else {
+                    // If glob pattern is invalid, treat as literal path
                     let path = PathBuf::from(pattern);
                     if path.exists() && path.is_file() {
                         files.push(path);
                     }
-                }
-            } else {
-                // If glob pattern is invalid, treat as literal path
-                let path = PathBuf::from(pattern);
-                if path.exists() && path.is_file() {
-                    files.push(path);
                 }
             }
         }

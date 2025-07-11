@@ -21,7 +21,7 @@ fmt:
 
 # Run clippy
 clippy:
-	cargo clippy -- -D warnings
+	cargo clippy --all-targets --all-features -- -D warnings
 
 # Clean build artifacts
 clean:

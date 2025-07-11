@@ -13,13 +13,21 @@ fn main() {
     let args = parse_args();
 
     // Load configuration
-    let config = match load_config(args.config.as_deref()) {
+    let mut config = match load_config(args.config.as_deref()) {
         Ok(config) => config,
         Err(e) => {
             eprintln!("Error loading configuration: {e}");
             process::exit(4);
         },
     };
+
+    // Apply CLI flags to override config
+    if args.no_newline_check {
+        config.checks.newline_ending = false;
+    }
+    if args.no_trailing_space {
+        config.checks.trailing_spaces = false;
+    }
 
     // Discover files to check
     let files = match discover_files(&args, &config) {

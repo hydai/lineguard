@@ -44,6 +44,21 @@ lineguard --fix src/
 lineguard --fix --dry-run src/
 ```
 
+#### Check files changed in the last commit
+```bash
+lineguard --from HEAD~1 .
+```
+
+#### Check files changed between commits
+```bash
+lineguard --from abc123 --to def456 .
+```
+
+#### Check files changed since a tag
+```bash
+lineguard --from v1.0.0 src/
+```
+
 ## Command-Line Options
 
 ### Input Options
@@ -56,6 +71,8 @@ lineguard --fix --dry-run src/
 - `--no-trailing-space` - Disable trailing space check
 - `--fix` - Automatically fix issues
 - `--dry-run` - Show what would be fixed without modifying files
+- `--from <COMMIT>` - Check only files changed since this commit (Git repositories only)
+- `--to <COMMIT>` - Check files changed until this commit (Git only, default: HEAD)
 
 ### Output Options
 - `-f, --format <FORMAT>` - Output format [default: human]

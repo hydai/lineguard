@@ -73,6 +73,17 @@ LineGuard follows a modular architecture with clear separation of concerns, maki
   - `fix_file(path: &Path, issues: &[Issue], config: &Config, dry_run: bool) -> Result<FixResult, Error>`
   - `fix_file_streaming(path: &Path, issues: &[Issue], config: &Config, dry_run: bool) -> Result<FixResult, Error>`
 
+### 7. Git Module (`git.rs`)
+- **Responsibility**: Git repository operations and commit range filtering
+- **Key Features**:
+  - Detect if current directory is a Git repository
+  - Validate commit hashes
+  - Get list of files changed between commits
+  - Support for commit ranges (from..to)
+- **Interfaces**:
+  - `is_git_repository(path: &Path) -> Result<bool>`
+  - `get_changed_files(from: &str, to: Option<&str>, repo_path: &Path) -> Result<Vec<PathBuf>>`
+
 ## Data Structures
 
 ### Core Types
@@ -92,6 +103,8 @@ pub struct CliArgs {
     pub no_trailing_space: bool,
     pub fix: bool,
     pub dry_run: bool,
+    pub from: Option<String>,
+    pub to: Option<String>,
 }
 
 pub struct Config {
@@ -218,6 +231,7 @@ tests/
 ├── permission_tests.rs     # Permission error handling
 ├── large_file_tests.rs     # Streaming for large files
 ├── check_options_tests.rs  # CLI check flags
+├── git_range_tests.rs      # Git commit range filtering
 └── ...                     # Other feature-specific tests
 ```
 
@@ -250,12 +264,14 @@ main.rs
    ├── cli.rs
    ├── config.rs
    ├── discovery.rs
-   │     └── config.rs
+   │     ├── config.rs
+   │     └── git.rs
    ├── checker.rs
    │     └── config.rs
    ├── fixer.rs
    │     ├── checker.rs (for types)
    │     └── config.rs
-   └── reporter.rs
-         └── checker.rs (for types)
+   ├── reporter.rs
+   │     └── checker.rs (for types)
+   └── git.rs
 ```

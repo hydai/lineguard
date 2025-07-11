@@ -22,6 +22,7 @@ A fast and reliable file linter that ensures proper line endings and clean forma
 - 🔍 **Binary File Detection**: Automatically skips binary files
 - 🚫 **Ignore Patterns**: Skip files/directories with glob patterns
 - 📝 **File Extension Filtering**: Check only specific file types
+- 🔀 **Git Integration**: Check only files changed between commits
 
 ## Installation
 
@@ -92,6 +93,8 @@ Options:
       --no-trailing-space      Disable trailing space check
       --fix                    Automatically fix issues
       --dry-run                Show what would be fixed without modifying files
+      --from <FROM>            Check files changed since this commit (Git only)
+      --to <TO>                Check files changed until this commit (Git only, default: HEAD)
   -h, --help                   Print help
   -V, --version                Print version
 ```
@@ -120,6 +123,18 @@ lineguard --no-newline-check src/   # Only check trailing spaces
 
 # Pipe files from other commands
 find . -name "*.rs" | lineguard --stdin
+
+# Check files changed in the last commit
+lineguard --from HEAD~1 .
+
+# Check files changed between specific commits
+lineguard --from abc123 --to def456 .
+
+# Check files changed since a tag
+lineguard --from v1.0.0 src/
+
+# Combine with other options
+lineguard --from main --fix --format json .
 ```
 
 ### Output Examples

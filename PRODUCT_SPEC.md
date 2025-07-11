@@ -130,6 +130,7 @@ All planned features have been successfully implemented:
 - ✅ Progress indicators for large file sets
 - ✅ Parallel processing with rayon
 - ✅ Binary file detection and skipping
+- ✅ Git commit range filtering (`--from` and `--to` flags)
 
 ## Future Enhancements
 - Editor integrations (VS Code, Vim, etc.)

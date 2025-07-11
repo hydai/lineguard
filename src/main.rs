@@ -3,10 +3,11 @@ use lineguard::checker::check_file;
 use lineguard::cli::{OutputFormat, parse_args};
 use lineguard::config::load_config;
 use lineguard::discovery::discover_files;
+use lineguard::fixer::fix_file;
 use lineguard::reporter::{GitHubReporter, HumanReporter, JsonReporter, Reporter};
 use rayon::prelude::*;
 use std::process;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 fn main() {
     let args = parse_args();
@@ -34,9 +35,17 @@ fn main() {
         process::exit(0);
     }
 
-    // Show checking message for human format
+    // Show appropriate message for human format
     if !args.quiet && args.format == OutputFormat::Human && files.len() > 1 {
-        println!("Checking {} files...", files.len());
+        if args.fix {
+            if args.dry_run {
+                println!("Checking {} files (dry run)...", files.len());
+            } else {
+                println!("Fixing {} files...", files.len());
+            }
+        } else {
+            println!("Checking {} files...", files.len());
+        }
     }
 
     // Set up progress bar for large file sets
@@ -54,41 +63,145 @@ fn main() {
     };
 
     let pb_mutex = progress_bar.as_ref().map(Mutex::new);
+    let config_arc = Arc::new(config.clone());
+    let fix_mode = args.fix;
+    let dry_run = args.dry_run;
 
-    // Check each file in parallel
-    let all_results: Vec<_> = files
-        .par_iter()
-        .map(|file_path| {
-            let result = check_file(file_path, &config);
-            if let Some(pb) = &pb_mutex {
-                if let Ok(pb) = pb.lock() {
-                    pb.inc(1);
+    if fix_mode {
+        // Fix mode: check and fix files
+        let fix_results: Vec<_> = files
+            .par_iter()
+            .map(|file_path| {
+                let check_result = check_file(file_path, &config_arc);
+                let fix_result = if !check_result.issues.is_empty() {
+                    fix_file(file_path, &check_result.issues, &config_arc, dry_run)
+                } else {
+                    Ok(lineguard::fixer::FixResult {
+                        file_path: file_path.clone(),
+                        fixed: false,
+                        issues_fixed: vec![],
+                    })
+                };
+
+                if let Some(pb) = &pb_mutex {
+                    if let Ok(pb) = pb.lock() {
+                        pb.inc(1);
+                    }
                 }
-            }
-            result
-        })
-        .collect();
 
-    if let Some(pb) = progress_bar {
-        pb.finish_and_clear();
+                (check_result, fix_result)
+            })
+            .collect();
+
+        if let Some(pb) = progress_bar {
+            pb.finish_and_clear();
+        }
+
+        // Report fix results
+        report_fix_results(&fix_results, &args);
+
+        // Exit with appropriate code
+        let has_errors = fix_results
+            .iter()
+            .any(|(_, fix_result)| fix_result.is_err());
+        process::exit(if has_errors { 1 } else { 0 });
+    } else {
+        // Normal check mode
+        let all_results: Vec<_> = files
+            .par_iter()
+            .map(|file_path| {
+                let result = check_file(file_path, &config_arc);
+                if let Some(pb) = &pb_mutex {
+                    if let Ok(pb) = pb.lock() {
+                        pb.inc(1);
+                    }
+                }
+                result
+            })
+            .collect();
+
+        if let Some(pb) = progress_bar {
+            pb.finish_and_clear();
+        }
+
+        // Create appropriate reporter
+        let reporter: Box<dyn Reporter> = match args.format {
+            OutputFormat::Json => Box::new(JsonReporter),
+            OutputFormat::GitHub => Box::new(GitHubReporter),
+            OutputFormat::Human => Box::new(HumanReporter {
+                use_color: !args.no_color,
+            }),
+        };
+
+        // Exit with appropriate code
+        let has_issues = all_results.iter().any(|r| !r.issues.is_empty());
+
+        // Report results (skip for quiet mode if no issues)
+        if !args.quiet || has_issues {
+            reporter.report(&all_results);
+        }
+
+        process::exit(if has_issues { 1 } else { 0 });
+    }
+}
+
+fn report_fix_results(
+    results: &[(
+        lineguard::CheckResult,
+        Result<lineguard::fixer::FixResult, anyhow::Error>,
+    )],
+    args: &lineguard::cli::CliArgs,
+) {
+    if args.quiet {
+        return;
     }
 
-    // Create appropriate reporter
-    let reporter: Box<dyn Reporter> = match args.format {
-        OutputFormat::Json => Box::new(JsonReporter),
-        OutputFormat::GitHub => Box::new(GitHubReporter),
-        OutputFormat::Human => Box::new(HumanReporter {
-            use_color: !args.no_color,
-        }),
-    };
+    let mut fixed_count = 0;
+    let mut error_count = 0;
 
-    // Exit with appropriate code
-    let has_issues = all_results.iter().any(|r| !r.issues.is_empty());
-
-    // Report results (skip for quiet mode if no issues)
-    if !args.quiet || has_issues {
-        reporter.report(&all_results);
+    for (_, fix_result) in results {
+        match fix_result {
+            Ok(fix) if fix.fixed => {
+                fixed_count += 1;
+                if args.format == OutputFormat::Human {
+                    if args.dry_run {
+                        println!("Would fix: {}", fix.file_path.display());
+                    } else {
+                        println!("Fixed: {}", fix.file_path.display());
+                    }
+                }
+            },
+            Err(e) => {
+                error_count += 1;
+                if args.format == OutputFormat::Human {
+                    eprintln!("Error: {}", e);
+                }
+            },
+            _ => {},
+        }
     }
 
-    process::exit(if has_issues { 1 } else { 0 });
+    if args.format == OutputFormat::Human && fixed_count > 0 {
+        if args.dry_run {
+            println!(
+                "\nWould fix {} file{}",
+                fixed_count,
+                if fixed_count == 1 { "" } else { "s" }
+            );
+        } else {
+            println!(
+                "\nFixed {} file{}",
+                fixed_count,
+                if fixed_count == 1 { "" } else { "s" }
+            );
+        }
+    }
+
+    if error_count > 0 {
+        eprintln!(
+            "\n{} error{} occurred",
+            error_count,
+            if error_count == 1 { "" } else { "s" }
+        );
+    }
 }

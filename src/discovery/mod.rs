@@ -77,6 +77,7 @@ pub fn discover_files(args: &CliArgs, base_config: &Config) -> Result<Vec<PathBu
                     let path = PathBuf::from(pattern);
                     if path.exists()
                         && path.is_file()
+                        && should_check_file(&path, &config)
                         && !is_ignored(&path, &config.ignore_patterns)?
                     {
                         files.push(path);

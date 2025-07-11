@@ -35,7 +35,8 @@ fn test_cpp_files_are_checked_by_default() {
     .unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
     cmd.arg("--format").arg("json");
 
@@ -65,7 +66,8 @@ fn test_cpp_object_files_are_skipped() {
     std::fs::write(temp_dir.path().join("lib.so"), "binary content").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
     cmd.arg("--format").arg("json");
 

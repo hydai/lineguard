@@ -2,6 +2,7 @@ pub mod checker;
 pub mod cli;
 pub mod config;
 pub mod discovery;
+pub mod fixer;
 pub mod reporter;
 
 pub use checker::*;

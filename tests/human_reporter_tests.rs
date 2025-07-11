@@ -12,7 +12,8 @@ fn test_human_reporter_shows_checking_message() {
     std::fs::write(temp_dir.path().join("file3.txt"), "content\n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
 
     cmd.assert()
@@ -28,7 +29,8 @@ fn test_human_reporter_no_message_for_single_file() {
     std::fs::write(temp_dir.path().join("file.txt"), "content\n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path().join("file.txt"));
+    cmd.current_dir(&temp_dir);
+    cmd.arg("file.txt");
 
     cmd.assert()
         .success()
@@ -45,7 +47,8 @@ fn test_human_reporter_no_message_with_quiet_flag() {
     std::fs::write(temp_dir.path().join("file3.txt"), "content\n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
     cmd.arg("--quiet");
 
@@ -62,7 +65,8 @@ fn test_human_reporter_no_message_with_json_format() {
     std::fs::write(temp_dir.path().join("file3.txt"), "content\n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
     cmd.arg("--format").arg("json");
 

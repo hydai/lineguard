@@ -12,7 +12,8 @@ fn test_ignore_pattern_simple() {
     std::fs::write(temp_dir.path().join("ignore.txt"), "content  \n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
     cmd.arg("--ignore").arg("ignore.txt");
     cmd.arg("--format").arg("json");
@@ -34,7 +35,8 @@ fn test_ignore_pattern_glob() {
     std::fs::write(temp_dir.path().join("test.tmp"), "content  \n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
     cmd.arg("--ignore").arg("*.log");
     cmd.arg("--ignore").arg("*.tmp");
@@ -55,7 +57,8 @@ fn test_ignore_pattern_directory() {
     std::fs::write(temp_dir.path().join("node_modules/bad.txt"), "content  \n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(temp_dir.path());
+    cmd.current_dir(&temp_dir);
+    cmd.arg(".");
     cmd.arg("--recursive");
     cmd.arg("--ignore").arg("**/node_modules/**");
     cmd.arg("--format").arg("json");

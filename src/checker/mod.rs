@@ -15,7 +15,7 @@ pub struct Issue {
     pub message: String,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum IssueType {
     MissingNewline,
     MultipleNewlines,

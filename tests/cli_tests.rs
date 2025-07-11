@@ -10,7 +10,8 @@ fn test_cli_accepts_single_file_path() {
     std::fs::write(&temp_path, "test content\n").unwrap();
 
     let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.arg(&temp_path);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("test.txt");
     cmd.arg("--format").arg("json");
     cmd.assert()
         .success()

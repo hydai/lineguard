@@ -58,6 +58,12 @@ pub struct CliArgs {
 
     #[arg(long, help = "Disable trailing space check")]
     pub no_trailing_space: bool,
+
+    #[arg(long, help = "Automatically fix issues")]
+    pub fix: bool,
+
+    #[arg(long, help = "Show what would be fixed without modifying files")]
+    pub dry_run: bool,
 }
 
 pub fn parse_args() -> CliArgs {

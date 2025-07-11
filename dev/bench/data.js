@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752273120709,
+  "lastUpdate": 1752275576255,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -97,6 +97,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.00499782435798507,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "distinct": true,
+          "id": "36a96823ca05b9b476b092333f43a895056ffd63",
+          "message": "feat: add verbose output for git range information\n\nWhen using --from and --to flags with --verbose, lineguard now displays:\n- The git commit range being checked\n- The number of changed files\n- A list of all changed files in the range\n\nThis helps users understand which files are being checked when using\ngit range filtering.\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-07-12T07:11:09+08:00",
+          "tree_id": "6ce5560ab6bf009690d81a4c56835b031178a429",
+          "url": "https://github.com/hydai/lineguard/commit/36a96823ca05b9b476b092333f43a895056ffd63"
+        },
+        "date": 1752275576018,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0013268042492810468,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.001322751037692311,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.0009592457361105221,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.0018462910797485356,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.005045486110188678,
             "unit": "seconds"
           }
         ]

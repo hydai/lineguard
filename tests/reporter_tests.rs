@@ -21,6 +21,7 @@ fn test_github_reporter_with_issues() {
                     message: "Trailing spaces found".to_string(),
                 },
             ],
+            error: None,
         },
         CheckResult {
             file_path: PathBuf::from("tests/test_utils.rs"),
@@ -29,6 +30,7 @@ fn test_github_reporter_with_issues() {
                 line: Some(23),
                 message: "Trailing spaces found".to_string(),
             }],
+            error: None,
         },
     ];
 

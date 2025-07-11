@@ -74,7 +74,17 @@ impl Reporter for JsonReporter {
         let total_issues: usize = results.iter().map(|r| r.issues.len()).sum();
 
         let mut issues = Vec::new();
+        let mut errors = Vec::new();
+
         for result in results {
+            // Collect errors
+            if let Some(error) = &result.error {
+                errors.push(json!({
+                    "file": result.file_path.display().to_string(),
+                    "error": error,
+                }));
+            }
+
             if !result.issues.is_empty() {
                 let file_issues: Vec<_> = result
                     .issues
@@ -99,12 +109,16 @@ impl Reporter for JsonReporter {
             }
         }
 
-        let output = json!({
+        let mut output = json!({
             "files_checked": files_checked,
             "files_with_issues": files_with_issues,
             "total_issues": total_issues,
             "issues": issues,
         });
+
+        if !errors.is_empty() {
+            output["errors"] = json!(errors);
+        }
 
         println!("{}", serde_json::to_string_pretty(&output).unwrap());
     }

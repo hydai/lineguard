@@ -96,8 +96,22 @@ fn discover_files_in_dir(
     files: &mut Vec<PathBuf>,
     config: &Config,
 ) -> Result<(), anyhow::Error> {
-    for entry in fs::read_dir(dir)? {
-        let entry = entry?;
+    let entries = match fs::read_dir(dir) {
+        Ok(entries) => entries,
+        Err(e) => {
+            eprintln!("{}: {}", dir.display(), e);
+            return Ok(()); // Continue with other directories
+        },
+    };
+
+    for entry in entries {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(e) => {
+                eprintln!("Error reading directory entry: {e}");
+                continue;
+            },
+        };
         let path = entry.path();
 
         if path.is_file()

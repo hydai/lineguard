@@ -7,6 +7,7 @@ use std::path::Path;
 pub struct CheckResult {
     pub file_path: std::path::PathBuf,
     pub issues: Vec<Issue>,
+    pub error: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -27,10 +28,11 @@ pub fn check_file(path: &Path, config: &Config) -> CheckResult {
     // For small files (< 10MB), use the existing implementation
     let file_size = match fs::metadata(path) {
         Ok(metadata) => metadata.len(),
-        Err(_) => {
+        Err(e) => {
             return CheckResult {
                 file_path: path.to_path_buf(),
                 issues: vec![],
+                error: Some(format!("{}: {}", path.display(), e)),
             };
         },
     };
@@ -49,11 +51,12 @@ fn check_file_in_memory(path: &Path, config: &Config) -> CheckResult {
     // Read file content
     let content = match fs::read_to_string(path) {
         Ok(content) => content,
-        Err(_) => {
-            // If we can't read the file, return empty result
+        Err(e) => {
+            // If we can't read the file, return error result
             return CheckResult {
                 file_path: path.to_path_buf(),
                 issues,
+                error: Some(format!("{}: {}", path.display(), e)),
             };
         },
     };
@@ -74,6 +77,7 @@ fn check_file_in_memory(path: &Path, config: &Config) -> CheckResult {
     CheckResult {
         file_path: path.to_path_buf(),
         issues,
+        error: None,
     }
 }
 
@@ -82,10 +86,11 @@ fn check_file_streaming(path: &Path, config: &Config) -> CheckResult {
 
     let file = match File::open(path) {
         Ok(file) => file,
-        Err(_) => {
+        Err(e) => {
             return CheckResult {
                 file_path: path.to_path_buf(),
                 issues,
+                error: Some(format!("{}: {}", path.display(), e)),
             };
         },
     };
@@ -148,6 +153,7 @@ fn check_file_streaming(path: &Path, config: &Config) -> CheckResult {
     CheckResult {
         file_path: path.to_path_buf(),
         issues,
+        error: None,
     }
 }
 

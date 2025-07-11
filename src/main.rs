@@ -133,6 +133,18 @@ fn main() {
             }),
         };
 
+        // Check for permission errors
+        let permission_errors: Vec<_> = all_results.iter().filter(|r| r.error.is_some()).collect();
+
+        // Report permission errors to stderr
+        if !permission_errors.is_empty() && !args.quiet {
+            for result in &permission_errors {
+                if let Some(error) = &result.error {
+                    eprintln!("{error}");
+                }
+            }
+        }
+
         // Exit with appropriate code
         let has_issues = all_results.iter().any(|r| !r.issues.is_empty());
 
@@ -141,6 +153,7 @@ fn main() {
             reporter.report(&all_results);
         }
 
+        // Exit with 1 only if there are actual lint issues, not permission errors
         process::exit(if has_issues { 1 } else { 0 });
     }
 }
@@ -159,7 +172,7 @@ fn report_fix_results(
     let mut fixed_count = 0;
     let mut error_count = 0;
 
-    for (_, fix_result) in results {
+    for (check_result, fix_result) in results {
         match fix_result {
             Ok(fix) if fix.fixed => {
                 fixed_count += 1;
@@ -174,7 +187,7 @@ fn report_fix_results(
             Err(e) => {
                 error_count += 1;
                 if args.format == OutputFormat::Human {
-                    eprintln!("Error: {e}");
+                    eprintln!("{}: {}", check_result.file_path.display(), e);
                 }
             },
             _ => {},

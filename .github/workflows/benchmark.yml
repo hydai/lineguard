@@ -122,6 +122,10 @@ jobs:
     - name: Setup gh-pages branch
       if: github.event_name != 'pull_request'
       run: |
+        # Configure git identity
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
         git fetch origin gh-pages:gh-pages || true
         if ! git show-ref --verify --quiet refs/heads/gh-pages; then
           echo "Creating gh-pages branch"

@@ -1,0 +1,113 @@
+# LineLint Configuration File Example
+# Copy this file to .lineguardrc in your project root or home directory
+
+# File extensions to check (if not specified, checks all text files)
+# Common programming language extensions are included by default
+file_extensions = [
+    # Web development
+    "html", "css", "scss", "sass", "less",
+    "js", "jsx", "ts", "tsx", "vue", "svelte",
+    
+    # Backend languages
+    "py", "rb", "php", "java", "kt", "scala",
+    "go", "rs", "swift", "m", "mm",
+    
+    # C/C++ (these are already checked by default)
+    "c", "h", "cpp", "cc", "cxx", "hpp", "hh", "hxx",
+    
+    # Configuration and data
+    "json", "yaml", "yml", "toml", "ini", "cfg",
+    "xml", "plist",
+    
+    # Documentation
+    "md", "rst", "txt", "tex",
+    
+    # Shell scripts
+    "sh", "bash", "zsh", "fish", "ps1",
+    
+    # Build files
+    "cmake", "make", "makefile", "dockerfile",
+    
+    # Other
+    "sql", "graphql", "proto"
+]
+
+# Patterns to ignore (uses glob patterns)
+ignore_patterns = [
+    # Version control
+    ".git/**",
+    ".svn/**",
+    
+    # Dependencies
+    "node_modules/**",
+    "vendor/**",
+    ".bundle/**",
+    "bower_components/**",
+    
+    # Build outputs
+    "target/**",
+    "build/**",
+    "dist/**",
+    "out/**",
+    "_build/**",
+    ".next/**",
+    ".nuxt/**",
+    
+    # IDE and editor files
+    ".idea/**",
+    ".vscode/**",
+    "*.swp",
+    "*.swo",
+    "*~",
+    ".DS_Store",
+    
+    # Temporary files
+    "*.tmp",
+    "*.temp",
+    "*.bak",
+    "*.backup",
+    "*.old",
+    "*.orig",
+    
+    # Cache directories
+    ".cache/**",
+    ".pytest_cache/**",
+    "__pycache__/**",
+    "*.pyc",
+    
+    # Test coverage
+    "coverage/**",
+    ".coverage",
+    "*.lcov",
+    
+    # Package files
+    "*.min.js",
+    "*.min.css",
+    "package-lock.json",
+    "yarn.lock",
+    "Cargo.lock",
+    "poetry.lock",
+    "composer.lock",
+    
+    # Generated files
+    "*.generated.*",
+    "*.auto.*",
+    
+    # Large data files
+    "*.csv",
+    "*.tsv",
+    "*.log"
+]
+
+# Check configuration
+[checks]
+# Check for missing newline at end of file
+newline_ending = true
+
+# Check for trailing spaces at end of lines
+trailing_spaces = true
+
+# Future options (not yet implemented):
+# max_line_length = 120
+# tab_style = "spaces"  # or "tabs"
+# indent_size = 4

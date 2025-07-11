@@ -1,7 +1,7 @@
-# LineLint Technical Architecture
+# LineGuard Technical Architecture
 
 ## Overview
-LineLint follows a modular architecture with clear separation of concerns, making it easy to test, maintain, and extend.
+LineGuard follows a modular architecture with clear separation of concerns, making it easy to test, maintain, and extend.
 
 ## Core Components
 
@@ -32,8 +32,11 @@ LineLint follows a modular architecture with clear separation of concerns, makin
   - Newline ending validation
   - Trailing space detection
   - Parallel file processing
+  - Streaming support for large files (>10MB)
+  - Permission error handling
 - **Interfaces**:
-  - `check_file(path: &Path) -> CheckResult`
+  - `check_file(path: &Path, config: &Config) -> CheckResult`
+  - `check_file_streaming(path: &Path, config: &Config) -> CheckResult`
   - `check_newline_ending(content: &str) -> Option<Issue>`
   - `check_trailing_spaces(content: &str) -> Vec<Issue>`
 
@@ -50,12 +53,25 @@ LineLint follows a modular architecture with clear separation of concerns, makin
 ### 5. Configuration Module (`config.rs`)
 - **Responsibility**: Loading and managing configuration
 - **Key Features**:
-  - Config file parsing (`.linelintrc`)
+  - Config file parsing (`.lineguardrc`)
   - Default configuration
-  - Environment variable support
+  - Auto-discovery in parent directories
+  - CLI override support
 - **Interfaces**:
   - `load_config(path: Option<&Path>) -> Result<Config, Error>`
-  - `merge_cli_config(config: Config, args: &CliArgs) -> Config`
+  - `find_config_file() -> Option<PathBuf>`
+  - `Config::default() -> Config`
+
+### 6. Fixer Module (`fixer.rs`)
+- **Responsibility**: Automatically fixing detected issues
+- **Key Features**:
+  - Fix trailing spaces
+  - Fix newline endings
+  - Dry-run mode support
+  - Streaming support for large files
+- **Interfaces**:
+  - `fix_file(path: &Path, issues: &[Issue], config: &Config, dry_run: bool) -> Result<FixResult, Error>`
+  - `fix_file_streaming(path: &Path, issues: &[Issue], config: &Config, dry_run: bool) -> Result<FixResult, Error>`
 
 ## Data Structures
 
@@ -74,6 +90,8 @@ pub struct CliArgs {
     pub extensions: Option<Vec<String>>,
     pub no_newline_check: bool,
     pub no_trailing_space: bool,
+    pub fix: bool,
+    pub dry_run: bool,
 }
 
 pub struct Config {
@@ -90,6 +108,13 @@ pub struct CheckConfig {
 pub struct CheckResult {
     pub file_path: PathBuf,
     pub issues: Vec<Issue>,
+    pub error: Option<String>,
+}
+
+pub struct FixResult {
+    pub file_path: PathBuf,
+    pub fixed: bool,
+    pub issues_fixed: Vec<Issue>,
 }
 
 pub struct Issue {
@@ -122,6 +147,7 @@ pub enum OutputFormat {
 - `anyhow` - Error handling
 - `thiserror` - Error type definitions
 - `indicatif` - Progress bars
+- `toml` - Configuration file parsing
 
 ### Testing Dependencies
 - `assert_cmd` - CLI testing
@@ -133,7 +159,7 @@ pub enum OutputFormat {
 ### Error Types
 ```rust
 #[derive(Debug, thiserror::Error)]
-pub enum LineLintError {
+pub enum LineGuardError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     
@@ -145,6 +171,9 @@ pub enum LineLintError {
     
     #[error("No files found matching pattern")]
     NoFilesFound,
+    
+    #[error("Permission denied: {0}")]
+    PermissionDenied(String),
 }
 ```
 
@@ -180,10 +209,16 @@ pub enum LineLintError {
 ### Test Organization
 ```
 tests/
-├── cli_tests.rs         # CLI argument handling
-├── checker_tests.rs     # Core checking logic
-├── reporter_tests.rs    # Output formatting
-└── integration_tests.rs # End-to-end scenarios
+├── cli_tests.rs             # CLI argument handling
+├── checker_tests.rs         # Core checking logic
+├── reporter_tests.rs        # Output formatting
+├── integration_tests.rs     # End-to-end scenarios
+├── fix_tests.rs            # Auto-fix functionality
+├── config_file_tests.rs    # Configuration loading
+├── permission_tests.rs     # Permission error handling
+├── large_file_tests.rs     # Streaming for large files
+├── check_options_tests.rs  # CLI check flags
+└── ...                     # Other feature-specific tests
 ```
 
 ## Build Configuration
@@ -191,9 +226,11 @@ tests/
 ### Cargo.toml Structure
 ```toml
 [package]
-name = "linelint"
+name = "lineguard"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/hydai/lineguard"
 
 [dependencies]
 # Listed above
@@ -215,6 +252,10 @@ main.rs
    ├── discovery.rs
    │     └── config.rs
    ├── checker.rs
+   │     └── config.rs
+   ├── fixer.rs
+   │     ├── checker.rs (for types)
+   │     └── config.rs
    └── reporter.rs
          └── checker.rs (for types)
 ```

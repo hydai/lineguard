@@ -6,9 +6,17 @@ A fast and reliable file linter that ensures proper line endings and clean forma
 
 - ✅ **Newline Ending Check**: Ensures files end with exactly one newline character
 - ✅ **Trailing Space Detection**: Identifies and reports trailing whitespace at line ends
-- 🚀 **High Performance**: Parallel file processing for speed
-- 🎨 **Multiple Output Formats**: Human-readable, JSON, and GitHub Actions formats
-- 🔧 **Configurable**: Flexible configuration via CLI flags or config files
+- 🚀 **High Performance**: Parallel file processing with progress indicators
+- 🎨 **Multiple Output Formats**: Human-readable (with colors), JSON, and GitHub Actions formats
+- 🔧 **Configurable**: Flexible configuration via CLI flags or `.lineguardrc` files
+- 🔄 **Auto-fix**: Automatically fix issues with `--fix` flag
+- 📁 **Smart File Discovery**: Glob patterns, recursive directory scanning, stdin support
+- 🎯 **Selective Checks**: Disable specific checks via CLI flags
+- 💾 **Memory Efficient**: Streaming support for large files (>10MB)
+- 🛡️ **Robust Error Handling**: Graceful handling of permission errors
+- 🔍 **Binary File Detection**: Automatically skips binary files
+- 🚫 **Ignore Patterns**: Skip files/directories with glob patterns
+- 📝 **File Extension Filtering**: Check only specific file types
 
 ## Installation
 
@@ -52,11 +60,42 @@ Options:
   -q, --quiet                  Suppress non-error output
   -v, --verbose                Show detailed information
       --no-color               Disable colored output
+  -c, --config <CONFIG>        Path to configuration file
       --stdin                  Read file paths from stdin
+      --ignore <IGNORE>        Ignore files matching pattern (can be used multiple times)
+      --extensions <EXTENSIONS> File extensions to check (comma-separated)
       --no-newline-check       Disable newline ending check
       --no-trailing-space      Disable trailing space check
+      --fix                    Automatically fix issues
+      --dry-run                Show what would be fixed without modifying files
   -h, --help                   Print help
   -V, --version                Print version
+```
+
+### Advanced Usage
+
+```bash
+# Fix issues automatically
+lineguard --fix src/
+
+# Preview fixes without applying
+lineguard --fix --dry-run src/
+
+# Ignore specific patterns
+lineguard --ignore "*.generated.rs" --ignore "**/target/**" .
+
+# Check only specific file types
+lineguard --extensions rs,toml .
+
+# Use custom config file
+lineguard --config path/to/.lineguardrc src/
+
+# Disable specific checks
+lineguard --no-trailing-space src/  # Only check newlines
+lineguard --no-newline-check src/   # Only check trailing spaces
+
+# Pipe files from other commands
+find . -name "*.rs" | lineguard --stdin
 ```
 
 ### Output Examples
@@ -77,10 +116,75 @@ Summary: 1 file with issues, 2 total issues found
 lineguard --format json src/
 ```
 
+```json
+{
+  "files_checked": 3,
+  "files_with_issues": 1,
+  "total_issues": 2,
+  "issues": [
+    {
+      "file": "src/main.rs",
+      "issues": [
+        {
+          "type": "missing_newline",
+          "line": null,
+          "message": "Missing newline at end of file"
+        },
+        {
+          "type": "trailing_space",
+          "line": 45,
+          "message": "Trailing spaces found"
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "file": "src/protected.rs",
+      "error": "Permission denied (os error 13)"
+    }
+  ]
+}
+```
+
 **GitHub Actions Format**
 ```bash
 lineguard --format github src/
 ```
+
+## Configuration File
+
+LineGuard supports configuration files to customize its behavior. Create a `.lineguardrc` file in your project root:
+
+```toml
+# .lineguardrc
+[checks]
+newline_ending = true      # Check for proper newline at end of file
+trailing_spaces = true     # Check for trailing spaces
+
+# Ignore patterns (glob format)
+ignore_patterns = [
+    "**/target/**",
+    "**/.git/**",
+    "**/node_modules/**",
+    "*.generated.*",
+]
+
+# File extensions to check (default: all text files)
+file_extensions = [
+    "rs", "toml", "md", "txt",
+    "js", "ts", "jsx", "tsx",
+    "py", "go", "java", "c", "cpp", "h", "hpp",
+    "yml", "yaml", "json", "xml",
+]
+```
+
+Configuration files are searched in the following order:
+1. Path specified with `--config` flag
+2. `.lineguardrc` in the current directory
+3. `.lineguardrc` in parent directories (up to the root)
+
+CLI flags always override configuration file settings.
 
 ## Exit Codes
 

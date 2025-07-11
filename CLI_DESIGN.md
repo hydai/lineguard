@@ -1,37 +1,47 @@
-# LineLint CLI Design
+# LineGuard CLI Design
 
 ## Command Structure
 
 ### Basic Usage
 ```bash
-linelint [OPTIONS] [FILES...]
+lineguard [OPTIONS] [FILES...]
 ```
 
 ### Examples
 
 #### Check single file
 ```bash
-linelint main.rs
+lineguard main.rs
 ```
 
 #### Check multiple files
 ```bash
-linelint src/main.rs src/lib.rs
+lineguard src/main.rs src/lib.rs
 ```
 
 #### Check with glob pattern
 ```bash
-linelint "src/**/*.rs"
+lineguard "src/**/*.rs"
 ```
 
 #### Check all files in directory
 ```bash
-linelint .
+lineguard .
 ```
 
 #### Pipe files from find command
 ```bash
-find . -name "*.rs" | linelint --stdin
+find . -name "*.rs" | lineguard --stdin
+```
+
+#### Fix issues automatically
+```bash
+lineguard --fix src/
+```
+
+#### Preview fixes without applying
+```bash
+lineguard --fix --dry-run src/
 ```
 
 ## Command-Line Options
@@ -44,7 +54,8 @@ find . -name "*.rs" | linelint --stdin
 ### Check Options
 - `--no-newline-check` - Disable newline ending check
 - `--no-trailing-space` - Disable trailing space check
-- `--fix` - Automatically fix issues (future enhancement)
+- `--fix` - Automatically fix issues
+- `--dry-run` - Show what would be fixed without modifying files
 
 ### Output Options
 - `-f, --format <FORMAT>` - Output format [default: human]
@@ -119,6 +130,12 @@ Summary: 2 files with issues, 3 total issues found
           "message": "Trailing spaces found"
         }
       ]
+    }
+  ],
+  "errors": [
+    {
+      "file": "src/protected.rs",
+      "error": "Permission denied (os error 13)"
     }
   ]
 }

@@ -1,7 +1,7 @@
-# LineLint - Product Specification
+# LineGuard - Product Specification
 
 ## Overview
-LineLint is a command-line tool written in Rust that validates text files for proper line endings and formatting. It ensures code quality by checking that files end with a newline character and flags any trailing spaces at the end of lines.
+LineGuard is a command-line tool written in Rust that validates text files for proper line endings and formatting. It ensures code quality by checking that files end with a newline character and flags any trailing spaces at the end of lines.
 
 ## Core Features
 
@@ -19,9 +19,11 @@ LineLint is a command-line tool written in Rust that validates text files for pr
 
 1. **As a developer**, I want to check all files in my project for proper line endings so that my code follows best practices.
 
-2. **As a CI/CD engineer**, I want to integrate linelint into my pipeline to automatically catch formatting issues before merging code.
+2. **As a CI/CD engineer**, I want to integrate lineguard into my pipeline to automatically catch formatting issues before merging code.
 
 3. **As a team lead**, I want to enforce consistent file formatting across my team's codebase.
+
+4. **As a developer**, I want to automatically fix formatting issues instead of manually correcting them.
 
 ## Functional Requirements
 
@@ -38,10 +40,12 @@ LineLint is a command-line tool written in Rust that validates text files for pr
 - Summary statistics (files checked, violations found)
 
 ### Configuration
-- Support `.linelintrc` configuration file
+- Support `.lineguardrc` configuration file
 - Allow enabling/disabling specific checks
 - Support ignore patterns (similar to .gitignore)
 - Configurable file extensions to check
+- Auto-discovery of config files in parent directories
+- CLI flags override configuration file settings
 
 ## Non-Functional Requirements
 
@@ -114,9 +118,22 @@ For the initial release, focus on:
 4. Human-readable output format
 5. Exit codes for CI/CD integration
 
+## Implemented Features
+All planned features have been successfully implemented:
+- ✅ Configuration file support (`.lineguardrc`)
+- ✅ Multiple output formats (human, JSON, GitHub Actions)
+- ✅ Auto-fix capability (`--fix` and `--dry-run` flags)
+- ✅ Streaming support for large files
+- ✅ Permission error handling
+- ✅ CLI flags to disable specific checks
+- ✅ Ignore patterns and file extension filtering
+- ✅ Progress indicators for large file sets
+- ✅ Parallel processing with rayon
+- ✅ Binary file detection and skipping
+
 ## Future Enhancements
-- Configuration file support
-- Multiple output formats
-- Editor integrations
-- Additional lint rules
-- Auto-fix capability
+- Editor integrations (VS Code, Vim, etc.)
+- Additional lint rules (indentation, line length, etc.)
+- Git pre-commit hook integration
+- Performance profiling and optimization
+- Internationalization support

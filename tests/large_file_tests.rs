@@ -11,9 +11,9 @@ fn test_check_large_file_with_issues() {
     let mut content = String::new();
     for i in 0..500_000 {
         if i % 1000 == 0 {
-            content.push_str(&format!("Line {} with trailing spaces  \n", i));
+            content.push_str(&format!("Line {i} with trailing spaces  \n"));
         } else {
-            content.push_str(&format!("Line {}\n", i));
+            content.push_str(&format!("Line {i}\n"));
         }
     }
     // Remove final newline to create an issue
@@ -38,7 +38,7 @@ fn test_fix_large_file() {
     // Create a large file (5MB) with trailing spaces
     let mut content = String::new();
     for i in 0..250_000 {
-        content.push_str(&format!("Line {} with trailing spaces  \n", i));
+        content.push_str(&format!("Line {i} with trailing spaces  \n"));
     }
     std::fs::write(&file_path, content).unwrap();
 

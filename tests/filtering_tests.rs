@@ -12,8 +12,10 @@ fn test_should_check_regular_file() {
 
 #[test]
 fn test_should_check_with_extensions_filter() {
-    let mut config = Config::default();
-    config.file_extensions = vec!["rs".to_string(), "txt".to_string()];
+    let config = Config {
+        file_extensions: vec!["rs".to_string(), "txt".to_string()],
+        ..Default::default()
+    };
 
     assert!(should_check_file(Path::new("test.rs"), &config));
     assert!(should_check_file(Path::new("file.txt"), &config));

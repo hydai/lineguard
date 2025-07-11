@@ -43,7 +43,7 @@ pub fn get_changed_files(from: &str, to: Option<&str>, repo_path: &Path) -> Resu
 /// Check if the current directory is a git repository
 pub fn is_git_repository(path: &Path) -> Result<bool> {
     let output = Command::new("git")
-        .args(&["rev-parse", "--is-inside-work-tree"])
+        .args(["rev-parse", "--is-inside-work-tree"])
         .current_dir(path)
         .output()?;
 
@@ -53,7 +53,7 @@ pub fn is_git_repository(path: &Path) -> Result<bool> {
 /// Validate that a commit exists
 fn validate_commit(commit: &str, repo_path: &Path) -> Result<()> {
     let output = Command::new("git")
-        .args(&["rev-parse", "--verify", commit])
+        .args(["rev-parse", "--verify", commit])
         .current_dir(repo_path)
         .output()?;
 
@@ -71,17 +71,17 @@ mod tests {
 
     fn init_test_repo(dir: &TempDir) -> Result<()> {
         Command::new("git")
-            .args(&["init"])
+            .args(["init"])
             .current_dir(dir.path())
             .output()?;
 
         Command::new("git")
-            .args(&["config", "user.name", "Test"])
+            .args(["config", "user.name", "Test"])
             .current_dir(dir.path())
             .output()?;
 
         Command::new("git")
-            .args(&["config", "user.email", "test@example.com"])
+            .args(["config", "user.email", "test@example.com"])
             .current_dir(dir.path())
             .output()?;
 

@@ -8,18 +8,18 @@ fn init_git_repo(dir: &TempDir) -> Result<(), Box<dyn std::error::Error>> {
 
     // Initialize git repo
     StdCommand::new("git")
-        .args(&["init"])
+        .args(["init"])
         .current_dir(repo_path)
         .output()?;
 
     // Configure git
     StdCommand::new("git")
-        .args(&["config", "user.name", "Test User"])
+        .args(["config", "user.name", "Test User"])
         .current_dir(repo_path)
         .output()?;
 
     StdCommand::new("git")
-        .args(&["config", "user.email", "test@example.com"])
+        .args(["config", "user.email", "test@example.com"])
         .current_dir(repo_path)
         .output()?;
 
@@ -40,19 +40,19 @@ fn create_commit(
 
     // Stage all files
     StdCommand::new("git")
-        .args(&["add", "-A"])
+        .args(["add", "-A"])
         .current_dir(repo_path)
         .output()?;
 
     // Commit
     StdCommand::new("git")
-        .args(&["commit", "-m", message])
+        .args(["commit", "-m", message])
         .current_dir(repo_path)
         .output()?;
 
     // Get commit hash
     let output = StdCommand::new("git")
-        .args(&["rev-parse", "HEAD"])
+        .args(["rev-parse", "HEAD"])
         .current_dir(repo_path)
         .output()?;
 

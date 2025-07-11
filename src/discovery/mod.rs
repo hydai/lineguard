@@ -1,3 +1,4 @@
+use crate::git;
 use crate::{CliArgs, Config};
 use glob::{Pattern, glob};
 use std::fs;
@@ -85,6 +86,34 @@ pub fn discover_files(args: &CliArgs, base_config: &Config) -> Result<Vec<PathBu
                 }
             }
         }
+    }
+
+    // If --from is specified, filter to only git-changed files
+    if let Some(from_commit) = &args.from {
+        // Get the current working directory for git operations
+        let cwd = std::env::current_dir()?;
+
+        // Get list of changed files from git
+        let changed_files = git::get_changed_files(from_commit, args.to.as_deref(), &cwd)?;
+
+        // Filter discovered files to only include changed files
+        files.retain(|file| {
+            // Convert to absolute path for comparison
+            let abs_file = if file.is_absolute() {
+                file.clone()
+            } else {
+                cwd.join(file)
+            };
+
+            changed_files.iter().any(|changed| {
+                let abs_changed = if changed.is_absolute() {
+                    changed.clone()
+                } else {
+                    cwd.join(changed)
+                };
+                abs_file == abs_changed
+            })
+        });
     }
 
     Ok(files)

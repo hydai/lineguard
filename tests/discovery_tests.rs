@@ -24,6 +24,8 @@ fn test_discover_single_file() {
         no_trailing_space: false,
         fix: false,
         dry_run: false,
+        from: None,
+        to: None,
     };
 
     let config = Config::default();
@@ -62,6 +64,8 @@ fn test_discover_multiple_files() {
         no_trailing_space: false,
         fix: false,
         dry_run: false,
+        from: None,
+        to: None,
     };
 
     let config = Config::default();
@@ -99,6 +103,8 @@ fn test_discover_files_with_glob_pattern() {
         no_trailing_space: false,
         fix: false,
         dry_run: false,
+        from: None,
+        to: None,
     };
 
     let config = Config::default();
@@ -133,6 +139,8 @@ fn test_discover_files_in_directory() {
         no_trailing_space: false,
         fix: false,
         dry_run: false,
+        from: None,
+        to: None,
     };
 
     let config = Config::default();
@@ -171,6 +179,8 @@ fn test_discover_files_recursive() {
         no_trailing_space: false,
         fix: false,
         dry_run: false,
+        from: None,
+        to: None,
     };
 
     let config = Config::default();

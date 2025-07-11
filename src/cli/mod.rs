@@ -64,6 +64,15 @@ pub struct CliArgs {
 
     #[arg(long, help = "Show what would be fixed without modifying files")]
     pub dry_run: bool,
+
+    #[arg(long, help = "Check files changed since this commit (Git only)")]
+    pub from: Option<String>,
+
+    #[arg(
+        long,
+        help = "Check files changed until this commit (Git only, default: HEAD)"
+    )]
+    pub to: Option<String>,
 }
 
 pub fn parse_args() -> CliArgs {

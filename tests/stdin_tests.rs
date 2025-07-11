@@ -19,6 +19,8 @@ fn test_discover_files_from_stdin_empty() {
         no_trailing_space: false,
         fix: false,
         dry_run: false,
+        from: None,
+        to: None,
     };
 
     // With stdin flag but no actual stdin, should return empty

@@ -60,7 +60,7 @@ jobs:
         
     - name: Create GitHub Release
       id: release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.version.outputs.version }}
         name: LineGuard ${{ steps.version.outputs.version }}
@@ -167,7 +167,7 @@ jobs:
       shell: bash
       
     - name: Upload release asset
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ needs.create-release.outputs.version }}
         files: |

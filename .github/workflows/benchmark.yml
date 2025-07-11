@@ -83,11 +83,11 @@ jobs:
         # Convert hyperfine output to custom benchmark format
         python3 << 'EOF'
         import json
-        import sys
 
         with open('hyperfine_results.json', 'r') as f:
             hyperfine_data = json.load(f)
 
+        # Create array of benchmark results as required by customSmallerIsBetter
         benchmarks = []
         for result in hyperfine_data['results']:
             command = result['command']
@@ -109,14 +109,9 @@ jobs:
                 'value': result['mean']
             })
 
-        output = {
-            'name': 'LineGuard Performance',
-            'unit': 'seconds',
-            'benchmarks': benchmarks
-        }
-
+        # Write array directly (not wrapped in object) as required by the action
         with open('benchmark_results.json', 'w') as f:
-            json.dump(output, f, indent=2)
+            json.dump(benchmarks, f, indent=2)
         EOF
           
     - name: Store benchmark result

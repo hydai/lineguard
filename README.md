@@ -252,8 +252,9 @@ cargo test
 ### Code Quality
 
 ```bash
-cargo fmt      # Format code
-cargo clippy   # Run linter
+cargo fmt --all -- --check  # Check code formatting
+cargo fmt --all             # Auto-format code
+cargo clippy --all-targets --all-features -- -D warnings  # Run linter
 ```
 
 ## License

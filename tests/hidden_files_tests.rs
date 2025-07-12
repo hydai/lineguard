@@ -71,4 +71,3 @@ fn test_hidden_directories_are_checked_by_default() {
         .failure()
         .stdout(predicate::str::contains("workflow.yml"));
 }
-

@@ -191,7 +191,7 @@
 ### Before Each Commit
 - [ ] All tests pass (`cargo test`)
 - [ ] No Clippy warnings (`cargo clippy`)
-- [ ] Code formatted (`cargo fmt`)
+- [ ] Code formatted (`cargo fmt --all -- --check`)
 - [ ] Builds without warnings (`cargo build`)
 
 ### Before Each Milestone

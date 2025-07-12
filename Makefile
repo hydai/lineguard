@@ -15,9 +15,9 @@ test:
 check: fmt clippy build test
 	@echo "✅ All checks passed!"
 
-# Format code
+# Check code formatting
 fmt:
-	cargo fmt --all
+	cargo fmt --all -- --check
 
 # Run clippy
 clippy:
@@ -74,8 +74,10 @@ update-deps:
 	@command -v cargo-edit >/dev/null 2>&1 || cargo install cargo-edit
 	cargo upgrade --workspace --incompatible
 
-# Development workflow
-dev: fmt test
+# Development workflow (format and test)
+dev:
+	cargo fmt --all
+	cargo test
 	@echo "Ready for commit!"
 
 # Show help
@@ -85,7 +87,7 @@ help:
 	@echo "  make build       - Build the project"
 	@echo "  make test        - Run all tests"
 	@echo "  make check       - Run all checks (fmt, clippy, build, test)"
-	@echo "  make fmt         - Format code"
+	@echo "  make fmt         - Check code formatting"
 	@echo "  make clippy      - Run clippy linter"
 	@echo "  make clean       - Clean build artifacts"
 	@echo "  make release     - Build release version"
@@ -96,5 +98,5 @@ help:
 	@echo "  make coverage    - Generate coverage report"
 	@echo "  make audit       - Run security audit"
 	@echo "  make update-deps - Update dependencies"
-	@echo "  make dev         - Development workflow (fmt + test)"
+	@echo "  make dev         - Development workflow (format + test)"
 	@echo "  make help        - Show this help message"

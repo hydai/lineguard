@@ -26,7 +26,7 @@ This document outlines the design and implementation plan for GitHub Actions wor
 2. **Quality Checks**
    - Run on Ubuntu latest with stable Rust
    - Steps:
-     - Format check (`cargo fmt --check`)
+     - Format check (`cargo fmt --all -- --check`)
      - Clippy linting (`cargo clippy`)
      - Security audit (`cargo audit`)
      - Documentation build (`cargo doc`)

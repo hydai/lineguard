@@ -62,9 +62,7 @@ jobs:
           printf "line %s\n" {1..500000} > bench_data/large/file_$i.txt
         done
         
-        # Add some files with issues
-        echo -n "no newline" > bench_data/small/no_newline.txt
-        echo "trailing spaces  " > bench_data/small/trailing.txt
+        # Don't add files with issues - they cause lineguard to exit with code 1
         
     - name: Run benchmarks
       run: |
@@ -72,6 +70,7 @@ jobs:
         hyperfine \
           --warmup 3 \
           --min-runs 10 \
+          --ignore-failure \
           --export-json hyperfine_results.json \
           --export-markdown benchmark_results.md \
           './target/release/lineguard bench_data/small' \

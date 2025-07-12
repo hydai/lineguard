@@ -20,6 +20,7 @@ A fast and reliable file linter that ensures proper line endings and clean forma
 - 💾 **Memory Efficient**: Streaming support for large files (>10MB)
 - 🛡️ **Robust Error Handling**: Graceful handling of permission errors
 - 🔍 **Binary File Detection**: Automatically skips binary files
+- 👁️ **Hidden Files**: Checks hidden files by default (use `--no-hidden` to skip)
 - 🚫 **Ignore Patterns**: Skip files/directories with glob patterns
 - 📝 **File Extension Filtering**: Check only specific file types
 - 🔀 **Git Integration**: Check only files changed between commits
@@ -89,6 +90,7 @@ Options:
       --stdin                  Read file paths from stdin
       --ignore <IGNORE>        Ignore files matching pattern (can be used multiple times)
       --extensions <EXTENSIONS> File extensions to check (comma-separated)
+      --no-hidden              Skip hidden files (files starting with .)
       --no-newline-check       Disable newline ending check
       --no-trailing-space      Disable trailing space check
       --fix                    Automatically fix issues

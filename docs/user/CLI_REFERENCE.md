@@ -59,6 +59,17 @@ lineguard --from abc123 --to def456 .
 lineguard --from v1.0.0 src/
 ```
 
+#### Check git range with verbose output
+```bash
+lineguard --verbose --from HEAD~5 --to HEAD .
+# Output includes:
+# Git range: abc1234..def5678
+# Changed files: 10
+#   - src/main.rs
+#   - src/lib.rs
+#   - ...
+```
+
 ## Command-Line Options
 
 ### Input Options
@@ -87,6 +98,7 @@ lineguard --from v1.0.0 src/
 - `-c, --config <FILE>` - Path to configuration file
 - `--ignore <PATTERN>` - Ignore files matching pattern
 - `--extensions <EXT>` - File extensions to check (comma-separated)
+- `--no-hidden` - Skip hidden files (files starting with .)
 
 ### General Options
 - `-h, --help` - Show help information

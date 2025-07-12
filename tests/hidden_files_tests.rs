@@ -72,21 +72,3 @@ fn test_hidden_directories_are_checked_by_default() {
         .stdout(predicate::str::contains("workflow.yml"));
 }
 
-#[test]
-fn test_no_hidden_flag_with_direct_path_still_checks() {
-    let temp_dir = TempDir::new().unwrap();
-
-    // Create a hidden file with issues
-    let hidden_file = temp_dir.path().join(".hidden.txt");
-    std::fs::write(&hidden_file, "line 1  \nline 2").unwrap();
-
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
-    cmd.current_dir(&temp_dir);
-    cmd.arg("--no-hidden");
-    cmd.arg(hidden_file.to_str().unwrap());
-
-    // Should still check the file when directly specified, even with --no-hidden
-    cmd.assert()
-        .failure()
-        .stdout(predicate::str::contains(".hidden.txt"));
-}

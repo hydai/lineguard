@@ -193,7 +193,7 @@ lineguard --format github src/
 
 ## Configuration File
 
-LineGuard supports configuration files to customize its behavior. Create a `.lineguardrc` file in your project root:
+LineGuard supports configuration files to customize its behavior. Create a `.lineguardrc` file in your project root (see `.lineguardrc.example` for reference):
 
 ```toml
 # .lineguardrc

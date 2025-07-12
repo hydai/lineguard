@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752275636851,
+  "lastUpdate": 1752295754630,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -195,6 +195,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.0049678762890167,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "distinct": true,
+          "id": "7efbe84aaf7bfb4aaa05dff432b0e3649fc7013d",
+          "message": "fix: resolve benchmark CI failure due to non-zero exit codes\n\n- Remove test files with lint issues that caused exit code 1\n- Add --ignore-failure flag to hyperfine for robustness\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-07-12T12:47:47+08:00",
+          "tree_id": "1d96a89b6cbe555cb450bc96accb47bb3342f411",
+          "url": "https://github.com/hydai/lineguard/commit/7efbe84aaf7bfb4aaa05dff432b0e3649fc7013d"
+        },
+        "date": 1752295754382,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0018894703006151292,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005944497243636364,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.0571906778614815,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07731343539219511,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07928680250857142,
             "unit": "seconds"
           }
         ]

@@ -58,6 +58,12 @@ pub fn resolve_commit_hash(reference: &str, repo_path: &Path) -> Result<String> 
     }
 
     let hash = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if hash.is_empty() {
+        return Err(anyhow!(
+            "Could not resolve git reference '{}' to a commit hash",
+            reference
+        ));
+    }
     Ok(hash)
 }
 
@@ -159,7 +165,12 @@ mod tests {
         init_test_repo(&temp_dir).unwrap();
 
         // Invalid reference should fail
-        assert!(resolve_commit_hash("invalid-ref", temp_dir.path()).is_err());
+        let result = resolve_commit_hash("invalid-ref", temp_dir.path());
+        assert!(result.is_err());
+
+        // Check that the error message is appropriate
+        let error_msg = result.unwrap_err().to_string();
+        assert!(error_msg.contains("Invalid git reference"));
     }
 
     #[test]
@@ -197,23 +208,15 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create initial commit using helper function
-        create_initial_commit(&temp_dir);
+        // Create initial commit and get its hash
+        let expected_hash = create_initial_commit(&temp_dir);
 
-        // Create a new branch
+        // Create a new branch, which will point to the initial commit
         Command::new("git")
             .args(["checkout", "-b", "feature-branch"])
             .current_dir(temp_dir.path())
             .output()
             .unwrap();
-
-        // Get the commit hash for the branch
-        let output = Command::new("git")
-            .args(["rev-list", "-n", "1", "--abbrev-commit", "feature-branch"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        let expected_hash = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
         // Test resolving branch name
         let resolved = resolve_commit_hash("feature-branch", temp_dir.path()).unwrap();
@@ -225,10 +228,10 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create initial commit using helper function
-        create_initial_commit(&temp_dir);
+        // Create initial commit and get its hash
+        let expected_hash = create_initial_commit(&temp_dir);
 
-        // Create a tag
+        // Create a tag pointing to the initial commit
         let tag_output = Command::new("git")
             .args(["tag", "v1.0.0"])
             .current_dir(temp_dir.path())
@@ -239,19 +242,6 @@ mod tests {
             "git tag failed: {}",
             String::from_utf8_lossy(&tag_output.stderr)
         );
-
-        // Get the commit hash for the tag
-        let output = Command::new("git")
-            .args(["rev-list", "-n", "1", "--abbrev-commit", "v1.0.0"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "git rev-list failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        let expected_hash = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
         // Test resolving tag name
         let resolved = resolve_commit_hash("v1.0.0", temp_dir.path()).unwrap();

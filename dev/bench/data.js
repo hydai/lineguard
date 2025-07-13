@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752295754630,
+  "lastUpdate": 1752391114491,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -244,6 +244,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07928680250857142,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "distinct": true,
+          "id": "29fca6756490f3ed51f0de6ddca5033a03498b85",
+          "message": "Improve error messages and test assertions based on reviewer feedback\n\n- Enhanced git error messages to include stderr output for better debugging\n- Updated test assertions to use .code(1) instead of .failure() when issues are found\n- Added better error context in test helper functions with .with_context()\n- Maintained .failure() for actual error conditions (invalid refs, missing repos)\n\nThis provides more specific and helpful error information for both users and developers.\n\nSigned-off-by: hydai <z54981220@gmail.com>",
+          "timestamp": "2025-07-13T15:17:19+08:00",
+          "tree_id": "0f6a62f7747a8a265444797f40e2bcd88e6cf404",
+          "url": "https://github.com/hydai/lineguard/commit/29fca6756490f3ed51f0de6ddca5033a03498b85"
+        },
+        "date": 1752391114073,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001907066064775088,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006074990415643566,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.058256450508301895,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07699856778555557,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07952673595435898,
             "unit": "seconds"
           }
         ]

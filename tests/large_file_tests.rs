@@ -25,7 +25,7 @@ fn test_check_large_file_with_issues() {
     cmd.arg("large.txt");
 
     cmd.assert()
-        .failure()
+        .code(1) // Should exit with code 1 when issues are found
         .stdout(predicate::str::contains("Trailing spaces"))
         .stdout(predicate::str::contains("Missing newline"));
 }

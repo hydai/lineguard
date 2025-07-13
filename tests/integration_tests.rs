@@ -85,7 +85,7 @@ fn test_stdin_with_file_paths() {
     cmd.write_stdin(stdin_input);
 
     cmd.assert()
-        .failure() // Should fail because file1 has issues
+        .code(1) // Should exit with code 1 when issues are found
         .stdout(predicate::str::contains("test1.txt"))
         .stdout(predicate::str::contains("Trailing spaces found"));
 }

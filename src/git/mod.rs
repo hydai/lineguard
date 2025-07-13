@@ -179,7 +179,7 @@ mod tests {
             .args(["rev-parse", "HEAD"])
             .current_dir(temp_dir.path())
             .output()
-            .unwrap();
+            .expect("Failed to get full commit hash");
         let full_hash = String::from_utf8_lossy(&full_output.stdout)
             .trim()
             .to_string();
@@ -288,7 +288,7 @@ mod tests {
             .args(["rev-parse", "--abbrev-ref", "HEAD"])
             .current_dir(temp_dir.path())
             .output()
-            .unwrap();
+            .expect("Failed to get current branch name");
         let default_branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
 
         // If the branch name is empty or "HEAD", use "master" as fallback

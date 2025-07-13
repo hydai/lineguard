@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752391210538,
+  "lastUpdate": 1752414396682,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -342,6 +342,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07846487975897434,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "distinct": true,
+          "id": "02f43522e3d24b8e8ef1c5e4d4fbfd5c93164457",
+          "message": "docs: add shell command alternatives to README\n\nAdd comprehensive shell command alternatives for users who prefer not to install LineGuard:\n- Basic file checking with find and grep\n- Automatic fixing of issues\n- Git integration examples\n- Advanced usage with GNU parallel\n- Shell function for .bashrc/.zshrc\n- Feature comparison table\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-07-13T21:45:07+08:00",
+          "tree_id": "f1ad4d79b9a3bc18141ec41f3d3a44447cacb6fb",
+          "url": "https://github.com/hydai/lineguard/commit/02f43522e3d24b8e8ef1c5e4d4fbfd5c93164457"
+        },
+        "date": 1752414396072,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001949726795698924,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.0059507363208791235,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05747028146296295,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07705007677777778,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.0792765894871795,
             "unit": "seconds"
           }
         ]

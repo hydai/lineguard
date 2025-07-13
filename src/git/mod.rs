@@ -91,6 +91,54 @@ mod tests {
         Ok(())
     }
 
+    /// Helper function to create a test commit with specified file and content
+    fn create_test_commit(
+        temp_dir: &TempDir,
+        filename: &str,
+        content: &str,
+        message: &str,
+    ) -> String {
+        // Write file
+        std::fs::write(temp_dir.path().join(filename), content).unwrap();
+
+        // git add
+        let add_output = Command::new("git")
+            .args(["add", filename])
+            .current_dir(temp_dir.path())
+            .output()
+            .unwrap();
+        assert!(
+            add_output.status.success(),
+            "git add failed: {}",
+            String::from_utf8_lossy(&add_output.stderr)
+        );
+
+        // git commit
+        let commit_output = Command::new("git")
+            .args(["commit", "-m", message])
+            .current_dir(temp_dir.path())
+            .output()
+            .unwrap();
+        assert!(
+            commit_output.status.success(),
+            "git commit failed: {}",
+            String::from_utf8_lossy(&commit_output.stderr)
+        );
+
+        // Return commit hash
+        let output = Command::new("git")
+            .args(["rev-list", "-n", "1", "--abbrev-commit", "HEAD"])
+            .current_dir(temp_dir.path())
+            .output()
+            .unwrap();
+        String::from_utf8_lossy(&output.stdout).trim().to_string()
+    }
+
+    /// Helper function to create a basic initial commit
+    fn create_initial_commit(temp_dir: &TempDir) -> String {
+        create_test_commit(temp_dir, "test.txt", "test content", "Initial commit")
+    }
+
     #[test]
     fn test_is_git_repository() {
         let temp_dir = TempDir::new().unwrap();
@@ -119,37 +167,8 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create a test file and commit
-        std::fs::write(temp_dir.path().join("test.txt"), "test content").unwrap();
-        let add_output = Command::new("git")
-            .args(["add", "test.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        assert!(
-            add_output.status.success(),
-            "git add failed: {}",
-            String::from_utf8_lossy(&add_output.stderr)
-        );
-
-        let commit_output = Command::new("git")
-            .args(["commit", "-m", "Initial commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        assert!(
-            commit_output.status.success(),
-            "git commit failed: {}",
-            String::from_utf8_lossy(&commit_output.stderr)
-        );
-
-        // Get the actual commit hash
-        let output = Command::new("git")
-            .args(["rev-list", "-n", "1", "--abbrev-commit", "HEAD"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        let expected_hash = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        // Create initial commit using helper function
+        let expected_hash = create_initial_commit(&temp_dir);
 
         // Test resolving HEAD
         let resolved = resolve_commit_hash("HEAD", temp_dir.path()).unwrap();
@@ -178,18 +197,8 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create initial commit
-        std::fs::write(temp_dir.path().join("test.txt"), "test content").unwrap();
-        Command::new("git")
-            .args(["add", "test.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Initial commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Create initial commit using helper function
+        create_initial_commit(&temp_dir);
 
         // Create a new branch
         Command::new("git")
@@ -216,18 +225,8 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create initial commit
-        std::fs::write(temp_dir.path().join("test.txt"), "test content").unwrap();
-        Command::new("git")
-            .args(["add", "test.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Initial commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Create initial commit using helper function
+        create_initial_commit(&temp_dir);
 
         // Create a tag
         let tag_output = Command::new("git")
@@ -264,39 +263,12 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create first commit
-        std::fs::write(temp_dir.path().join("test1.txt"), "test content 1").unwrap();
-        Command::new("git")
-            .args(["add", "test1.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "First commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Create first commit using helper function
+        let expected_hash =
+            create_test_commit(&temp_dir, "test1.txt", "test content 1", "First commit");
 
-        // Create second commit
-        std::fs::write(temp_dir.path().join("test2.txt"), "test content 2").unwrap();
-        Command::new("git")
-            .args(["add", "test2.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Second commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-
-        // Get the commit hash for HEAD~1
-        let output = Command::new("git")
-            .args(["rev-list", "-n", "1", "--abbrev-commit", "HEAD~1"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        let expected_hash = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        // Create second commit using helper function
+        create_test_commit(&temp_dir, "test2.txt", "test content 2", "Second commit");
 
         // Test resolving HEAD~1
         let resolved = resolve_commit_hash("HEAD~1", temp_dir.path()).unwrap();
@@ -308,18 +280,8 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create initial commit on default branch
-        std::fs::write(temp_dir.path().join("file1.txt"), "content 1").unwrap();
-        Command::new("git")
-            .args(["add", "file1.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Initial commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Create initial commit on default branch using helper function
+        create_test_commit(&temp_dir, "file1.txt", "content 1", "Initial commit");
 
         // Get the current branch name using rev-parse
         let output = Command::new("git")
@@ -343,18 +305,8 @@ mod tests {
             .output()
             .unwrap();
 
-        // Add a file in feature branch
-        std::fs::write(temp_dir.path().join("feature.txt"), "feature content").unwrap();
-        Command::new("git")
-            .args(["add", "feature.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Add feature"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Add a file in feature branch using helper function
+        create_test_commit(&temp_dir, "feature.txt", "feature content", "Add feature");
 
         // Test get_changed_files with branch names
         let changed_files =
@@ -370,18 +322,8 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create initial commit
-        std::fs::write(temp_dir.path().join("file1.txt"), "content 1").unwrap();
-        Command::new("git")
-            .args(["add", "file1.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Initial commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Create initial commit using helper function
+        create_test_commit(&temp_dir, "file1.txt", "content 1", "Initial commit");
 
         // Create a tag
         Command::new("git")
@@ -390,18 +332,8 @@ mod tests {
             .output()
             .unwrap();
 
-        // Add another file
-        std::fs::write(temp_dir.path().join("file2.txt"), "content 2").unwrap();
-        Command::new("git")
-            .args(["add", "file2.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Second commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Add another file using helper function
+        create_test_commit(&temp_dir, "file2.txt", "content 2", "Second commit");
 
         // Test get_changed_files with tag
         let changed_files = get_changed_files("v1.0.0", Some("HEAD"), temp_dir.path()).unwrap();
@@ -416,31 +348,11 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         init_test_repo(&temp_dir).unwrap();
 
-        // Create first commit
-        std::fs::write(temp_dir.path().join("file1.txt"), "content 1").unwrap();
-        Command::new("git")
-            .args(["add", "file1.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "First commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Create first commit using helper function
+        create_test_commit(&temp_dir, "file1.txt", "content 1", "First commit");
 
-        // Create second commit
-        std::fs::write(temp_dir.path().join("file2.txt"), "content 2").unwrap();
-        Command::new("git")
-            .args(["add", "file2.txt"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
-        Command::new("git")
-            .args(["commit", "-m", "Second commit"])
-            .current_dir(temp_dir.path())
-            .output()
-            .unwrap();
+        // Create second commit using helper function
+        create_test_commit(&temp_dir, "file2.txt", "content 2", "Second commit");
 
         // Test get_changed_files with HEAD~1
         let changed_files = get_changed_files("HEAD~1", Some("HEAD"), temp_dir.path()).unwrap();

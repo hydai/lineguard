@@ -54,7 +54,12 @@ pub fn resolve_commit_hash(reference: &str, repo_path: &Path) -> Result<String> 
         .output()?;
 
     if !output.status.success() {
-        return Err(anyhow!("Invalid git reference: {}", reference));
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(anyhow!(
+            "Invalid git reference: {}: {}",
+            reference,
+            stderr.trim()
+        ));
     }
 
     let hash = String::from_utf8_lossy(&output.stdout).trim().to_string();

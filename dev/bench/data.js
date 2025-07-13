@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752391114491,
+  "lastUpdate": 1752391210538,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -293,6 +293,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07952673595435898,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "distinct": true,
+          "id": "13c4c41df11a316d961282493ae802d932a7a07e",
+          "message": "chore(version): bump to v0.1.4\n\nSigned-off-by: hydai <z54981220@gmail.com>",
+          "timestamp": "2025-07-13T15:18:11+08:00",
+          "tree_id": "282b2c25898aa23325b77b24eb29d9601425ab25",
+          "url": "https://github.com/hydai/lineguard/commit/13c4c41df11a316d961282493ae802d932a7a07e"
+        },
+        "date": 1752391210320,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0019214410093064075,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005842621946637747,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05705907499259261,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07572762465,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07846487975897434,
             "unit": "seconds"
           }
         ]

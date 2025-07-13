@@ -253,7 +253,7 @@ fn test_from_option_with_json_output() {
     cmd.arg(".");
 
     cmd.assert()
-        .failure()
+        .code(1) // Should exit with code 1 when issues are found
         .stdout(predicate::str::contains("\"files_checked\": 1"))
         .stdout(predicate::str::contains("file2.txt"));
 }
@@ -303,7 +303,7 @@ fn test_verbose_mode_shows_git_range_info() {
     cmd.arg(".");
 
     cmd.assert()
-        .failure()
+        .code(1) // Should exit with code 1 when issues are found
         .stdout(predicate::str::contains("Git range:"))
         .stdout(predicate::str::contains(&commit1[0..7]))  // Short hash
         .stdout(predicate::str::contains(&commit3[0..7]))  // Short hash

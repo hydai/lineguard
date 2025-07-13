@@ -54,6 +54,23 @@ cd lineguard
 cargo install --path .
 ```
 
+### Shell Command Alternative
+
+If you prefer not to install LineGuard, you can achieve similar functionality using standard Unix tools:
+
+```bash
+# Basic check for trailing spaces and missing newlines
+find . -name "*.txt" -type f -exec bash -c 'f="$1"; grep -n "[[:space:]]$" "$f" 2>/dev/null && echo "$f: has trailing spaces"; [ -n "$(tail -c 1 "$f")" ] && echo "$f: missing newline"' _ {} \;
+
+# Fix issues automatically
+find . -name "*.txt" -type f -exec bash -c 'sed -i.bak "s/[[:space:]]*$//" "$1" && rm "$1.bak"; [ -n "$(tail -c 1 "$1")" ] && echo >> "$1"' _ {} \;
+
+# Check files changed in git
+git diff --name-only master HEAD | while read f; do [ -f "$f" ] && { grep -q "[[:space:]]$" "$f" && echo "$f: trailing spaces"; [ -n "$(tail -c 1 "$f")" ] && echo "$f: missing newline"; }; done
+```
+
+See [Shell Alternatives](#shell-alternatives) section for more examples.
+
 ## Usage
 
 ### Basic Usage
@@ -258,6 +275,178 @@ cargo fmt --all -- --check  # Check code formatting
 cargo fmt --all             # Auto-format code
 cargo clippy --all-targets --all-features -- -D warnings  # Run linter
 ```
+
+## Shell Alternatives
+
+While LineGuard provides superior performance and features, you can achieve similar basic functionality using standard Unix tools. These examples use `find`, `grep`, `sed`, and other common utilities.
+
+### Basic Checks
+
+```bash
+# Check single file for issues
+check_file() {
+    local file="$1"
+    grep -n '[[:space:]]$' "$file" 2>/dev/null && echo "$file: has trailing spaces"
+    [ -n "$(tail -c 1 "$file")" ] && echo "$file: missing newline at EOF"
+}
+
+# Check all text files in current directory
+find . -type f -name "*.txt" -exec bash -c '
+    f="$1"
+    grep -n "[[:space:]]$" "$f" 2>/dev/null && echo "$f: has trailing spaces"
+    [ -n "$(tail -c 1 "$f")" ] && echo "$f: missing newline"
+' _ {} \;
+
+# Recursive check with multiple extensions
+find . -type f \( -name "*.rs" -o -name "*.md" -o -name "*.txt" \) -exec bash -c '
+    echo -n "Checking $1... "
+    issues=0
+    grep -q "[[:space:]]$" "$1" && { echo -n "trailing spaces, "; issues=1; }
+    [ -n "$(tail -c 1 "$1")" ] && { echo -n "missing newline, "; issues=1; }
+    [ $issues -eq 0 ] && echo "OK" || echo "FAILED"
+' _ {} \;
+```
+
+### Fix Issues
+
+```bash
+# Remove trailing spaces from files
+find . -name "*.txt" -type f -exec sed -i 's/[[:space:]]*$//' {} \;
+
+# Add missing newlines
+find . -name "*.txt" -type f -exec bash -c '[ -n "$(tail -c 1 "$1")" ] && echo >> "$1"' _ {} \;
+
+# Fix both issues at once
+fix_file() {
+    local file="$1"
+    # Remove trailing spaces
+    sed -i.bak 's/[[:space:]]*$//' "$file" && rm "$file.bak"
+    # Add newline if missing
+    [ -n "$(tail -c 1 "$file")" ] && echo >> "$file"
+}
+
+# Apply fixes to all matching files
+find . -name "*.txt" -type f -exec bash -c '
+    sed -i.bak "s/[[:space:]]*$//" "$1" && rm "$1.bak"
+    [ -n "$(tail -c 1 "$1")" ] && echo >> "$1"
+' _ {} \;
+```
+
+### Git Integration
+
+```bash
+# Check files changed in last commit
+git diff --name-only HEAD~1 HEAD | while read f; do
+    [ -f "$f" ] && {
+        grep -q '[[:space:]]$' "$f" && echo "$f: trailing spaces"
+        [ -n "$(tail -c 1 "$f")" ] && echo "$f: missing newline"
+    }
+done
+
+# Check files changed between branches
+git diff --name-only master feature-branch | while read f; do
+    [ -f "$f" ] && check_file "$f"
+done
+
+# Check staged files before commit
+git diff --cached --name-only | while read f; do
+    [ -f "$f" ] && {
+        grep -n '[[:space:]]$' "$f" && { echo "$f has trailing spaces"; exit 1; }
+        [ -n "$(tail -c 1 "$f")" ] && { echo "$f missing newline"; exit 1; }
+    }
+done
+```
+
+### Advanced Examples
+
+```bash
+# Parallel processing with GNU parallel (if installed)
+find . -name "*.txt" -type f | parallel -j+0 '
+    echo -n "{}: "
+    grep -c "[[:space:]]$" {} | { read n; [ $n -gt 0 ] && echo -n "$n trailing spaces, "; }
+    [ -n "$(tail -c 1 {})" ] && echo -n "missing newline, "
+    echo "checked"
+' | grep -v "0 trailing.*checked$"
+
+# Generate report similar to LineGuard
+check_all() {
+    local total=0 issues=0
+    while IFS= read -r file; do
+        ((total++))
+        local has_issue=0
+        if grep -q '[[:space:]]$' "$file"; then
+            echo "✗ $file: trailing spaces on lines $(grep -n '[[:space:]]$' "$file" | cut -d: -f1 | tr '\n' ' ')"
+            has_issue=1
+        fi
+        if [ -n "$(tail -c 1 "$file")" ]; then
+            echo "✗ $file: missing newline at EOF"
+            has_issue=1
+        fi
+        [ $has_issue -eq 1 ] && ((issues++))
+        [ $has_issue -eq 0 ] && echo "✓ $file"
+    done < <(find . -name "*.txt" -type f)
+    echo
+    echo "Checked $total files, found issues in $issues files"
+    [ $issues -gt 0 ] && return 1 || return 0
+}
+```
+
+### Shell Function for .bashrc/.zshrc
+
+Add this function to your shell configuration for easy access:
+
+```bash
+lineguard_check() {
+    local pattern="${1:-*}"
+    local recursive="${2:-}"
+    local find_depth=""
+    
+    [ "$recursive" != "-r" ] && find_depth="-maxdepth 1"
+    
+    find . $find_depth -name "$pattern" -type f ! -path '*/\.*' -exec bash -c '
+        file="$1"
+        has_issue=0
+        
+        # Check trailing spaces
+        if trailing=$(grep -n "[[:space:]]$" "$file" 2>/dev/null); then
+            echo -e "\033[0;31m✗\033[0m $file"
+            echo "  Trailing spaces on lines:"
+            echo "$trailing" | cut -d: -f1 | while read ln; do echo "    Line $ln"; done
+            has_issue=1
+        fi
+        
+        # Check newline at EOF
+        if [ -s "$file" ] && [ -n "$(tail -c 1 "$file")" ]; then
+            [ $has_issue -eq 0 ] && echo -e "\033[0;31m✗\033[0m $file"
+            echo "  Missing newline at end of file"
+            has_issue=1
+        fi
+        
+        [ $has_issue -eq 0 ] && echo -e "\033[0;32m✓\033[0m $file"
+        exit $has_issue
+    ' _ {} \;
+}
+
+# Usage:
+# lineguard_check "*.txt"      # Check .txt files in current directory
+# lineguard_check "*.rs" -r    # Recursively check .rs files
+```
+
+### Comparison
+
+| Feature | LineGuard | Shell Commands |
+|---------|-----------|----------------|
+| Performance | Fast (parallel Rust) | Slower (sequential bash) |
+| Binary file detection | Automatic | Manual with `file` command |
+| Progress bar | Yes (for large sets) | No |
+| Configuration file | Yes (.lineguardrc) | No |
+| Output formats | Human, JSON, GitHub | Basic text only |
+| Cross-platform | Yes | Unix/Linux/macOS only |
+| Memory usage | Efficient streaming | Depends on file size |
+| Error handling | Comprehensive | Basic |
+| Installation | Required | Uses built-in tools |
+
+Choose LineGuard for production use and comprehensive checking. Use shell commands for quick checks or when installation is not possible.
 
 ## License
 

@@ -23,6 +23,12 @@ fn init_git_repo(dir: &TempDir) -> Result<(), Box<dyn std::error::Error>> {
         .current_dir(repo_path)
         .output()?;
 
+    // Disable GPG signing for tests
+    StdCommand::new("git")
+        .args(["config", "commit.gpgsign", "false"])
+        .current_dir(repo_path)
+        .output()?;
+
     Ok(())
 }
 
@@ -50,9 +56,9 @@ fn create_commit(
         .current_dir(repo_path)
         .output()?;
 
-    // Get commit hash
+    // Get commit hash (short version for consistency)
     let output = StdCommand::new("git")
-        .args(["rev-parse", "HEAD"])
+        .args(["rev-list", "-n", "1", "--abbrev-commit", "HEAD"])
         .current_dir(repo_path)
         .output()?;
 
@@ -183,7 +189,7 @@ fn test_invalid_commit_hash_shows_error() {
 
     cmd.assert()
         .failure()
-        .stderr(predicate::str::contains("Invalid commit"));
+        .stderr(predicate::str::contains("Invalid git reference"));
 }
 
 #[test]

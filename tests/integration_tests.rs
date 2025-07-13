@@ -48,3 +48,57 @@ fn test_check_file_no_issues() {
     assert_eq!(result.file_path, file_path);
     assert!(result.issues.is_empty());
 }
+
+// Stdin integration tests
+use assert_cmd::Command;
+use predicates::prelude::*;
+
+#[test]
+fn test_stdin_with_empty_input() {
+    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    cmd.arg("--stdin");
+
+    // Provide empty stdin
+    cmd.write_stdin("");
+
+    cmd.assert()
+        .success()
+        .stderr(predicate::str::contains("No files found to check"));
+}
+
+#[test]
+fn test_stdin_with_file_paths() {
+    let temp_dir = TempDir::new().unwrap();
+
+    // Create test files
+    let file1 = temp_dir.path().join("test1.txt");
+    let file2 = temp_dir.path().join("test2.txt");
+    fs::write(&file1, "content with trailing spaces  \n").unwrap();
+    fs::write(&file2, "good content\n").unwrap();
+
+    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("--stdin");
+
+    // Provide file paths via stdin
+    let stdin_input = format!("{}\n{}\n", file1.to_string_lossy(), file2.to_string_lossy());
+    cmd.write_stdin(stdin_input);
+
+    cmd.assert()
+        .failure() // Should fail because file1 has issues
+        .stdout(predicate::str::contains("test1.txt"))
+        .stdout(predicate::str::contains("Trailing spaces found"));
+}
+
+#[test]
+fn test_stdin_with_nonexistent_files() {
+    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    cmd.arg("--stdin");
+
+    // Provide paths to non-existent files
+    cmd.write_stdin("nonexistent1.txt\nnonexistent2.txt\n");
+
+    cmd.assert()
+        .success()
+        .stderr(predicate::str::contains("No files found to check"));
+}

@@ -1,3 +1,4 @@
+use anyhow::Context;
 use assert_cmd::Command;
 use predicates::prelude::*;
 use std::process::Command as StdCommand;
@@ -10,24 +11,28 @@ fn init_git_repo(dir: &TempDir) -> Result<(), Box<dyn std::error::Error>> {
     StdCommand::new("git")
         .args(["init"])
         .current_dir(repo_path)
-        .output()?;
+        .output()
+        .context("Failed to initialize git repository")?;
 
     // Configure git
     StdCommand::new("git")
         .args(["config", "user.name", "Test User"])
         .current_dir(repo_path)
-        .output()?;
+        .output()
+        .context("Failed to configure git user.name")?;
 
     StdCommand::new("git")
         .args(["config", "user.email", "test@example.com"])
         .current_dir(repo_path)
-        .output()?;
+        .output()
+        .context("Failed to configure git user.email")?;
 
     // Disable GPG signing for tests
     StdCommand::new("git")
         .args(["config", "commit.gpgsign", "false"])
         .current_dir(repo_path)
-        .output()?;
+        .output()
+        .context("Failed to disable GPG signing for tests")?;
 
     Ok(())
 }
@@ -41,26 +46,30 @@ fn create_commit(
 
     // Create/modify files
     for (filename, content) in files {
-        std::fs::write(repo_path.join(filename), content)?;
+        std::fs::write(repo_path.join(filename), content)
+            .with_context(|| format!("Failed to write file: {filename}"))?;
     }
 
     // Stage all files
     StdCommand::new("git")
         .args(["add", "-A"])
         .current_dir(repo_path)
-        .output()?;
+        .output()
+        .context("Failed to stage files with git add")?;
 
     // Commit
     StdCommand::new("git")
         .args(["commit", "-m", message])
         .current_dir(repo_path)
-        .output()?;
+        .output()
+        .with_context(|| format!("Failed to create commit: {message}"))?;
 
     // Get commit hash (short version for consistency)
     let output = StdCommand::new("git")
         .args(["rev-list", "-n", "1", "--abbrev-commit", "HEAD"])
         .current_dir(repo_path)
-        .output()?;
+        .output()
+        .context("Failed to get commit hash")?;
 
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
@@ -101,7 +110,7 @@ fn test_from_option_checks_only_changed_files() {
     cmd.arg(".");
 
     cmd.assert()
-        .failure()
+        .code(1) // Should exit with code 1 when issues are found
         .stdout(predicate::str::contains("file4.txt"))
         .stdout(predicate::str::contains("file1.txt").not())
         .stdout(predicate::str::contains("file2.txt").not())
@@ -152,7 +161,7 @@ fn test_from_to_option_checks_range() {
     cmd.arg(".");
 
     cmd.assert()
-        .failure()
+        .code(1) // Should exit with code 1 when issues are found
         .stdout(predicate::str::contains("file2.txt"))
         .stdout(predicate::str::contains("file3.txt"))
         .stdout(predicate::str::contains("file4.txt").not());
@@ -176,7 +185,7 @@ fn test_from_without_git_repo_shows_error() {
 }
 
 #[test]
-fn test_invalid_commit_hash_shows_error() {
+fn test_invalid_git_reference_shows_error() {
     let temp_dir = TempDir::new().unwrap();
     init_git_repo(&temp_dir).unwrap();
 

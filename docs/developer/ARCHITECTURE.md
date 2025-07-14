@@ -175,16 +175,16 @@ pub enum OutputFormat {
 pub enum LineGuardError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
-    
+
     #[error("Pattern error: {0}")]
     Pattern(#[from] glob::PatternError),
-    
+
     #[error("Configuration error: {0}")]
     Config(String),
-    
+
     #[error("No files found matching pattern")]
     NoFilesFound,
-    
+
     #[error("Permission denied: {0}")]
     PermissionDenied(String),
 }

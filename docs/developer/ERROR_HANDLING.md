@@ -134,7 +134,7 @@ src/main.rs
   Issue: Missing newline at end of file
     Type: missing_newline
     Severity: warning
-    
+
   Issue: Trailing spaces found
     Type: trailing_space
     Line: 45

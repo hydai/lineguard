@@ -14,22 +14,22 @@ jobs:
   update:
     name: Update Dependencies
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
-      
+
     - name: Install cargo-edit
       run: cargo install cargo-edit
-      
+
     - name: Update dependencies
       run: |
         # Update all dependencies to latest versions
         cargo upgrade --workspace --incompatible
-        
+
     - name: Check if updates available
       id: check
       run: |
@@ -40,13 +40,13 @@ jobs:
           echo "Updates available"
           echo "has_updates=true" >> $GITHUB_OUTPUT
         fi
-        
+
     - name: Run tests
       if: steps.check.outputs.has_updates == 'true'
       run: |
         cargo test --all-features
         cargo clippy --all-targets --all-features -- -D warnings
-        
+
     - name: Create Pull Request
       if: steps.check.outputs.has_updates == 'true'
       uses: peter-evans/create-pull-request@v7
@@ -56,19 +56,19 @@ jobs:
         title: "chore: update dependencies"
         body: |
           ## Automated Dependency Update
-          
+
           This PR updates the project dependencies to their latest versions.
-          
+
           ### Changes
           ```
           ${{ steps.check.outputs.changes }}
           ```
-          
+
           ### Checklist
           - [x] All tests pass
           - [x] Clippy checks pass
           - [ ] Manual testing completed
-          
+
           Please review the changes and test manually before merging.
         branch: deps/update-dependencies
         delete-branch: true
@@ -76,11 +76,11 @@ jobs:
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Run security audit
       uses: rustsec/audit-check@v2
       with:

@@ -400,13 +400,13 @@ lineguard_check() {
     local pattern="${1:-*}"
     local recursive="${2:-}"
     local find_depth=""
-    
+
     [ "$recursive" != "-r" ] && find_depth="-maxdepth 1"
-    
+
     find . $find_depth -name "$pattern" -type f ! -path '*/\.*' -exec bash -c '
         file="$1"
         has_issue=0
-        
+
         # Check trailing spaces
         if trailing=$(grep -n "[[:space:]]$" "$file" 2>/dev/null); then
             echo -e "\033[0;31m✗\033[0m $file"
@@ -414,14 +414,14 @@ lineguard_check() {
             echo "$trailing" | cut -d: -f1 | while read ln; do echo "    Line $ln"; done
             has_issue=1
         fi
-        
+
         # Check newline at EOF
         if [ -s "$file" ] && [ -n "$(tail -c 1 "$file")" ]; then
             [ $has_issue -eq 0 ] && echo -e "\033[0;31m✗\033[0m $file"
             echo "  Missing newline at end of file"
             has_issue=1
         fi
-        
+
         [ $has_issue -eq 0 ] && echo -e "\033[0;32m✓\033[0m $file"
         exit $has_issue
     ' _ {} \;

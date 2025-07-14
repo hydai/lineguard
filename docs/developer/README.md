@@ -9,7 +9,7 @@ This directory contains technical documentation for developers working on LineGu
   - Data structures and interfaces
   - Dependency graph
   - Performance considerations
-  
+
 - **[ERROR_HANDLING.md](ERROR_HANDLING.md)** - Error handling design
   - Error categories and types
   - Reporting formats

@@ -7,7 +7,7 @@ This document outlines the design and implementation plan for GitHub Actions wor
 
 ### 1. Continuous Integration (CI) Workflow
 **File**: `.github/workflows/ci.yml`
-**Triggers**: 
+**Triggers**:
 - Push to main/master branch
 - Pull requests
 - Manual workflow dispatch
@@ -38,7 +38,7 @@ This document outlines the design and implementation plan for GitHub Actions wor
 
 ### 2. Release Workflow
 **File**: `.github/workflows/release.yml`
-**Triggers**: 
+**Triggers**:
 - Push tags matching `v*.*.*`
 - Manual workflow dispatch with version input
 
@@ -73,7 +73,7 @@ This document outlines the design and implementation plan for GitHub Actions wor
 
 ### 3. Dependency Update Workflow
 **File**: `.github/workflows/dependencies.yml`
-**Triggers**: 
+**Triggers**:
 - Weekly schedule
 - Manual workflow dispatch
 

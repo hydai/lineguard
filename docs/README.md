@@ -6,11 +6,11 @@ This directory contains all documentation for the LineGuard project, organized b
 
 - **[user/](user/)** - User-facing documentation
   - CLI reference guide with detailed examples and options
-  
+
 - **[developer/](developer/)** - Technical documentation for developers
   - Architecture documentation
   - Error handling design
-  
+
 - **[planning/](planning/)** - Planning and historical documents
   - Product specifications
   - Implementation plans

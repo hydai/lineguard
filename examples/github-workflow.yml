@@ -11,31 +11,31 @@ jobs:
   lineguard:
     name: Check Line Endings
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     # Option 1: Install from crates.io (recommended)
     - name: Install LineGuard
       run: |
         cargo install lineguard
-        
+
     # Option 2: Download pre-built binary
     # - name: Install LineGuard
     #   run: |
     #     curl -L https://github.com/hydai/lineguard/releases/latest/download/lineguard-x86_64-unknown-linux-gnu.tar.gz | tar xz
     #     sudo mv lineguard /usr/local/bin/
-        
+
     - name: Run LineGuard
       run: |
         lineguard --format github .
-        
+
     # Optional: Auto-fix issues
     # - name: Fix issues
     #   run: |
     #     lineguard --fix .
-    #     
+    #
     # - name: Commit fixes
     #   uses: stefanzweifel/git-auto-commit-action@v4
     #   with:

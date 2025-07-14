@@ -182,7 +182,7 @@
 
 ### Test Categories
 - **Unit Tests**: Test individual functions
-- **Integration Tests**: Test module interactions  
+- **Integration Tests**: Test module interactions
 - **CLI Tests**: Test command-line interface
 - **Performance Tests**: Ensure speed requirements
 

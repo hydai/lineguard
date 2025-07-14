@@ -21,13 +21,13 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
       upload_url: ${{ steps.release.outputs.upload_url }}
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
+
     - name: Determine version
       id: version
       run: |
@@ -37,7 +37,7 @@ jobs:
           VERSION="${{ github.ref_name }}"
         fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
-        
+
     - name: Generate changelog
       id: changelog
       run: |
@@ -48,16 +48,16 @@ jobs:
         else
           COMMITS=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
         fi
-        
+
         # Create changelog content
         cat << EOF > CHANGELOG.md
         ## What's Changed
-        
+
         ${COMMITS}
-        
+
         **Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${{ steps.version.outputs.version }}
         EOF
-        
+
     - name: Create GitHub Release
       id: release
       uses: softprops/action-gh-release@v2
@@ -89,7 +89,7 @@ jobs:
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
             use-cross: true
-          
+
           # macOS
           - os: macos-latest
             target: x86_64-apple-darwin
@@ -97,25 +97,25 @@ jobs:
           - os: macos-latest
             target: aarch64-apple-darwin
             use-cross: false
-          
+
           # Windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             use-cross: false
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: ${{ matrix.target }}
-        
+
     - name: Install cross
       if: matrix.use-cross
       run: cargo install cross --git https://github.com/cross-rs/cross
-      
+
     - name: Build binary
       run: |
         if [ "${{ matrix.use-cross }}" = "true" ]; then
@@ -124,7 +124,7 @@ jobs:
           cargo build --release --target ${{ matrix.target }}
         fi
       shell: bash
-      
+
     - name: Strip binary (Linux/macOS)
       if: matrix.os != 'windows-latest'
       run: |
@@ -135,13 +135,13 @@ jobs:
             strip target/${{ matrix.target }}/release/lineguard
           fi
         fi
-        
+
     - name: Create archive
       id: archive
       run: |
         VERSION=${{ needs.create-release.outputs.version }}
         ARCHIVE_NAME="lineguard-${VERSION}-${{ matrix.target }}"
-        
+
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
           # Windows - create zip
           cd target/${{ matrix.target }}/release
@@ -156,7 +156,7 @@ jobs:
           echo "file=${ARCHIVE_NAME}.tar.gz" >> $GITHUB_OUTPUT
         fi
       shell: bash
-      
+
     - name: Generate checksum
       run: |
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
@@ -165,7 +165,7 @@ jobs:
           shasum -a 256 ${{ steps.archive.outputs.file }} > ${{ steps.archive.outputs.file }}.sha256
         fi
       shell: bash
-      
+
     - name: Upload release asset
       uses: softprops/action-gh-release@v2
       with:
@@ -178,23 +178,23 @@ jobs:
     name: Publish to crates.io
     needs: [create-release, build-binaries]
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
-      
+
     - name: Update version in Cargo.toml
       run: |
         VERSION=${{ needs.create-release.outputs.version }}
         VERSION=${VERSION#v}  # Remove 'v' prefix
         sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
-        
+
     - name: Verify package
       run: cargo package --no-verify
-      
+
     - name: Publish to crates.io
       run: cargo publish --no-verify
       env:

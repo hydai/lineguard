@@ -99,7 +99,7 @@ Every development cycle MUST strictly follow:
 
 ### Development Workflow
 ```
-1. Write test → 2. Run test (fails) → 3. Implement → 4. Run test (passes) → 
+1. Write test → 2. Run test (fails) → 3. Implement → 4. Run test (passes) →
 5. Run quality checks → 6. Git commit → 7. Refactor (if needed) → 8. Run all checks
 ```
 

@@ -2,10 +2,23 @@ name: Benchmark
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ master ]
+    paths:
+      - 'src/**'
+      - 'Cargo.*'
+      - '.github/workflows/benchmark.yml'
   pull_request:
-    branches: [ main, master ]
+    branches: [ master ]
+    paths:
+      - 'src/**'
+      - 'Cargo.*'
+      - '.github/workflows/benchmark.yml'
   workflow_dispatch:
+
+# Cancel old runs when pushing new commits to a PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -16,6 +29,11 @@ jobs:
   benchmark:
     name: Performance Benchmark
     runs-on: ubuntu-latest
+    # Only run on master push or manual trigger or PR with 'benchmark' label
+    if: |
+      github.event_name == 'push' || 
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'benchmark')
 
     steps:
     - name: Checkout repository
@@ -165,6 +183,8 @@ jobs:
   size-check:
     name: Binary Size Check
     runs-on: ubuntu-latest
+    # Only run on PRs
+    if: github.event_name == 'pull_request'
 
     steps:
     - name: Checkout repository

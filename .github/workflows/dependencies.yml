@@ -28,7 +28,7 @@ jobs:
     - name: Update dependencies
       run: |
         # Update all dependencies to latest versions
-        cargo upgrade --workspace --incompatible
+        cargo upgrade --incompatible
 
     - name: Check if updates available
       id: check

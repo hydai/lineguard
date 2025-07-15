@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752557556870,
+  "lastUpdate": 1752606771629,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -538,6 +538,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07785223658256409,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cd26e5cde4f48a67ca2b5122047d97308a824ef8",
+          "message": "chore(coverage): improve the coverage (#15)\n\n* chore(coverage): improve the coverage\n\nSigned-off-by: hydai <z54981220@gmail.com>\n\n* chore(lineguard): apply lineguard again\n\nSigned-off-by: hydai <z54981220@gmail.com>\n\n* fix: the edge cases\n\nSigned-off-by: hydai <z54981220@gmail.com>\n\n* fix: the error on windows\n\nSigned-off-by: hydai <z54981220@gmail.com>\n\n* fix: apply the gemini review comments\n\nSigned-off-by: hydai <z54981220@gmail.com>\n\n---------\n\nSigned-off-by: hydai <z54981220@gmail.com>",
+          "timestamp": "2025-07-16T03:10:28+08:00",
+          "tree_id": "f36033ac80071bbb661adc91ee29b1668d998e75",
+          "url": "https://github.com/hydai/lineguard/commit/cd26e5cde4f48a67ca2b5122047d97308a824ef8"
+        },
+        "date": 1752606770965,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001887565528987854,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.00579639609868132,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05558521459818182,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07352463811170734,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07697618600162161,
             "unit": "seconds"
           }
         ]

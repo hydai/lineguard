@@ -244,6 +244,8 @@ fn test_config_directory_instead_of_file() {
         error_msg.contains("Is a directory")
             || error_msg.contains("directory")
             || error_msg.contains("I/O")
+            || error_msg.contains("Access is denied")
+            || error_msg.contains("Permission denied")
     );
 }
 

@@ -39,18 +39,10 @@ fn test_check_large_file_streaming() {
 }
 
 #[test]
-fn test_check_large_file_with_errors() {
+fn test_check_non_existent_file() {
     let temp_dir = TempDir::new().unwrap();
-    let large_file = temp_dir.path().join("large_error.txt");
 
-    // Create a large file with read error in the middle
-    let mut content = String::new();
-    for i in 0..300000 {
-        content.push_str(&format!("Line {i}\n"));
-    }
-    fs::write(&large_file, &content).unwrap();
-
-    // Now test with a non-existent file to trigger error
+    // Test with a non-existent file to trigger error
     let non_existent = temp_dir.path().join("non_existent.txt");
     let config = Config::default();
     let result = check_file(&non_existent, &config);
@@ -209,11 +201,11 @@ fn test_check_large_file_no_content() {
 }
 
 #[test]
-fn test_check_streaming_seek_error() {
+fn test_check_large_file_missing_newline() {
     let temp_dir = TempDir::new().unwrap();
-    let large_file = temp_dir.path().join("large_seek.txt");
+    let large_file = temp_dir.path().join("large_no_newline.txt");
 
-    // Create a large file with only one byte (to test seek error)
+    // Create a large file without a final newline to test streaming newline detection
     let mut content = String::new();
     for _ in 0..300000 {
         content.push('x');
@@ -223,8 +215,14 @@ fn test_check_streaming_seek_error() {
     let config = Config::default();
     let result = check_file(&large_file, &config);
 
-    // Should still work even if seek fails
     assert!(result.error.is_none());
+    // Should detect missing newline issue
+    let newline_issues: Vec<_> = result
+        .issues
+        .iter()
+        .filter(|i| i.issue_type == IssueType::MissingNewline)
+        .collect();
+    assert_eq!(newline_issues.len(), 1);
 }
 
 #[test]
@@ -297,25 +295,4 @@ fn test_check_streaming_only_newline_disabled() {
         })
         .collect();
     assert!(newline_issues.is_empty());
-}
-
-#[test]
-fn test_check_streaming_read_error() {
-    let temp_dir = TempDir::new().unwrap();
-    let file_path = temp_dir.path().join("will_be_deleted.txt");
-
-    // Create a large file
-    let mut content = String::new();
-    for i in 0..300000 {
-        content.push_str(&format!("Line {i}\n"));
-    }
-    fs::write(&file_path, &content).unwrap();
-
-    // Open the file for checking but then delete it to cause read error
-    // This is a race condition test, so we'll test the error path differently
-    let non_existent = temp_dir.path().join("never_existed.txt");
-    let config = Config::default();
-    let result = check_file(&non_existent, &config);
-
-    assert!(result.error.is_some());
 }

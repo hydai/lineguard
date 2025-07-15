@@ -193,6 +193,23 @@ fn report_fix_results(
     )],
     args: &lineguard::cli::CliArgs,
 ) {
+    report_fix_results_to_writers(
+        results,
+        args,
+        &mut std::io::stdout(),
+        &mut std::io::stderr(),
+    );
+}
+
+fn report_fix_results_to_writers<W1: std::io::Write, W2: std::io::Write>(
+    results: &[(
+        lineguard::CheckResult,
+        Result<lineguard::fixer::FixResult, anyhow::Error>,
+    )],
+    args: &lineguard::cli::CliArgs,
+    stdout: &mut W1,
+    stderr: &mut W2,
+) {
     if args.quiet {
         return;
     }
@@ -206,16 +223,16 @@ fn report_fix_results(
                 fixed_count += 1;
                 if args.format == OutputFormat::Human {
                     if args.dry_run {
-                        println!("Would fix: {}", fix.file_path.display());
+                        writeln!(stdout, "Would fix: {}", fix.file_path.display()).unwrap();
                     } else {
-                        println!("Fixed: {}", fix.file_path.display());
+                        writeln!(stdout, "Fixed: {}", fix.file_path.display()).unwrap();
                     }
                 }
             },
             Err(e) => {
                 error_count += 1;
                 if args.format == OutputFormat::Human {
-                    eprintln!("{}: {}", check_result.file_path.display(), e);
+                    writeln!(stderr, "{}: {}", check_result.file_path.display(), e).unwrap();
                 }
             },
             _ => {},
@@ -224,26 +241,32 @@ fn report_fix_results(
 
     if args.format == OutputFormat::Human && fixed_count > 0 {
         if args.dry_run {
-            println!(
+            writeln!(
+                stdout,
                 "\nWould fix {} file{}",
                 fixed_count,
                 if fixed_count == 1 { "" } else { "s" }
-            );
+            )
+            .unwrap();
         } else {
-            println!(
+            writeln!(
+                stdout,
                 "\nFixed {} file{}",
                 fixed_count,
                 if fixed_count == 1 { "" } else { "s" }
-            );
+            )
+            .unwrap();
         }
     }
 
     if error_count > 0 {
-        eprintln!(
+        writeln!(
+            stderr,
             "\n{} error{} occurred",
             error_count,
             if error_count == 1 { "" } else { "s" }
-        );
+        )
+        .unwrap();
     }
 }
 
@@ -254,7 +277,6 @@ mod tests {
     use lineguard::cli::{CliArgs, OutputFormat};
     use lineguard::fixer::FixResult;
     use std::path::PathBuf;
-
     fn create_test_args(format: OutputFormat, quiet: bool, dry_run: bool) -> CliArgs {
         CliArgs {
             files: vec![],
@@ -318,8 +340,21 @@ mod tests {
         let results = vec![(check_result, fix_result)];
         let args = create_test_args(OutputFormat::Human, true, false);
 
-        // In quiet mode, the function should return without producing output
-        report_fix_results(&results, &args);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // In quiet mode, no output should be produced
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stdout_str.is_empty(),
+            "Expected no stdout output in quiet mode, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.is_empty(),
+            "Expected no stderr output in quiet mode, got: '{stderr_str}'"
+        );
     }
 
     #[test]
@@ -330,8 +365,25 @@ mod tests {
         let results = vec![(check_result, fix_result)];
         let args = create_test_args(OutputFormat::Human, false, false);
 
-        // This should produce output - "Fixed: test.txt" and "\nFixed 1 file"
-        report_fix_results(&results, &args);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // Should produce "Fixed: test.txt" and "\nFixed 1 file"
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stdout_str.contains("Fixed: test.txt"),
+            "Expected 'Fixed: test.txt' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stdout_str.contains("Fixed 1 file"),
+            "Expected 'Fixed 1 file' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.is_empty(),
+            "Expected no stderr output, got: '{stderr_str}'"
+        );
     }
 
     #[test]
@@ -342,8 +394,25 @@ mod tests {
         let results = vec![(check_result, fix_result)];
         let args = create_test_args(OutputFormat::Human, false, true);
 
-        // This should produce output - "Would fix: test.txt" and "\nWould fix 1 file"
-        report_fix_results(&results, &args);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // Should produce "Would fix: test.txt" and "\nWould fix 1 file"
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stdout_str.contains("Would fix: test.txt"),
+            "Expected 'Would fix: test.txt' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stdout_str.contains("Would fix 1 file"),
+            "Expected 'Would fix 1 file' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.is_empty(),
+            "Expected no stderr output, got: '{stderr_str}'"
+        );
     }
 
     #[test]
@@ -354,8 +423,25 @@ mod tests {
         let results = vec![(check_result, fix_result)];
         let args = create_test_args(OutputFormat::Human, false, false);
 
-        // This should produce error output
-        report_fix_results(&results, &args);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // Should produce error output to stderr and error count message
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stderr_str.contains("test.txt: Permission denied"),
+            "Expected error message in stderr, got: '{stderr_str}'"
+        );
+        assert!(
+            stderr_str.contains("1 error occurred"),
+            "Expected error count in stderr, got: '{stderr_str}'"
+        );
+        assert!(
+            stdout_str.is_empty(),
+            "Expected no stdout output for errors, got: '{stdout_str}'"
+        );
     }
 
     #[test]
@@ -366,8 +452,25 @@ mod tests {
         let results = vec![(check_result, fix_result)];
         let args = create_test_args(OutputFormat::Json, false, false);
 
-        // JSON format should not produce human-readable output
-        report_fix_results(&results, &args);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // JSON format should not produce human-readable output for individual files
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            !stdout_str.contains("Fixed: test.txt"),
+            "JSON format should not produce human-readable file messages, got: '{stdout_str}'"
+        );
+        assert!(
+            !stdout_str.contains("Fixed 1 file"),
+            "JSON format should not produce human-readable summary, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.is_empty(),
+            "Expected no stderr output, got: '{stderr_str}'"
+        );
     }
 
     #[test]
@@ -381,7 +484,125 @@ mod tests {
         let results = vec![(check_result1, fix_result1), (check_result2, fix_result2)];
         let args = create_test_args(OutputFormat::Human, false, false);
 
-        // Should show "Fixed 2 files"
-        report_fix_results(&results, &args);
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // Should show individual file fixes and summary
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stdout_str.contains("Fixed: test1.txt"),
+            "Expected 'Fixed: test1.txt' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stdout_str.contains("Fixed: test2.txt"),
+            "Expected 'Fixed: test2.txt' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stdout_str.contains("Fixed 2 files"),
+            "Expected 'Fixed 2 files' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.is_empty(),
+            "Expected no stderr output, got: '{stderr_str}'"
+        );
+    }
+
+    #[test]
+    fn test_report_fix_results_mixed_success_and_errors() {
+        let file1 = PathBuf::from("success.txt");
+        let file2 = PathBuf::from("error.txt");
+        let check_result1 = create_check_result(file1.clone(), true);
+        let check_result2 = create_check_result(file2.clone(), true);
+        let fix_result1 = Ok(create_fix_result(file1, true));
+        let fix_result2 = Err(anyhow::anyhow!("Read-only file"));
+        let results = vec![(check_result1, fix_result1), (check_result2, fix_result2)];
+        let args = create_test_args(OutputFormat::Human, false, false);
+
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // Should show successful fix in stdout and error in stderr
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stdout_str.contains("Fixed: success.txt"),
+            "Expected successful fix in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stdout_str.contains("Fixed 1 file"),
+            "Expected fix count in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.contains("error.txt: Read-only file"),
+            "Expected error message in stderr, got: '{stderr_str}'"
+        );
+        assert!(
+            stderr_str.contains("1 error occurred"),
+            "Expected error count in stderr, got: '{stderr_str}'"
+        );
+    }
+
+    #[test]
+    fn test_report_fix_results_no_fixes_needed() {
+        let file_path = PathBuf::from("clean.txt");
+        let check_result = create_check_result(file_path.clone(), false); // No issues
+        let fix_result = Ok(create_fix_result(file_path, false)); // Not fixed (no issues to fix)
+        let results = vec![(check_result, fix_result)];
+        let args = create_test_args(OutputFormat::Human, false, false);
+
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // Should produce no output when no fixes are needed
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stdout_str.is_empty(),
+            "Expected no stdout output when no fixes needed, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.is_empty(),
+            "Expected no stderr output when no fixes needed, got: '{stderr_str}'"
+        );
+    }
+
+    #[test]
+    fn test_report_fix_results_dry_run_multiple_files() {
+        let file1 = PathBuf::from("file1.txt");
+        let file2 = PathBuf::from("file2.txt");
+        let check_result1 = create_check_result(file1.clone(), true);
+        let check_result2 = create_check_result(file2.clone(), true);
+        let fix_result1 = Ok(create_fix_result(file1, true));
+        let fix_result2 = Ok(create_fix_result(file2, true));
+        let results = vec![(check_result1, fix_result1), (check_result2, fix_result2)];
+        let args = create_test_args(OutputFormat::Human, false, true);
+
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        report_fix_results_to_writers(&results, &args, &mut stdout, &mut stderr);
+
+        // Should show "Would fix" messages for dry run
+        let stdout_str = String::from_utf8(stdout).unwrap();
+        let stderr_str = String::from_utf8(stderr).unwrap();
+        assert!(
+            stdout_str.contains("Would fix: file1.txt"),
+            "Expected 'Would fix: file1.txt' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stdout_str.contains("Would fix: file2.txt"),
+            "Expected 'Would fix: file2.txt' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stdout_str.contains("Would fix 2 files"),
+            "Expected 'Would fix 2 files' in stdout, got: '{stdout_str}'"
+        );
+        assert!(
+            stderr_str.is_empty(),
+            "Expected no stderr output, got: '{stderr_str}'"
+        );
     }
 }

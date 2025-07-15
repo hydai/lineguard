@@ -44,8 +44,16 @@ not_a_real_option = "value"
     .unwrap();
 
     // Should load successfully but ignore unknown fields
+    // Unknown fields should be ignored by serde's default behavior
     let config = load_config(Some(config_path.as_path()));
     assert!(config.is_ok());
+
+    // Verify that the configuration loads successfully with default values
+    let config = config.unwrap();
+    assert!(config.checks.newline_ending); // Default value
+    assert!(config.checks.trailing_spaces); // Default value
+    assert!(config.ignore_patterns.is_empty()); // Default value
+    assert!(config.file_extensions.is_empty()); // Default value
 }
 
 #[test]
@@ -65,6 +73,15 @@ newline_ending = "yes"  # Should be boolean
 
     let config = load_config(Some(config_path.as_path()));
     assert!(config.is_err());
+
+    // Verify that the error message contains information about the type mismatch
+    let error = config.unwrap_err();
+    let error_msg = error.to_string();
+    assert!(
+        error_msg.contains("invalid type")
+            || error_msg.contains("expected")
+            || error_msg.contains("boolean")
+    );
 }
 
 #[test]
@@ -121,6 +138,14 @@ fn test_config_file_not_found() {
 
     let config = load_config(Some(config_path.as_path()));
     assert!(config.is_err());
+
+    // Verify that the error message indicates the file was not found
+    let error = config.unwrap_err();
+    let error_msg = error.to_string();
+    assert!(
+        error_msg.contains("Configuration file not found")
+            && error_msg.contains("nonexistent.toml")
+    );
 }
 
 #[test]
@@ -139,6 +164,16 @@ ignore_patterns = "not_an_array"
 
     let config = load_config(Some(config_path.as_path()));
     assert!(config.is_err());
+
+    // Verify that the error message indicates a type mismatch for ignore_patterns
+    let error = config.unwrap_err();
+    let error_msg = error.to_string();
+    assert!(
+        error_msg.contains("invalid type")
+            || error_msg.contains("expected")
+            || error_msg.contains("array")
+            || error_msg.contains("sequence")
+    );
 }
 
 #[test]
@@ -157,6 +192,16 @@ file_extensions = 123
 
     let config = load_config(Some(config_path.as_path()));
     assert!(config.is_err());
+
+    // Verify that the error message indicates a type mismatch for file_extensions
+    let error = config.unwrap_err();
+    let error_msg = error.to_string();
+    assert!(
+        error_msg.contains("invalid type")
+            || error_msg.contains("expected")
+            || error_msg.contains("array")
+            || error_msg.contains("sequence")
+    );
 }
 
 #[test]
@@ -172,6 +217,16 @@ fn test_config_with_invalid_utf8() {
 
     let config = load_config(Some(config_path.as_path()));
     assert!(config.is_err());
+
+    // Verify that the error message indicates UTF-8 encoding issues
+    let error = config.unwrap_err();
+    let error_msg = error.to_string();
+    assert!(
+        error_msg.contains("UTF-8")
+            || error_msg.contains("utf8")
+            || error_msg.contains("invalid")
+            || error_msg.contains("encoding")
+    );
 }
 
 #[test]
@@ -181,6 +236,15 @@ fn test_config_directory_instead_of_file() {
     // Try to load a directory as config
     let config = load_config(Some(temp_dir.path()));
     assert!(config.is_err());
+
+    // Verify that the error message indicates an I/O error (directory cannot be read as file)
+    let error = config.unwrap_err();
+    let error_msg = error.to_string();
+    assert!(
+        error_msg.contains("Is a directory")
+            || error_msg.contains("directory")
+            || error_msg.contains("I/O")
+    );
 }
 
 #[test]
@@ -253,8 +317,13 @@ something = true
 
     // Should either fail or ignore the nested section
     let config = load_config(Some(config_path.as_path()));
-    // The behavior depends on the implementation
-    assert!(config.is_ok() || config.is_err());
+    // Nested sections should be ignored by serde, so config should load successfully
+    assert!(config.is_ok());
+
+    // Verify that the valid configuration values are loaded correctly
+    let config = config.unwrap();
+    assert!(config.checks.newline_ending); // Should be true as specified
+    assert!(!config.checks.trailing_spaces); // Should be false as specified
 }
 
 #[test]
@@ -281,6 +350,15 @@ newline_ending = true
 
     let config = load_config(Some(config_path.as_path()));
     assert!(config.is_err());
+
+    // Verify that the error message indicates permission issues
+    let error = config.unwrap_err();
+    let error_msg = error.to_string();
+    assert!(
+        error_msg.contains("Permission denied")
+            || error_msg.contains("permission")
+            || error_msg.contains("denied")
+    );
 
     // Restore permissions for cleanup
     let mut perms = std::fs::metadata(&config_path).unwrap().permissions();

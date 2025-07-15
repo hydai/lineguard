@@ -5,7 +5,7 @@ use std::fs;
 use tempfile::TempDir;
 
 #[test]
-fn test_discover_files_from_stdin() {
+fn test_discover_files_from_args() {
     let temp_dir = TempDir::new().unwrap();
     let file1 = temp_dir.path().join("file1.txt");
     let file2 = temp_dir.path().join("file2.txt");
@@ -15,16 +15,7 @@ fn test_discover_files_from_stdin() {
     fs::write(&file2, "content2").unwrap();
     fs::write(&file3, "hidden").unwrap();
 
-    // Create stdin input
-    let _stdin_content = format!(
-        "{}\n{}\n{}\nnonexistent.txt\n\n  \n",
-        file1.display(),
-        file2.display(),
-        file3.display()
-    );
-
-    // Mock stdin by creating a custom test
-    // Since we can't easily mock stdin in tests, we'll test the logic separately
+    // Test file discovery from command line arguments
     let args = CliArgs {
         files: vec![
             file1.to_string_lossy().to_string(),
@@ -451,38 +442,4 @@ fn test_is_ignored_with_relative_path_pattern() {
 
     assert_eq!(result.files.len(), 1);
     assert!(result.files[0].file_name().unwrap().to_str().unwrap() == "keep.rs");
-}
-
-#[test]
-fn test_discover_files_directory_entry_error() {
-    // This test is hard to trigger in practice, but we can test the error path
-    // by creating a scenario where directory iteration might fail
-    let temp_dir = TempDir::new().unwrap();
-
-    // Create a normal directory structure
-    fs::write(temp_dir.path().join("file.txt"), "content").unwrap();
-
-    let args = CliArgs {
-        files: vec![temp_dir.path().to_string_lossy().to_string()],
-        stdin: false,
-        recursive: false,
-        format: OutputFormat::Human,
-        quiet: false,
-        verbose: false,
-        no_color: false,
-        config: None,
-        ignore: vec![],
-        extensions: None,
-        no_newline_check: false,
-        no_trailing_space: false,
-        fix: false,
-        dry_run: false,
-        from: None,
-        to: None,
-        no_hidden: false,
-    };
-
-    let config = Config::default();
-    let result = discover_files(&args, &config);
-    assert!(result.is_ok());
 }

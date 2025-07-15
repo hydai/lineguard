@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752493901957,
+  "lastUpdate": 1752557556870,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -489,6 +489,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.08041786627714288,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2da3ca01b863abe563bd08195fc338056bf5f0d2",
+          "message": "ci: optimize GitHub Actions workflows to reduce usage (#14)\n\n- Remove beta/nightly Rust testing (reduce test matrix from 9 to 3 jobs)\n- Add path filtering to skip runs for documentation-only changes\n- Prevent duplicate runs when PRs are merged (push/PR overlap)\n- Add concurrency control to cancel outdated workflow runs\n- Restrict benchmark runs to master push, manual trigger, or PRs with 'benchmark' label\n- Move coverage job to master-only execution\n- Add caching for cargo-audit and cargo-tarpaulin tools\n- Fix cargo upgrade command for newer cargo-edit versions\n- Limit size-check job to PRs only\n\nThese optimizations should reduce GitHub Actions usage by ~60-70% while\nmaintaining necessary CI/CD quality checks.\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-authored-by: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-07-15T13:31:25+08:00",
+          "tree_id": "176d19992b01816a7cafbb6034d524a119c3661f",
+          "url": "https://github.com/hydai/lineguard/commit/2da3ca01b863abe563bd08195fc338056bf5f0d2"
+        },
+        "date": 1752557556617,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0018906322710699227,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005865893790023313,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05716697898000002,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07519095250439024,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07785223658256409,
             "unit": "seconds"
           }
         ]

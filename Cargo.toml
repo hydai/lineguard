@@ -25,6 +25,7 @@ toml = "0.9"
 assert_cmd = "2.0"
 predicates = "3.1"
 tempfile = "3.10"
+gag = "1.0"
 
 [profile.release]
 lto = true

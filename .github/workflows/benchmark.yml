@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run on master push or manual trigger or PR with 'benchmark' label
     if: |
-      github.event_name == 'push' || 
+      github.event_name == 'push' ||
       github.event_name == 'workflow_dispatch' ||
       contains(github.event.pull_request.labels.*.name, 'benchmark')
 

@@ -91,3 +91,7 @@ The project is in the planning phase with complete specifications. Implementatio
 - ALWAYS run quality checks before committing
 - Each commit should represent one completed feature with passing tests
 - Refactoring is only allowed after committing working code
+
+## Pre-Commit Checks
+
+- You must run `cargo fmt` and `cargo clippy --all --all-features --tests -- -D warnings` before committing changes

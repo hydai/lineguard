@@ -94,4 +94,4 @@ The project is in the planning phase with complete specifications. Implementatio
 
 ## Pre-Commit Checks
 
-- You must run cargo fmt and cargo clippy --all --all-features --tests -- -D warnings before finishing the steps
+- You must run `cargo fmt` and `cargo clippy --all --all-features --tests -- -D warnings` before committing changes

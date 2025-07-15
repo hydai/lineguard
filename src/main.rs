@@ -223,16 +223,16 @@ fn report_fix_results_to_writers<W1: std::io::Write, W2: std::io::Write>(
                 fixed_count += 1;
                 if args.format == OutputFormat::Human {
                     if args.dry_run {
-                        writeln!(stdout, "Would fix: {}", fix.file_path.display()).unwrap();
+                        let _ = writeln!(stdout, "Would fix: {}", fix.file_path.display());
                     } else {
-                        writeln!(stdout, "Fixed: {}", fix.file_path.display()).unwrap();
+                        let _ = writeln!(stdout, "Fixed: {}", fix.file_path.display());
                     }
                 }
             },
             Err(e) => {
                 error_count += 1;
                 if args.format == OutputFormat::Human {
-                    writeln!(stderr, "{}: {}", check_result.file_path.display(), e).unwrap();
+                    let _ = writeln!(stderr, "{}: {}", check_result.file_path.display(), e);
                 }
             },
             _ => {},
@@ -241,32 +241,29 @@ fn report_fix_results_to_writers<W1: std::io::Write, W2: std::io::Write>(
 
     if args.format == OutputFormat::Human && fixed_count > 0 {
         if args.dry_run {
-            writeln!(
+            let _ = writeln!(
                 stdout,
                 "\nWould fix {} file{}",
                 fixed_count,
                 if fixed_count == 1 { "" } else { "s" }
-            )
-            .unwrap();
+            );
         } else {
-            writeln!(
+            let _ = writeln!(
                 stdout,
                 "\nFixed {} file{}",
                 fixed_count,
                 if fixed_count == 1 { "" } else { "s" }
-            )
-            .unwrap();
+            );
         }
     }
 
     if error_count > 0 {
-        writeln!(
+        let _ = writeln!(
             stderr,
             "\n{} error{} occurred",
             error_count,
             if error_count == 1 { "" } else { "s" }
-        )
-        .unwrap();
+        );
     }
 }
 

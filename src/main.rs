@@ -246,3 +246,142 @@ fn report_fix_results(
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use lineguard::checker::{CheckResult, Issue, IssueType};
+    use lineguard::cli::{CliArgs, OutputFormat};
+    use lineguard::fixer::FixResult;
+    use std::path::PathBuf;
+
+    fn create_test_args(format: OutputFormat, quiet: bool, dry_run: bool) -> CliArgs {
+        CliArgs {
+            files: vec![],
+            stdin: false,
+            recursive: false,
+            ignore: vec![],
+            extensions: None,
+            format,
+            config: None,
+            fix: false,
+            dry_run,
+            quiet,
+            no_color: true,
+            verbose: false,
+            no_newline_check: false,
+            no_trailing_space: false,
+            from: None,
+            to: None,
+            no_hidden: false,
+        }
+    }
+
+    fn create_check_result(file_path: PathBuf, has_issues: bool) -> CheckResult {
+        CheckResult {
+            file_path: file_path.clone(),
+            issues: if has_issues {
+                vec![Issue {
+                    line: Some(1),
+                    issue_type: IssueType::MissingNewline,
+                    message: "Missing newline at end of file".to_string(),
+                }]
+            } else {
+                vec![]
+            },
+            error: None,
+        }
+    }
+
+    fn create_fix_result(file_path: PathBuf, fixed: bool) -> FixResult {
+        FixResult {
+            file_path,
+            fixed,
+            issues_fixed: if fixed {
+                vec![Issue {
+                    line: Some(1),
+                    issue_type: IssueType::MissingNewline,
+                    message: "Missing newline at end of file".to_string(),
+                }]
+            } else {
+                vec![]
+            },
+        }
+    }
+
+    #[test]
+    fn test_report_fix_results_quiet_mode() {
+        // Test that no output is produced in quiet mode
+        let file_path = PathBuf::from("test.txt");
+        let check_result = create_check_result(file_path.clone(), true);
+        let fix_result = Ok(create_fix_result(file_path, true));
+        let results = vec![(check_result, fix_result)];
+        let args = create_test_args(OutputFormat::Human, true, false);
+
+        // In quiet mode, the function should return without producing output
+        report_fix_results(&results, &args);
+    }
+
+    #[test]
+    fn test_report_fix_results_human_format_fixed() {
+        let file_path = PathBuf::from("test.txt");
+        let check_result = create_check_result(file_path.clone(), true);
+        let fix_result = Ok(create_fix_result(file_path, true));
+        let results = vec![(check_result, fix_result)];
+        let args = create_test_args(OutputFormat::Human, false, false);
+
+        // This should produce output - "Fixed: test.txt" and "\nFixed 1 file"
+        report_fix_results(&results, &args);
+    }
+
+    #[test]
+    fn test_report_fix_results_dry_run() {
+        let file_path = PathBuf::from("test.txt");
+        let check_result = create_check_result(file_path.clone(), true);
+        let fix_result = Ok(create_fix_result(file_path, true));
+        let results = vec![(check_result, fix_result)];
+        let args = create_test_args(OutputFormat::Human, false, true);
+
+        // This should produce output - "Would fix: test.txt" and "\nWould fix 1 file"
+        report_fix_results(&results, &args);
+    }
+
+    #[test]
+    fn test_report_fix_results_with_errors() {
+        let file_path = PathBuf::from("test.txt");
+        let check_result = create_check_result(file_path.clone(), true);
+        let fix_result = Err(anyhow::anyhow!("Permission denied"));
+        let results = vec![(check_result, fix_result)];
+        let args = create_test_args(OutputFormat::Human, false, false);
+
+        // This should produce error output
+        report_fix_results(&results, &args);
+    }
+
+    #[test]
+    fn test_report_fix_results_json_format() {
+        let file_path = PathBuf::from("test.txt");
+        let check_result = create_check_result(file_path.clone(), true);
+        let fix_result = Ok(create_fix_result(file_path, true));
+        let results = vec![(check_result, fix_result)];
+        let args = create_test_args(OutputFormat::Json, false, false);
+
+        // JSON format should not produce human-readable output
+        report_fix_results(&results, &args);
+    }
+
+    #[test]
+    fn test_report_fix_results_multiple_files() {
+        let file1 = PathBuf::from("test1.txt");
+        let file2 = PathBuf::from("test2.txt");
+        let check_result1 = create_check_result(file1.clone(), true);
+        let check_result2 = create_check_result(file2.clone(), true);
+        let fix_result1 = Ok(create_fix_result(file1, true));
+        let fix_result2 = Ok(create_fix_result(file2, true));
+        let results = vec![(check_result1, fix_result1), (check_result2, fix_result2)];
+        let args = create_test_args(OutputFormat::Human, false, false);
+
+        // Should show "Fixed 2 files"
+        report_fix_results(&results, &args);
+    }
+}

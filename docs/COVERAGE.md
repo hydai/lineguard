@@ -135,15 +135,10 @@ fn process_content(content: &str) -> String {
     content.trim().to_string()
 }
 
-fn process_file<R: FileReader, W: FileWriter>(
-    path: &Path,
-    reader: &R,
-    writer: &W
-) -> Result<()> {
+fn process_file<R: FileReader>(path: &Path, reader: &R) -> Result<String> {
     let content = reader.read_to_string(path)?;
     let processed = process_content(&content);
-    writer.write(path, &processed)?;
-    Ok(())
+    Ok(processed)
 }
 ```
 

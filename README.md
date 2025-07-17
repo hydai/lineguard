@@ -316,7 +316,6 @@ use lineguard::testing::mocks::MockFileSystem;
 
 let mut fs = MockFileSystem::new();
 fs.add_file("test.txt", "content\n");
-fs.add_metadata("test.txt", MockMetadata::file(7));
 
 // Using MockOutput for testing output operations
 use lineguard::testing::mocks::MockOutput;

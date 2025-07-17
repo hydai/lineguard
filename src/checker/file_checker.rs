@@ -128,28 +128,62 @@ impl<R: FileReader> FileChecker<R> {
         // For real filesystem, we need to use standard File operations
         // This is a limitation of the current design that we accept for now
         if let Ok(mut file) = File::open(path) {
-            // Read last few bytes to check for newline
-            let _ = file.seek(SeekFrom::End(-2));
-            let mut buffer = [0u8; 2];
-            if let Ok(bytes_read) = file.read(&mut buffer) {
-                let end_bytes = &buffer[..bytes_read];
+            // Get file metadata first to check file size
+            if let Ok(metadata) = file.metadata() {
+                let file_size = metadata.len();
 
-                // Check if file ends with newline
-                let ends_with_newline = end_bytes.last() == Some(&b'\n');
-                let ends_with_double_newline = bytes_read == 2 && end_bytes == b"\n\n";
+                // Empty file is considered valid (no issues)
+                if file_size == 0 {
+                    return None;
+                }
 
-                if !ends_with_newline {
-                    return Some(Issue {
-                        issue_type: crate::IssueType::MissingNewline,
-                        line: None,
-                        message: "Missing newline at end of file".to_string(),
-                    });
-                } else if ends_with_double_newline {
-                    return Some(Issue {
-                        issue_type: crate::IssueType::MultipleNewlines,
-                        line: None,
-                        message: "Multiple newlines at end of file".to_string(),
-                    });
+                // For very small files, read the entire content
+                if file_size == 1 {
+                    let mut buffer = [0u8; 1];
+                    if let Ok(bytes_read) = file.read(&mut buffer) {
+                        if bytes_read == 1 {
+                            let ends_with_newline = buffer[0] == b'\n';
+                            if !ends_with_newline {
+                                return Some(Issue {
+                                    issue_type: crate::IssueType::MissingNewline,
+                                    line: None,
+                                    message: "Missing newline at end of file".to_string(),
+                                });
+                            }
+                        }
+                    }
+                    return None;
+                }
+
+                // For files with 2+ bytes, seek to read last 2 bytes
+                let seek_pos = if file_size >= 2 {
+                    -2
+                } else {
+                    -(file_size as i64)
+                };
+                if file.seek(SeekFrom::End(seek_pos)).is_ok() {
+                    let mut buffer = [0u8; 2];
+                    if let Ok(bytes_read) = file.read(&mut buffer) {
+                        let end_bytes = &buffer[..bytes_read];
+
+                        // Check if file ends with newline
+                        let ends_with_newline = end_bytes.last() == Some(&b'\n');
+                        let ends_with_double_newline = bytes_read == 2 && end_bytes == b"\n\n";
+
+                        if !ends_with_newline {
+                            return Some(Issue {
+                                issue_type: crate::IssueType::MissingNewline,
+                                line: None,
+                                message: "Missing newline at end of file".to_string(),
+                            });
+                        } else if ends_with_double_newline {
+                            return Some(Issue {
+                                issue_type: crate::IssueType::MultipleNewlines,
+                                line: None,
+                                message: "Multiple newlines at end of file".to_string(),
+                            });
+                        }
+                    }
                 }
             }
         }

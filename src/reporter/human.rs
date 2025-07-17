@@ -3,8 +3,8 @@
 //! This module provides a reporter that outputs results in a human-friendly format
 //! with optional color support.
 
-use crate::CheckResult;
 use crate::reporter::{Color, ColoredOutput, Output, Reporter, ReporterWithOutput};
+use crate::{CheckResult, Issue};
 use std::io;
 
 /// Human-readable reporter with color support
@@ -47,48 +47,32 @@ impl Reporter for HumanReporter {
 
 impl ReporterWithOutput for HumanReporter {
     fn report_to(&self, results: &[CheckResult], output: &mut dyn Output) -> io::Result<()> {
-        let mut total_issues = 0;
-        let mut files_with_issues = 0;
+        // Create a wrapper to use the colored output method without colors
+        struct PlainOutputWrapper<'a>(&'a mut dyn Output);
 
-        // Report individual file issues
-        for result in results {
-            if !result.issues.is_empty() {
-                files_with_issues += 1;
-                total_issues += result.issues.len();
-
-                // File header
-                output.write_line(&format!("✗ {}", result.file_path.display()))?;
-
-                // Issues
-                for issue in &result.issues {
-                    match issue.line {
-                        Some(line) => {
-                            output.write_line(&format!("  - Line {line}: {}", issue.message))?;
-                        },
-                        None => {
-                            output.write_line(&format!("  - {}", issue.message))?;
-                        },
-                    }
-                }
-                output.write_line("")?;
+        impl<'a> ColoredOutput for PlainOutputWrapper<'a> {
+            fn write_colored(&mut self, content: &str, _color: Color) -> io::Result<()> {
+                self.0.write(content)
             }
         }
 
-        // Summary
-        if total_issues == 0 {
-            output.write_line("✓ All files passed lint checks!")?;
-            let files_checked = results.len();
-            output.write_line(&format!("  Files checked: {files_checked}"))?;
-        } else {
-            output.write_line(&format!(
-                "✗ Found {total_issues} issues in {files_with_issues} files"
-            ))?;
-            let files_checked = results.len();
-            output.write_line(&format!("  Files checked: {files_checked}"))?;
+        impl<'a> Output for PlainOutputWrapper<'a> {
+            fn write(&mut self, content: &str) -> io::Result<()> {
+                self.0.write(content)
+            }
+
+            fn write_line(&mut self, content: &str) -> io::Result<()> {
+                self.0.write_line(content)
+            }
+
+            fn flush(&mut self) -> io::Result<()> {
+                self.0.flush()
+            }
         }
 
-        output.flush()?;
-        Ok(())
+        let mut wrapper = PlainOutputWrapper(output);
+        let reporter = HumanReporter { use_color: false };
+        reporter.report_to_colored(results, &mut wrapper)
     }
 }
 
@@ -99,41 +83,78 @@ impl HumanReporter {
         results: &[CheckResult],
         output: &mut dyn ColoredOutput,
     ) -> io::Result<()> {
+        let (total_issues, files_with_issues) = self.report_file_issues(results, output)?;
+        self.report_summary(total_issues, files_with_issues, results.len(), output)?;
+        output.flush()?;
+        Ok(())
+    }
+
+    /// Report individual file issues and return summary counts
+    fn report_file_issues(
+        &self,
+        results: &[CheckResult],
+        output: &mut dyn ColoredOutput,
+    ) -> io::Result<(usize, usize)> {
         let mut total_issues = 0;
         let mut files_with_issues = 0;
 
-        // Report individual file issues
         for result in results {
             if !result.issues.is_empty() {
                 files_with_issues += 1;
                 total_issues += result.issues.len();
 
                 // File header with color
-                if self.use_color {
-                    output.write_colored("✗", Color::Red)?;
-                    output.write(" ")?;
-                    output.write(&format!("{}", result.file_path.display()))?;
-                    output.write_line("")?;
-                } else {
-                    output.write_line(&format!("✗ {}", result.file_path.display()))?;
-                }
+                self.write_file_header(&result.file_path, output)?;
 
                 // Issues
                 for issue in &result.issues {
-                    match issue.line {
-                        Some(line) => {
-                            output.write_line(&format!("  - Line {line}: {}", issue.message))?;
-                        },
-                        None => {
-                            output.write_line(&format!("  - {}", issue.message))?;
-                        },
-                    }
+                    self.write_issue(issue, output)?;
                 }
                 output.write_line("")?;
             }
         }
 
-        // Summary
+        Ok((total_issues, files_with_issues))
+    }
+
+    /// Write file header with appropriate coloring
+    fn write_file_header(
+        &self,
+        file_path: &std::path::Path,
+        output: &mut dyn ColoredOutput,
+    ) -> io::Result<()> {
+        if self.use_color {
+            output.write_colored("✗", Color::Red)?;
+            output.write(" ")?;
+            output.write(&format!("{}", file_path.display()))?;
+            output.write_line("")?;
+        } else {
+            output.write_line(&format!("✗ {}", file_path.display()))?;
+        }
+        Ok(())
+    }
+
+    /// Write individual issue
+    fn write_issue(&self, issue: &Issue, output: &mut dyn ColoredOutput) -> io::Result<()> {
+        match issue.line {
+            Some(line) => {
+                output.write_line(&format!("  - Line {line}: {}", issue.message))?;
+            },
+            None => {
+                output.write_line(&format!("  - {}", issue.message))?;
+            },
+        }
+        Ok(())
+    }
+
+    /// Write summary with appropriate coloring
+    fn report_summary(
+        &self,
+        total_issues: usize,
+        files_with_issues: usize,
+        files_checked: usize,
+        output: &mut dyn ColoredOutput,
+    ) -> io::Result<()> {
         if total_issues == 0 {
             if self.use_color {
                 output.write_colored("✓", Color::Green)?;
@@ -141,25 +162,18 @@ impl HumanReporter {
             } else {
                 output.write_line("✓ All files passed lint checks!")?;
             }
-            let files_checked = results.len();
-            output.write_line(&format!("  Files checked: {files_checked}"))?;
+        } else if self.use_color {
+            output.write_colored("✗", Color::Red)?;
+            output.write(&format!(
+                " Found {total_issues} issues in {files_with_issues} files"
+            ))?;
+            output.write_line("")?;
         } else {
-            if self.use_color {
-                output.write_colored("✗", Color::Red)?;
-                output.write(&format!(
-                    " Found {total_issues} issues in {files_with_issues} files"
-                ))?;
-                output.write_line("")?;
-            } else {
-                output.write_line(&format!(
-                    "✗ Found {total_issues} issues in {files_with_issues} files"
-                ))?;
-            }
-            let files_checked = results.len();
-            output.write_line(&format!("  Files checked: {files_checked}"))?;
+            output.write_line(&format!(
+                "✗ Found {total_issues} issues in {files_with_issues} files"
+            ))?;
         }
-
-        output.flush()?;
+        output.write_line(&format!("  Files checked: {files_checked}"))?;
         Ok(())
     }
 }

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1752607023461,
+  "lastUpdate": 1752736021549,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -636,6 +636,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07667548316857144,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "distinct": true,
+          "id": "d4f1e291b59128771f62cc1066b51a5ac4668761",
+          "message": "fix: correct MockOutput example in CONTRIBUTING.md\n\nFix MockOutput usage example to match actual API:\n- Remove non-existent set_color_support() method\n- Fix buffer assertion: use get_output() instead of direct buffer access\n- Add missing Color import statement\n- Use contains_colored() method for colored output verification\n- Correct write_line() behavior: produces [\"Hello\", \"\\n\"] not [\"Hello\\n\"]\n\nThe example now accurately demonstrates MockOutput's actual API.\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>",
+          "timestamp": "2025-07-17T15:05:44+08:00",
+          "tree_id": "b6fc764741519d19c686f3d839c0d85d1a1b22ad",
+          "url": "https://github.com/hydai/lineguard/commit/d4f1e291b59128771f62cc1066b51a5ac4668761"
+        },
+        "date": 1752736020887,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0019066062010158205,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005974001913362832,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.056844390086666675,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07495592063951219,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.0788517850353846,
             "unit": "seconds"
           }
         ]

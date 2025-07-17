@@ -154,8 +154,8 @@ fn main() {
 
         // Create appropriate reporter
         let reporter: Box<dyn Reporter> = match args.format {
-            OutputFormat::Json => Box::new(JsonReporter),
-            OutputFormat::GitHub => Box::new(GitHubReporter),
+            OutputFormat::Json => Box::new(JsonReporter::new()),
+            OutputFormat::GitHub => Box::new(GitHubReporter::new()),
             OutputFormat::Human => Box::new(HumanReporter {
                 use_color: !args.no_color,
             }),

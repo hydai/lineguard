@@ -61,34 +61,27 @@ jobs:
       run: cargo install cargo-tarpaulin
 
     - name: Generate coverage - Unit tests
-      run: cargo tarpaulin --lib --out xml --output-dir . --avoid-cfg-tarpaulin --profile-name "unit-tests"
+      run: |
+        cargo tarpaulin --lib --out xml --output-dir . --avoid-cfg-tarpaulin
+        mv cobertura.xml cobertura-unit.xml
 
     - name: Upload unit test coverage to Codecov
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./cobertura.xml
+        files: ./cobertura-unit.xml
         flags: unit-tests
         fail_ci_if_error: false
 
     - name: Generate coverage - All tests
-      run: cargo tarpaulin --all --out xml --output-dir . --avoid-cfg-tarpaulin --profile-name "all-tests"
+      run: |
+        cargo tarpaulin --all --out xml --output-dir . --avoid-cfg-tarpaulin
+        mv cobertura.xml cobertura-all.xml
 
     - name: Upload full coverage to Codecov
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./cobertura.xml
+        files: ./cobertura-all.xml
         flags: all-tests
         fail_ci_if_error: false
-
-    - name: Comment coverage on PR
-      if: github.event_name == 'pull_request'
-      uses: 5monkeys/cobertura-action@master
-      with:
-        path: ./cobertura.xml
-        minimum_coverage: 75
-        show_missing: true
-        show_class_names: true

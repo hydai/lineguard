@@ -115,17 +115,17 @@ LineGuard provides mock implementations for testing without real I/O:
 #### MockFileSystem
 
 ```rust
-use lineguard::testing::mocks::{MockFileSystem, MockMetadata};
+use lineguard::testing::mocks::{MockFileSystem, file_metadata};
 
 #[test]
 fn test_file_operations() {
     let mut fs = MockFileSystem::new();
 
-    // Add a file with content
+    // Add a file with content (metadata is set automatically)
     fs.add_file("test.txt", "Hello\n");
 
-    // Add metadata
-    fs.add_metadata("test.txt", MockMetadata::file(6));
+    // Optionally set custom metadata
+    fs.set_metadata("test.txt", file_metadata(6));
 
     // Simulate errors
     fs.add_error("error.txt", std::io::Error::new(

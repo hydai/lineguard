@@ -540,8 +540,11 @@ mod checker_tests {
 
         let result = check_file(temp_file.path(), &Config::default());
 
-        // Should handle binary files gracefully (might have error or issues)
-        assert!(result.error.is_some() || !result.issues.is_empty() || result.issues.is_empty());
+        // Should handle binary files gracefully (should have UTF-8 error)
+        assert!(
+            result.error.is_some(),
+            "Expected an error when reading a binary file as a string"
+        );
     }
 
     #[test]

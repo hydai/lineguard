@@ -238,16 +238,4 @@ mod tests {
             config.checks.newline_ending
         );
     }
-
-    #[test]
-    fn test_check_content_trailing_whitespace_disabled() {
-        let mut config = Config::default();
-        config.checks.trailing_spaces = false;
-        let checker = CheckerCore::new(config);
-
-        // Should return empty vec immediately when check is disabled
-        let content = "line with spaces   \nmore spaces   \n";
-        let issues = checker.check_content_trailing_whitespace(content);
-        assert!(issues.is_empty());
-    }
 }

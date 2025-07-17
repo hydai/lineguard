@@ -264,8 +264,66 @@ cargo build
 
 ### Testing
 
+LineGuard uses comprehensive testing with dependency injection patterns for better testability.
+
+#### Running Tests
+
 ```bash
+# Run all tests
 cargo test
+
+# Run only unit tests (fast)
+cargo test --lib
+
+# Run only integration tests
+cargo test --test '*'
+
+# Run tests for a specific module
+cargo test reporter::
+
+# Run tests with output
+cargo test -- --nocapture
+```
+
+#### Test Coverage
+
+```bash
+# Install cargo-tarpaulin
+cargo install cargo-tarpaulin
+
+# Generate coverage report (HTML)
+cargo tarpaulin --lib --out html
+
+# Generate coverage report (stdout)
+cargo tarpaulin --lib --print-summary
+
+# Check coverage for all tests
+cargo tarpaulin --all
+```
+
+Current coverage targets:
+- Overall: 90%+
+- Core modules (checker, reporter): 85%+
+- Utility modules: 80%+
+
+#### Test Architecture
+
+The codebase uses dependency injection and mock implementations:
+
+```rust
+// Using MockFileSystem for testing file operations
+use lineguard::testing::mocks::MockFileSystem;
+
+let mut fs = MockFileSystem::new();
+fs.add_file("test.txt", "content\n");
+fs.add_metadata("test.txt", MockMetadata::file(7));
+
+// Using MockOutput for testing output operations
+use lineguard::testing::mocks::MockOutput;
+
+let mut output = MockOutput::new();
+reporter.report_to(&results, &mut output)?;
+assert_eq!(output.buffer, vec!["expected output\n"]);
 ```
 
 ### Code Quality

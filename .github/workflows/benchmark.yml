@@ -229,8 +229,8 @@ jobs:
             repo: context.repo.repo,
           });
 
-          const botComment = comments.find(comment => 
-            comment.user.type === 'Bot' && 
+          const botComment = comments.find(comment =>
+            comment.user.type === 'Bot' &&
             comment.body.includes('## Binary Size Report')
           );
 

@@ -142,21 +142,22 @@ fn test_file_operations() {
 #### MockOutput
 
 ```rust
-use lineguard::testing::mocks::MockOutput;
-
 #[test]
 fn test_output_operations() {
+    use lineguard::reporter::Color;
+    use lineguard::testing::mocks::MockOutput;
+
     let mut output = MockOutput::new();
 
     // Write content
     output.write_line("Hello").unwrap();
 
     // Check buffer
-    assert_eq!(output.buffer, vec!["Hello\n"]);
+    assert_eq!(output.get_output(), "Hello\n");
 
     // Test colored output
-    output.set_color_support(true);
     output.write_colored("Error", Color::Red).unwrap();
+    assert!(output.contains_colored("Error", Color::Red));
 }
 ```
 

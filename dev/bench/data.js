@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1754297035166,
+  "lastUpdate": 1757665079954,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -881,6 +881,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07995711565000002,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "distinct": true,
+          "id": "91e4cf5161ed26e346226c851f7afb7b038de832",
+          "message": "chore: apply cargo fmt and clippy\n\nSigned-off-by: hydai <z54981220@gmail.com>",
+          "timestamp": "2025-09-12T16:16:38+08:00",
+          "tree_id": "9d7fd9ec77a6d86ebf24d8295a686f830b622a5a",
+          "url": "https://github.com/hydai/lineguard/commit/91e4cf5161ed26e346226c851f7afb7b038de832"
+        },
+        "date": 1757665079328,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001905797412173915,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005874794426117137,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05739459022181818,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06064447960521739,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07719380868102567,
             "unit": "seconds"
           }
         ]

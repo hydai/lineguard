@@ -140,16 +140,16 @@ impl<R: FileReader> FileChecker<R> {
                 // For very small files, read the entire content
                 if file_size == 1 {
                     let mut buffer = [0u8; 1];
-                    if let Ok(bytes_read) = file.read(&mut buffer) {
-                        if bytes_read == 1 {
-                            let ends_with_newline = buffer[0] == b'\n';
-                            if !ends_with_newline {
-                                return Some(Issue {
-                                    issue_type: crate::IssueType::MissingNewline,
-                                    line: None,
-                                    message: "Missing newline at end of file".to_string(),
-                                });
-                            }
+                    if let Ok(bytes_read) = file.read(&mut buffer)
+                        && bytes_read == 1
+                    {
+                        let ends_with_newline = buffer[0] == b'\n';
+                        if !ends_with_newline {
+                            return Some(Issue {
+                                issue_type: crate::IssueType::MissingNewline,
+                                line: None,
+                                message: "Missing newline at end of file".to_string(),
+                            });
                         }
                     }
                     return None;

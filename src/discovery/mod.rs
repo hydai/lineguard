@@ -175,14 +175,12 @@ fn discover_files_in_dir(
         let path = entry.path();
 
         // Skip hidden files if no_hidden is true
-        if no_hidden {
-            if let Some(file_name) = path.file_name() {
-                if let Some(name_str) = file_name.to_str() {
-                    if name_str.starts_with('.') {
-                        continue;
-                    }
-                }
-            }
+        if no_hidden
+            && let Some(file_name) = path.file_name()
+            && let Some(name_str) = file_name.to_str()
+            && name_str.starts_with('.')
+        {
+            continue;
         }
 
         if path.is_file()
@@ -199,10 +197,10 @@ fn discover_files_in_dir(
 }
 
 fn is_hidden_file(path: &Path) -> bool {
-    if let Some(file_name) = path.file_name() {
-        if let Some(name_str) = file_name.to_str() {
-            return name_str.starts_with('.');
-        }
+    if let Some(file_name) = path.file_name()
+        && let Some(name_str) = file_name.to_str()
+    {
+        return name_str.starts_with('.');
     }
     false
 }
@@ -259,27 +257,26 @@ fn is_ignored(path: &Path, ignore_patterns: &[String]) -> Result<bool, anyhow::E
                 }
 
                 // Check relative path from current directory
-                if let Ok(current_dir) = std::env::current_dir() {
-                    if let Ok(relative_path) = current_path.strip_prefix(&current_dir) {
-                        if pattern.matches_path(relative_path) {
-                            return Ok(true);
-                        }
+                if let Ok(current_dir) = std::env::current_dir()
+                    && let Ok(relative_path) = current_path.strip_prefix(&current_dir)
+                {
+                    if pattern.matches_path(relative_path) {
+                        return Ok(true);
+                    }
 
-                        // Also check if pattern matches any parent component
-                        let relative_str = relative_path.to_string_lossy();
-                        if pattern.matches(&relative_str) {
-                            return Ok(true);
-                        }
+                    // Also check if pattern matches any parent component
+                    let relative_str = relative_path.to_string_lossy();
+                    if pattern.matches(&relative_str) {
+                        return Ok(true);
                     }
                 }
 
                 // Check just the filename
-                if let Some(file_name) = current_path.file_name() {
-                    if let Some(file_name_str) = file_name.to_str() {
-                        if pattern.matches(file_name_str) {
-                            return Ok(true);
-                        }
-                    }
+                if let Some(file_name) = current_path.file_name()
+                    && let Some(file_name_str) = file_name.to_str()
+                    && pattern.matches(file_name_str)
+                {
+                    return Ok(true);
                 }
             }
 

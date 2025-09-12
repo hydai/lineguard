@@ -41,20 +41,21 @@ fn main() {
     let files = discovery_result.files;
 
     // Show git range info in verbose mode
-    if args.verbose && discovery_result.git_range.is_some() {
-        if let Some(git_info) = &discovery_result.git_range {
-            println!(
-                "Git range: {}..{}",
-                &git_info.from[0..7.min(git_info.from.len())],
-                &git_info.to[0..7.min(git_info.to.len())]
-            );
-            println!("Changed files: {}", git_info.changed_files.len());
-            if !args.quiet {
-                for file in &git_info.changed_files {
-                    println!("  - {}", file.display());
-                }
-                println!();
+    if args.verbose
+        && discovery_result.git_range.is_some()
+        && let Some(git_info) = &discovery_result.git_range
+    {
+        println!(
+            "Git range: {}..{}",
+            &git_info.from[0..7.min(git_info.from.len())],
+            &git_info.to[0..7.min(git_info.to.len())]
+        );
+        println!("Changed files: {}", git_info.changed_files.len());
+        if !args.quiet {
+            for file in &git_info.changed_files {
+                println!("  - {}", file.display());
             }
+            println!();
         }
     }
 
@@ -111,10 +112,10 @@ fn main() {
                     })
                 };
 
-                if let Some(pb) = &pb_mutex {
-                    if let Ok(pb) = pb.lock() {
-                        pb.inc(1);
-                    }
+                if let Some(pb) = &pb_mutex
+                    && let Ok(pb) = pb.lock()
+                {
+                    pb.inc(1);
                 }
 
                 (check_result, fix_result)
@@ -139,10 +140,10 @@ fn main() {
             .par_iter()
             .map(|file_path| {
                 let result = check_file(file_path, &config_arc);
-                if let Some(pb) = &pb_mutex {
-                    if let Ok(pb) = pb.lock() {
-                        pb.inc(1);
-                    }
+                if let Some(pb) = &pb_mutex
+                    && let Ok(pb) = pb.lock()
+                {
+                    pb.inc(1);
                 }
                 result
             })

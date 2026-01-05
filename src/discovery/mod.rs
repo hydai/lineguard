@@ -3,7 +3,7 @@ use crate::{CliArgs, Config};
 use glob::{Pattern, glob};
 use std::fs;
 use std::io::{self, BufRead, BufReader};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 pub struct DiscoveryResult {
     pub files: Vec<PathBuf>,
@@ -14,6 +14,14 @@ pub struct GitRangeInfo {
     pub from: String,
     pub to: String,
     pub changed_files: Vec<PathBuf>,
+}
+
+/// Pre-compile glob patterns once for efficient reuse.
+fn compile_ignore_patterns(patterns: &[String]) -> Vec<Pattern> {
+    patterns
+        .iter()
+        .filter_map(|s| Pattern::new(s).ok())
+        .collect()
 }
 
 pub fn discover_files(
@@ -36,6 +44,9 @@ pub fn discover_files(
         config.file_extensions = extensions.clone();
     }
 
+    // Pre-compile ignore patterns once for performance
+    let ignore_patterns = compile_ignore_patterns(&config.ignore_patterns);
+
     if args.stdin {
         // Read file paths from stdin
         let stdin = io::stdin();
@@ -49,7 +60,7 @@ pub fn discover_files(
                 if path.exists()
                     && path.is_file()
                     && should_check_file(&path, &config)
-                    && !is_ignored(&path, &config.ignore_patterns)?
+                    && !is_ignored(&path, &ignore_patterns)
                     && !(args.no_hidden && is_hidden_file(&path))
                 {
                     files.push(path);
@@ -63,7 +74,14 @@ pub fn discover_files(
 
             // Check if it's a directory
             if path.is_dir() {
-                discover_files_in_dir(&path, args.recursive, &mut files, &config, args.no_hidden)?;
+                discover_files_in_dir(
+                    &path,
+                    args.recursive,
+                    &mut files,
+                    &config,
+                    args.no_hidden,
+                    &ignore_patterns,
+                )?;
             } else {
                 // Try glob pattern first
                 if let Ok(paths) = glob(pattern) {
@@ -71,7 +89,7 @@ pub fn discover_files(
                     for path in paths.flatten() {
                         if path.is_file()
                             && should_check_file(&path, &config)
-                            && !is_ignored(&path, &config.ignore_patterns)?
+                            && !is_ignored(&path, &ignore_patterns)
                             && !(args.no_hidden && is_hidden_file(&path))
                         {
                             files.push(path);
@@ -85,7 +103,7 @@ pub fn discover_files(
                         if path.exists()
                             && path.is_file()
                             && should_check_file(&path, &config)
-                            && !is_ignored(&path, &config.ignore_patterns)?
+                            && !is_ignored(&path, &ignore_patterns)
                             && !(args.no_hidden && is_hidden_file(&path))
                         {
                             files.push(path);
@@ -97,7 +115,7 @@ pub fn discover_files(
                     if path.exists()
                         && path.is_file()
                         && should_check_file(&path, &config)
-                        && !is_ignored(&path, &config.ignore_patterns)?
+                        && !is_ignored(&path, &ignore_patterns)
                         && !(args.no_hidden && is_hidden_file(&path))
                     {
                         files.push(path);
@@ -155,6 +173,7 @@ fn discover_files_in_dir(
     files: &mut Vec<PathBuf>,
     config: &Config,
     no_hidden: bool,
+    ignore_patterns: &[Pattern],
 ) -> Result<(), anyhow::Error> {
     let entries = match fs::read_dir(dir) {
         Ok(entries) => entries,
@@ -183,13 +202,11 @@ fn discover_files_in_dir(
             continue;
         }
 
-        if path.is_file()
-            && should_check_file(&path, config)
-            && !is_ignored(&path, &config.ignore_patterns)?
+        if path.is_file() && should_check_file(&path, config) && !is_ignored(&path, ignore_patterns)
         {
             files.push(path);
-        } else if path.is_dir() && recursive && !is_ignored(&path, &config.ignore_patterns)? {
-            discover_files_in_dir(&path, recursive, files, config, no_hidden)?;
+        } else if path.is_dir() && recursive && !is_ignored(&path, ignore_patterns) {
+            discover_files_in_dir(&path, recursive, files, config, no_hidden, ignore_patterns)?;
         }
     }
 
@@ -240,53 +257,62 @@ pub fn should_check_file(path: &Path, config: &Config) -> bool {
     true
 }
 
-fn is_ignored(path: &Path, ignore_patterns: &[String]) -> Result<bool, anyhow::Error> {
+fn normalize_path(path: &Path) -> PathBuf {
+    let mut components = Vec::new();
+    for component in path.components() {
+        if component == Component::CurDir {
+            continue;
+        }
+
+        if component == Component::ParentDir
+            && let Some(Component::Normal(_)) = components.last()
+        {
+            components.pop();
+            continue;
+        }
+
+        components.push(component);
+    }
+    if components.is_empty() {
+        return PathBuf::from(".");
+    }
+    components.iter().collect()
+}
+
+fn is_ignored(path: &Path, ignore_patterns: &[Pattern]) -> bool {
     if ignore_patterns.is_empty() {
-        return Ok(false);
+        return false;
     }
 
-    for pattern_str in ignore_patterns {
-        // Check if any parent directory matches the pattern
-        let mut current_path = path;
-        loop {
-            // Try to compile as a glob pattern
-            if let Ok(pattern) = Pattern::new(pattern_str) {
-                // Check absolute path
-                if pattern.matches_path(current_path) {
-                    return Ok(true);
-                }
+    let normalized_path_buf = normalize_path(path);
+    let normalized_path = normalized_path_buf.as_path();
 
-                // Check relative path from current directory
-                if let Ok(current_dir) = std::env::current_dir()
-                    && let Ok(relative_path) = current_path.strip_prefix(&current_dir)
-                {
-                    if pattern.matches_path(relative_path) {
-                        return Ok(true);
-                    }
+    for pattern in ignore_patterns {
+        // Check normalized relative path directly
+        if pattern.matches_path(normalized_path) {
+            return true;
+        }
 
-                    // Also check if pattern matches any parent component
-                    let relative_str = relative_path.to_string_lossy();
-                    if pattern.matches(&relative_str) {
-                        return Ok(true);
-                    }
-                }
+        // For filename-only patterns (no path separator), also check against just the filename.
+        // Use matches_path with filename as a Path to maintain proper path semantics.
+        // Check both '/' and '\\' explicitly since glob patterns may use either separator
+        // regardless of platform, and users might write patterns with either style.
+        let pattern_str = pattern.as_str();
+        if !pattern_str.contains('/')
+            && !pattern_str.contains('\\')
+            && let Some(file_name) = normalized_path.file_name()
+            && pattern.matches_path(Path::new(file_name))
+        {
+            return true;
+        }
 
-                // Check just the filename
-                if let Some(file_name) = current_path.file_name()
-                    && let Some(file_name_str) = file_name.to_str()
-                    && pattern.matches(file_name_str)
-                {
-                    return Ok(true);
-                }
-            }
-
-            // Move to parent directory
-            match current_path.parent() {
-                Some(parent) if parent != current_path => current_path = parent,
-                _ => break,
+        // Skip the path itself (already checked above) and check its parent directories.
+        for ancestor in normalized_path.ancestors().skip(1) {
+            if !ancestor.as_os_str().is_empty() && pattern.matches_path(ancestor) {
+                return true;
             }
         }
     }
 
-    Ok(false)
+    false
 }

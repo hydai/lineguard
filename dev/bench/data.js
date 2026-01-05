@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1767630786144,
+  "lastUpdate": 1767650166293,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -1224,6 +1224,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07762692897333333,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b1e4490f487c74f396215163d5e5c2cde744f29b",
+          "message": "fix: normalize paths in is_ignored() to handle relative path prefixes (#62)\n\n- Normalize input paths by stripping ./ prefix and resolving .. components\n- Ensure consistent path matching regardless of how paths are specified\n- Use matches_path for filename-only patterns (safer than matches())\n- Add comprehensive tests for path normalization edge cases\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-authored-by: Claude Opus 4.5 <noreply@anthropic.com>",
+          "timestamp": "2026-01-06T05:54:52+08:00",
+          "tree_id": "8ddab56e523f888689226a12b667c2e4e98f9bcd",
+          "url": "https://github.com/hydai/lineguard/commit/b1e4490f487c74f396215163d5e5c2cde744f29b"
+        },
+        "date": 1767650165611,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0020755795441791017,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.007063242238190719,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.06359540764666669,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06711587870608696,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.08371199202864865,
             "unit": "seconds"
           }
         ]

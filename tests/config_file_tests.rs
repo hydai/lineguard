@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -17,7 +17,7 @@ ignore_patterns = ["ignore.txt"]
 "#;
     std::fs::write(temp_dir.path().join(".lineguardrc"), config_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path());
     cmd.arg("--recursive");
     cmd.arg("--config")
@@ -46,7 +46,7 @@ file_extensions = ["txt", "py"]
 "#;
     std::fs::write(temp_dir.path().join(".lineguardrc"), config_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path());
     cmd.arg("--recursive");
     cmd.arg("--config")
@@ -73,7 +73,7 @@ trailing_spaces = true
 "#;
     std::fs::write(temp_dir.path().join(".lineguardrc"), config_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path().join("test.txt"));
     cmd.arg("--config")
         .arg(temp_dir.path().join(".lineguardrc"));
@@ -100,7 +100,7 @@ file_extensions = ["md"]  # Only check .md files
 "#;
     std::fs::write(temp_dir.path().join(".lineguardrc"), config_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&sub_dir); // Run from subdirectory
     cmd.arg(".");
     cmd.arg("--recursive");
@@ -127,7 +127,7 @@ ignore_patterns = []
 "#;
     std::fs::write(temp_dir.path().join(".lineguardrc"), config_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path());
     cmd.arg("--recursive");
     cmd.arg("--config")

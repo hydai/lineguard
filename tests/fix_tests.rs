@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -10,7 +10,7 @@ fn test_fix_trailing_spaces() {
     // Create file with trailing spaces
     std::fs::write(&file_path, "line 1  \nline 2   \nline 3\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -30,7 +30,7 @@ fn test_fix_missing_newline() {
     // Create file without newline at end
     std::fs::write(&file_path, "line 1\nline 2\nline 3").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -50,7 +50,7 @@ fn test_fix_multiple_newlines() {
     // Create file with multiple newlines at end
     std::fs::write(&file_path, "line 1\nline 2\nline 3\n\n\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -70,7 +70,7 @@ fn test_fix_combined_issues() {
     // Create file with both trailing spaces and missing newline
     std::fs::write(&file_path, "line 1  \nline 2   \nline 3  ").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -89,7 +89,7 @@ fn test_fix_with_quiet_flag() {
 
     std::fs::write(&file_path, "line 1  \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -105,7 +105,7 @@ fn test_fix_shows_fixed_files() {
 
     std::fs::write(&file_path, "line 1  \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -124,7 +124,7 @@ fn test_fix_dry_run() {
     let original_content = "line 1  \nline 2\n";
     std::fs::write(&file_path, original_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -156,7 +156,7 @@ trailing_spaces = true
 "#;
     std::fs::write(temp_dir.path().join(".lineguardrc"), config_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -176,7 +176,7 @@ fn test_fix_no_issues() {
     // Create file with no issues
     std::fs::write(&file_path, "line 1\nline 2\nline 3\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");

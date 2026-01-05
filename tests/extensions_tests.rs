@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -11,7 +11,7 @@ fn test_extensions_parameter_single() {
     std::fs::write(temp_dir.path().join("test.rs"), "content  \n").unwrap();
     std::fs::write(temp_dir.path().join("test.py"), "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path());
     cmd.arg("--recursive");
     cmd.arg("--extensions").arg("txt");
@@ -32,7 +32,7 @@ fn test_extensions_parameter_multiple() {
     std::fs::write(temp_dir.path().join("test.py"), "content\n").unwrap();
     std::fs::write(temp_dir.path().join("test.md"), "content  \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path());
     cmd.arg("--recursive");
     cmd.arg("--extensions").arg("txt,py");
@@ -51,7 +51,7 @@ fn test_extensions_includes_hidden_files_by_default() {
     std::fs::write(temp_dir.path().join("test.txt"), "content\n").unwrap();
     std::fs::write(temp_dir.path().join(".hidden.txt"), "content  \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path());
     cmd.arg("--recursive");
     cmd.arg("--extensions").arg("txt");
@@ -72,7 +72,7 @@ fn test_extensions_combines_with_ignore() {
     std::fs::write(temp_dir.path().join("ignore.txt"), "content  \n").unwrap();
     std::fs::write(temp_dir.path().join("test.rs"), "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path());
     cmd.arg("--recursive");
     cmd.arg("--extensions").arg("txt");

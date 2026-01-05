@@ -50,12 +50,12 @@ fn test_check_file_no_issues() {
 }
 
 // Stdin integration tests
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 
 #[test]
 fn test_stdin_with_empty_input() {
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--stdin");
 
     // Provide empty stdin
@@ -76,7 +76,7 @@ fn test_stdin_with_file_paths() {
     fs::write(&file1, "content with trailing spaces  \n").unwrap();
     fs::write(&file2, "good content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--stdin");
 
@@ -92,7 +92,7 @@ fn test_stdin_with_file_paths() {
 
 #[test]
 fn test_stdin_with_nonexistent_files() {
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--stdin");
 
     // Provide paths to non-existent files

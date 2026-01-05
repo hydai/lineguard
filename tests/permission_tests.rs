@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use std::fs;
 use tempfile::TempDir;
@@ -19,7 +19,7 @@ fn test_unreadable_file_error_message() {
     permissions.set_mode(0o000); // No permissions
     fs::set_permissions(&file_path, permissions).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("unreadable.txt");
 
@@ -49,7 +49,7 @@ fn test_unwritable_file_fix_error() {
     permissions.set_mode(0o444); // Read-only
     fs::set_permissions(&file_path, permissions).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("readonly.txt");
     cmd.arg("--fix");
@@ -81,7 +81,7 @@ fn test_unreadable_directory_error() {
     permissions.set_mode(0o000); // No permissions
     fs::set_permissions(&sub_dir, permissions).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("subdir");
     cmd.arg("--recursive");
@@ -110,7 +110,7 @@ fn test_permission_error_json_format() {
     permissions.set_mode(0o000); // No permissions
     fs::set_permissions(&file_path, permissions).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("unreadable.txt");
     cmd.arg("--format").arg("json");
@@ -142,7 +142,7 @@ fn test_multiple_files_with_permission_errors() {
     permissions.set_mode(0o000);
     fs::set_permissions(&unreadable, permissions).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");
@@ -173,7 +173,7 @@ fn test_readonly_file_on_windows() {
     permissions.set_readonly(true);
     fs::set_permissions(&file_path, permissions).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("readonly.txt");
     cmd.arg("--fix");
@@ -202,7 +202,7 @@ fn test_permission_error_handling_windows() {
     permissions.set_readonly(true);
     fs::set_permissions(&readonly_file, permissions).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("readonly.txt");
 

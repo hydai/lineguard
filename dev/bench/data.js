@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1767629943359,
+  "lastUpdate": 1767630786144,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -1175,6 +1175,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07569896640216218,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6542c13f28472b3b03f486901d541e55aa9d52e4",
+          "message": "chore(deps): bump assert_cmd from 2.0 to 2.1.1 (#64)\n\n- Update assert_cmd dependency to 2.1.1\n- Replace deprecated Command::cargo_bin() with cargo_bin_cmd! macro\n- Replace deprecated cargo_bin() function with cargo_bin! macro\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-authored-by: Claude Opus 4.5 <noreply@anthropic.com>",
+          "timestamp": "2026-01-06T00:31:54+08:00",
+          "tree_id": "a3a208dfd107b098707fda71d2c1392be24726d8",
+          "url": "https://github.com/hydai/lineguard/commit/6542c13f28472b3b03f486901d541e55aa9d52e4"
+        },
+        "date": 1767630785827,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.00188661119730897,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005879706526710233,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05799146386222223,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06274943811999999,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07762692897333333,
             "unit": "seconds"
           }
         ]

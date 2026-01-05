@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1757667234559,
+  "lastUpdate": 1767628872349,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -1028,6 +1028,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07786350591538461,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d6cc99b85831992da740ec35a2b85699f161b211",
+          "message": "chore: update dependencies (#63)\n\nUpdate all dependencies to latest compatible versions:\n- clap 4.5.47 -> 4.5.54\n- serde 1.0.219 -> 1.0.228\n- regex 1.11.2 -> 1.12.2\n- anyhow 1.0.99 -> 1.0.100\n- tempfile 3.22.0 -> 3.24.0\n- and many more transitive dependencies\n\nPin assert_cmd to ~2.0 to avoid breaking API changes in 2.1+ that\ndeprecate Command::cargo_bin() in favor of escargot crate.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-authored-by: Claude Opus 4.5 <noreply@anthropic.com>",
+          "timestamp": "2026-01-05T23:59:58+08:00",
+          "tree_id": "adadf4e90aa91cf9a1f39b8fc73c77776f7d51c7",
+          "url": "https://github.com/hydai/lineguard/commit/d6cc99b85831992da740ec35a2b85699f161b211"
+        },
+        "date": 1767628872109,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001897237027675763,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005906066213913046,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05766723399555556,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.061295674179999995,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07775337327333331,
             "unit": "seconds"
           }
         ]

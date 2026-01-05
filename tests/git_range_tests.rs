@@ -1,5 +1,5 @@
 use anyhow::Context;
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use std::process::Command as StdCommand;
 use tempfile::TempDir;
@@ -104,7 +104,7 @@ fn test_from_option_checks_only_changed_files() {
     .unwrap();
 
     // Run lineguard from first commit
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--from").arg(&first_commit);
     cmd.arg(".");
@@ -154,7 +154,7 @@ fn test_from_to_option_checks_range() {
     .unwrap();
 
     // Check only commits 2 and 3 (not 4)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--from").arg(&commit1);
     cmd.arg("--to").arg(&commit3);
@@ -174,7 +174,7 @@ fn test_from_without_git_repo_shows_error() {
     // Create a file without git repo
     std::fs::write(temp_dir.path().join("file.txt"), "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--from").arg("HEAD~1");
     cmd.arg(".");
@@ -191,7 +191,7 @@ fn test_invalid_git_reference_shows_error() {
 
     create_commit(&temp_dir, &[("file.txt", "content\n")], "Initial commit").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--from").arg("invalid-hash");
     cmd.arg(".");
@@ -223,7 +223,7 @@ fn test_from_option_with_fix_mode() {
     .unwrap();
 
     // Fix only changed files
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--from").arg(&first_commit);
     cmd.arg("--fix");
@@ -246,7 +246,7 @@ fn test_from_option_with_json_output() {
 
     create_commit(&temp_dir, &[("file2.txt", "content  \n")], "Second commit").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--from").arg(&first_commit);
     cmd.arg("--format").arg("json");
@@ -295,7 +295,7 @@ fn test_verbose_mode_shows_git_range_info() {
     .unwrap();
 
     // Run with verbose mode
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--verbose");
     cmd.arg("--from").arg(&commit1);

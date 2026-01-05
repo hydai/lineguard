@@ -1,9 +1,9 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use tempfile::TempDir;
 
 #[test]
 fn test_main_with_no_files() {
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--quiet")
         .arg("nonexistent_pattern_*.txt")
         .assert()
@@ -17,7 +17,7 @@ fn test_main_with_invalid_config() {
     let config_path = temp_dir.path().join("invalid.toml");
     std::fs::write(&config_path, "invalid toml content [[[").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--config")
         .arg(config_path)
         .arg(".")
@@ -34,14 +34,14 @@ fn test_main_exit_codes() {
     let good_file = temp_dir.path().join("good.txt");
     std::fs::write(&good_file, "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(&good_file).assert().success().code(0);
 
     // Test exit code 1: issues found
     let bad_file = temp_dir.path().join("bad.txt");
     std::fs::write(&bad_file, "content").unwrap(); // Missing newline
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(&bad_file).assert().failure().code(1);
 }
 
@@ -52,7 +52,7 @@ fn test_main_with_fix_mode() {
     std::fs::write(&file_path, "content").unwrap(); // Missing newline
 
     // Test dry run mode
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--fix")
         .arg("--dry-run")
         .arg(&file_path)
@@ -64,7 +64,7 @@ fn test_main_with_fix_mode() {
     assert_eq!(content, "content");
 
     // Test actual fix
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--fix").arg(&file_path).assert().success();
 
     // Verify file was fixed
@@ -79,7 +79,7 @@ fn test_main_with_multiple_output_formats() {
     std::fs::write(&file_path, "content").unwrap(); // Missing newline
 
     // Test JSON format
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--format")
         .arg("json")
         .arg(&file_path)
@@ -88,7 +88,7 @@ fn test_main_with_multiple_output_formats() {
         .stdout(predicates::str::contains("\"issues\""));
 
     // Test GitHub format
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--format")
         .arg("github")
         .arg(&file_path)
@@ -103,7 +103,7 @@ fn test_main_verbose_mode() {
     let file_path = temp_dir.path().join("test.txt");
     std::fs::write(&file_path, "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--verbose").arg(&file_path).assert().success();
 }
 
@@ -116,7 +116,7 @@ fn test_main_progress_bar_threshold() {
         std::fs::write(&file_path, "content\n").unwrap();
     }
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path()).assert().success();
 }
 
@@ -133,6 +133,6 @@ fn test_main_fix_with_errors() {
     perms.set_mode(0o444);
     std::fs::set_permissions(&file_path, perms).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--fix").arg(&file_path).assert().failure().code(1);
 }

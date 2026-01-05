@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -11,7 +11,7 @@ fn test_ignore_pattern_simple() {
     std::fs::write(temp_dir.path().join("bad.txt"), "content  \n").unwrap();
     std::fs::write(temp_dir.path().join("ignore.txt"), "content  \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");
@@ -34,7 +34,7 @@ fn test_ignore_pattern_glob() {
     std::fs::write(temp_dir.path().join("test.log"), "content  \n").unwrap();
     std::fs::write(temp_dir.path().join("test.tmp"), "content  \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");
@@ -56,7 +56,7 @@ fn test_ignore_pattern_directory() {
     std::fs::create_dir(temp_dir.path().join("node_modules")).unwrap();
     std::fs::write(temp_dir.path().join("node_modules/bad.txt"), "content  \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");

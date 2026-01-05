@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use lineguard::config::load_config;
 use predicates::prelude::*;
 use tempfile::TempDir;
@@ -18,7 +18,7 @@ newline_ending = true
     )
     .unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(".")
         .arg("--config")
         .arg(&config_path)

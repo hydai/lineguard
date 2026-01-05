@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -11,7 +11,7 @@ fn test_human_reporter_shows_checking_message() {
     std::fs::write(temp_dir.path().join("file2.txt"), "content\n").unwrap();
     std::fs::write(temp_dir.path().join("file3.txt"), "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");
@@ -28,7 +28,7 @@ fn test_human_reporter_no_message_for_single_file() {
     // Create single test file
     std::fs::write(temp_dir.path().join("file.txt"), "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("file.txt");
 
@@ -46,7 +46,7 @@ fn test_human_reporter_no_message_with_quiet_flag() {
     std::fs::write(temp_dir.path().join("file2.txt"), "content\n").unwrap();
     std::fs::write(temp_dir.path().join("file3.txt"), "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");
@@ -64,7 +64,7 @@ fn test_human_reporter_no_message_with_json_format() {
     std::fs::write(temp_dir.path().join("file2.txt"), "content\n").unwrap();
     std::fs::write(temp_dir.path().join("file3.txt"), "content\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");

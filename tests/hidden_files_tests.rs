@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -16,7 +16,7 @@ fn test_hidden_files_are_checked_by_default() {
     // Create a normal file without issues
     std::fs::write(temp_dir.path().join("normal.txt"), "line 1\nline 2\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
 
@@ -40,7 +40,7 @@ fn test_no_hidden_flag_skips_hidden_files() {
     // Create a normal file with issues
     std::fs::write(temp_dir.path().join("normal.txt"), "line 1  \nline 2").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--no-hidden");
     cmd.arg(".");
@@ -61,7 +61,7 @@ fn test_hidden_directories_are_checked_by_default() {
     std::fs::create_dir(&github_dir).unwrap();
     std::fs::write(github_dir.join("workflow.yml"), "line 1  \nline 2").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("--recursive");
     cmd.arg(".");

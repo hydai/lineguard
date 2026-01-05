@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -20,7 +20,7 @@ fn test_check_large_file_with_issues() {
     content.pop();
     std::fs::write(&file_path, content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("large.txt");
 
@@ -42,7 +42,7 @@ fn test_fix_large_file() {
     }
     std::fs::write(&file_path, content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("large.txt");
     cmd.arg("--fix");
@@ -68,7 +68,7 @@ fn test_memory_efficient_processing() {
     }
     std::fs::write(&file_path, content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("huge.txt");
 

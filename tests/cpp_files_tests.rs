@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -34,7 +34,7 @@ fn test_cpp_files_are_checked_by_default() {
     )
     .unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");
@@ -65,7 +65,7 @@ fn test_cpp_object_files_are_skipped() {
     std::fs::write(temp_dir.path().join("lib.a"), "binary content").unwrap();
     std::fs::write(temp_dir.path().join("lib.so"), "binary content").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg(".");
     cmd.arg("--recursive");

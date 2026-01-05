@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -24,18 +24,18 @@ fn test_exit_code_0_success() {
     .unwrap();
 
     // Test single file
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path().join("README.md"))
         .assert()
         .success()
         .code(0);
 
     // Test multiple files via directory
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path()).assert().success().code(0);
 
     // Test with --fix on already good files (should remain exit 0)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--fix")
         .arg(temp_dir.path())
         .assert()
@@ -43,7 +43,7 @@ fn test_exit_code_0_success() {
         .code(0);
 
     // Test with specific file extensions
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--extensions")
         .arg("md,json")
         .arg(temp_dir.path())
@@ -74,21 +74,21 @@ fn test_exit_code_1_issues_found() {
     .unwrap(); // missing newline
 
     // Test single file with missing newline issue
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path().join("README.md"))
         .assert()
         .failure()
         .code(1);
 
     // Test single file with trailing spaces issue
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path().join("config.yaml"))
         .assert()
         .failure()
         .code(1);
 
     // Test multiple files with various issues
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path()).assert().failure().code(1);
 
     // Test mix of good and bad files - should still exit 1 due to issues
@@ -97,11 +97,11 @@ fn test_exit_code_1_issues_found() {
         "This file is properly formatted.\n",
     )
     .unwrap();
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path()).assert().failure().code(1);
 
     // Test with specific extensions that include problematic files
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--extensions")
         .arg("md,yaml")
         .arg(temp_dir.path())
@@ -113,7 +113,7 @@ fn test_exit_code_1_issues_found() {
 #[test]
 fn test_exit_code_2_invalid_arguments() {
     // Test with conflicting arguments
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--format")
         .arg("invalid_format")
         .assert()
@@ -121,11 +121,11 @@ fn test_exit_code_2_invalid_arguments() {
         .code(2);
 
     // Test with invalid option
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--invalid-option").assert().failure().code(2);
 
     // Test with missing required argument value
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--format").assert().failure().code(2);
 }
 
@@ -134,7 +134,7 @@ fn test_exit_code_3_file_io_error() {
     let temp_dir = TempDir::new().unwrap();
 
     // Test with non-existent file pattern - this should exit 0 with "No files found"
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--quiet")
         .arg(temp_dir.path().join("nonexistent_pattern_*.txt"))
         .assert()
@@ -142,7 +142,7 @@ fn test_exit_code_3_file_io_error() {
         .code(0);
 
     // Test with git range in non-git directory - this should cause IO error (exit 3)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(temp_dir.path())
         .arg("--from")
         .arg("HEAD~1")
@@ -152,7 +152,7 @@ fn test_exit_code_3_file_io_error() {
         .stderr(predicate::str::contains("Error"));
 
     // Test with invalid git commit reference - this should also cause IO error (exit 3)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(temp_dir.path())
         .arg("--from")
         .arg("nonexistent_commit_hash_12345")
@@ -173,7 +173,7 @@ fn test_exit_code_4_configuration_error() {
     let config_path = temp_dir.path().join("invalid_syntax.toml");
     std::fs::write(&config_path, "invalid toml syntax [[[").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--config")
         .arg(&config_path)
         .arg(temp_dir.path())
@@ -190,7 +190,7 @@ fn test_exit_code_4_configuration_error() {
     )
     .unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--config")
         .arg(&malformed_config)
         .arg(temp_dir.path())
@@ -201,7 +201,7 @@ fn test_exit_code_4_configuration_error() {
 
     // Test with non-existent config file
     let non_existent_config = temp_dir.path().join("does_not_exist.toml");
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--config")
         .arg(&non_existent_config)
         .arg(temp_dir.path())
@@ -236,7 +236,7 @@ fn test_exit_code_1_fix_mode_with_errors() {
     }
 
     // Try to fix read-only file
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--fix").arg(&file_path).assert().failure().code(1);
 }
 
@@ -255,7 +255,7 @@ fn test_permission_errors_still_exit_0() {
     std::fs::set_permissions(&file_path, perms).unwrap();
 
     // Permission error should not cause exit code 1
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(&file_path).assert().success().code(0);
 
     // Restore permissions for cleanup
@@ -277,7 +277,7 @@ fn test_stdin_mode_exit_codes() {
     std::fs::write(&good_file1, "content with newline\n").unwrap();
     std::fs::write(&good_file2, "more content with newline\n").unwrap();
 
-    let mut child = Command::new(assert_cmd::cargo::cargo_bin("lineguard"))
+    let mut child = Command::new(assert_cmd::cargo::cargo_bin!("lineguard"))
         .arg("--stdin")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -300,7 +300,7 @@ fn test_stdin_mode_exit_codes() {
     std::fs::write(&bad_file1, "no newline").unwrap();
     std::fs::write(&bad_file2, "trailing spaces  \n").unwrap();
 
-    let mut child = Command::new(assert_cmd::cargo::cargo_bin("lineguard"))
+    let mut child = Command::new(assert_cmd::cargo::cargo_bin!("lineguard"))
         .arg("--stdin")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -318,7 +318,7 @@ fn test_stdin_mode_exit_codes() {
     assert_eq!(output.status.code(), Some(1));
 
     // Test stdin with mix of good and bad files (exit 1)
-    let mut child = Command::new(assert_cmd::cargo::cargo_bin("lineguard"))
+    let mut child = Command::new(assert_cmd::cargo::cargo_bin!("lineguard"))
         .arg("--stdin")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
@@ -345,7 +345,7 @@ fn test_dry_run_exit_codes() {
     std::fs::write(&file_path, "content  ").unwrap(); // Trailing spaces, no newline
 
     // Dry run should still exit with 0 (no actual changes made)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--fix")
         .arg("--dry-run")
         .arg(&file_path)
@@ -363,7 +363,7 @@ fn test_quiet_mode_exit_codes() {
     std::fs::write(temp_dir.path().join("bad.txt"), "no newline").unwrap();
 
     // Quiet mode should suppress output but not affect exit codes
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--quiet")
         .arg(temp_dir.path())
         .assert()
@@ -377,7 +377,7 @@ fn test_git_range_exit_codes() {
     let temp_dir = TempDir::new().unwrap();
 
     // Test with invalid git range in non-git directory (should exit with 3)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(temp_dir.path())
         .arg("--from")
         .arg("HEAD~1")
@@ -387,7 +387,7 @@ fn test_git_range_exit_codes() {
         .stderr(predicate::str::contains("Error"));
 
     // Test with invalid commit reference in non-git directory (should exit with 3)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(temp_dir.path())
         .arg("--from")
         .arg("invalid_commit_ref")
@@ -406,7 +406,7 @@ fn test_multiple_error_conditions() {
     std::fs::write(temp_dir.path().join("bad.txt"), "no newline").unwrap();
 
     // Config error should take precedence (exit 4)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--config")
         .arg(&config_path)
         .arg(temp_dir.path())
@@ -455,7 +455,7 @@ fn test_realistic_project_scenarios() {
     .unwrap(); // missing newline
 
     // Test that mixed project exits with code 1 due to issues (check recursively)
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--recursive")
         .arg(temp_dir.path())
         .assert()
@@ -463,7 +463,7 @@ fn test_realistic_project_scenarios() {
         .code(1);
 
     // Test that checking only good files exits with code 0
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--extensions")
         .arg("toml")
         .arg(temp_dir.path())
@@ -472,7 +472,7 @@ fn test_realistic_project_scenarios() {
         .code(0);
 
     // Test specific file with issue
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg(temp_dir.path().join("config.txt"))
         .assert()
         .failure()
@@ -496,7 +496,7 @@ fn test_fix_mode_realistic_scenarios() {
     .unwrap(); // trailing spaces
 
     // Test successful fix should exit with code 0
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--fix")
         .arg(temp_dir.path())
         .assert()
@@ -522,7 +522,7 @@ fn test_extension_filtering_exit_codes() {
     std::fs::write(temp_dir.path().join("bad.md"), "# Bad markdown").unwrap(); // missing newline
 
     // Test filtering to only good extensions - should exit 0
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--extensions")
         .arg("txt")
         .arg(temp_dir.path().join("good.txt"))
@@ -531,7 +531,7 @@ fn test_extension_filtering_exit_codes() {
         .code(0);
 
     // Test filtering to only bad extensions - should exit 1
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--extensions")
         .arg("md")
         .arg(temp_dir.path().join("bad.md"))
@@ -540,7 +540,7 @@ fn test_extension_filtering_exit_codes() {
         .code(1);
 
     // Test filtering to mixed extensions - should exit 1 due to bad files
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.arg("--extensions")
         .arg("txt,md")
         .arg(temp_dir.path())

@@ -1,4 +1,4 @@
-use assert_cmd::Command;
+use assert_cmd::cargo::cargo_bin_cmd;
 use predicates::prelude::*;
 use tempfile::TempDir;
 
@@ -10,7 +10,7 @@ fn test_no_newline_check_flag() {
     // Create file without newline at end
     std::fs::write(&file_path, "line 1\nline 2").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--no-newline-check");
@@ -28,7 +28,7 @@ fn test_no_trailing_space_flag() {
     // Create file with trailing spaces
     std::fs::write(&file_path, "line 1  \nline 2   \n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--no-trailing-space");
@@ -46,7 +46,7 @@ fn test_both_check_flags_disabled() {
     // Create file with both issues
     std::fs::write(&file_path, "line 1  \nline 2   ").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--no-newline-check");
@@ -73,7 +73,7 @@ trailing_spaces = true
 "#;
     std::fs::write(temp_dir.path().join(".lineguardrc"), config_content).unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--no-trailing-space");
@@ -91,7 +91,7 @@ fn test_check_flags_with_fix_mode() {
     // Create file with both issues
     std::fs::write(&file_path, "line 1  \nline 2").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--fix");
@@ -112,7 +112,7 @@ fn test_check_flags_json_output() {
     // Create file with trailing spaces
     std::fs::write(&file_path, "line 1  \nline 2\n").unwrap();
 
-    let mut cmd = Command::cargo_bin("lineguard").unwrap();
+    let mut cmd = cargo_bin_cmd!("lineguard");
     cmd.current_dir(&temp_dir);
     cmd.arg("test.txt");
     cmd.arg("--no-trailing-space");

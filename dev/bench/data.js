@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1769993061152,
+  "lastUpdate": 1770614763470,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -1518,6 +1518,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07654192183555558,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "41898282+github-actions[bot]@users.noreply.github.com",
+            "name": "github-actions[bot]",
+            "username": "github-actions[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cd4fc47ee2869562e8b1fe97302b69bee739dcde",
+          "message": "chore: update dependencies (#75)\n\nCo-authored-by: hydai <2776756+hydai@users.noreply.github.com>",
+          "timestamp": "2026-02-09T13:24:53+08:00",
+          "tree_id": "71ff3055b78ac02f6a288a17dd521ac6837ac25c",
+          "url": "https://github.com/hydai/lineguard/commit/cd4fc47ee2869562e8b1fe97302b69bee739dcde"
+        },
+        "date": 1770614763243,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0018834394211490427,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006127859711363634,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.059021424714893626,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06447867888163264,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.08090376174285714,
             "unit": "seconds"
           }
         ]

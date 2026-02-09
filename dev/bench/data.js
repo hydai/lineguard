@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1770617513164,
+  "lastUpdate": 1770617855676,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -1616,6 +1616,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07950679536333335,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "8a9efacf9b2ea4a29caebfc61c5056ac3318f481",
+          "message": "chore(deps): bump anyhow from 1.0.100 to 1.0.101 (#73)\n\nBumps [anyhow](https://github.com/dtolnay/anyhow) from 1.0.100 to 1.0.101.\n- [Release notes](https://github.com/dtolnay/anyhow/releases)\n- [Commits](https://github.com/dtolnay/anyhow/compare/1.0.100...1.0.101)\n\n---\nupdated-dependencies:\n- dependency-name: anyhow\n  dependency-version: 1.0.101\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-02-09T14:16:27+08:00",
+          "tree_id": "171647ee1b84d76a87edc3a39300d649876df91c",
+          "url": "https://github.com/hydai/lineguard/commit/8a9efacf9b2ea4a29caebfc61c5056ac3318f481"
+        },
+        "date": 1770617855374,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0013683510858172796,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006170715645531915,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05728354378666667,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.0599680947082353,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07359356914564104,
             "unit": "seconds"
           }
         ]

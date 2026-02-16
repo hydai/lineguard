@@ -19,7 +19,7 @@ rayon = "1.11"
 anyhow = "1.0"
 thiserror = "2.0"
 indicatif = "0.18"
-toml = "0.9"
+toml = "1.0"
 
 [dev-dependencies]
 assert_cmd = "2.1.2"

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1771813563706,
+  "lastUpdate": 1772418466517,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -1959,6 +1959,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07907843390974358,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "1f53ed9f1f142244454a4f53d2f62bd4195ad239",
+          "message": "chore(deps): bump tempfile from 3.25.0 to 3.26.0 (#88)\n\nBumps [tempfile](https://github.com/Stebalien/tempfile) from 3.25.0 to 3.26.0.\n- [Changelog](https://github.com/Stebalien/tempfile/blob/master/CHANGELOG.md)\n- [Commits](https://github.com/Stebalien/tempfile/commits/v3.26.0)\n\n---\nupdated-dependencies:\n- dependency-name: tempfile\n  dependency-version: 3.26.0\n  dependency-type: direct:production\n  update-type: version-update:semver-minor\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-03-02T10:26:34+08:00",
+          "tree_id": "0b122b43efb32e11fb9c90699bb78e8d9c4f478e",
+          "url": "https://github.com/hydai/lineguard/commit/1f53ed9f1f142244454a4f53d2f62bd4195ad239"
+        },
+        "date": 1772418466302,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0020615019056353582,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005993376374054056,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05520681293818182,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07083997653951218,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07901635329222224,
             "unit": "seconds"
           }
         ]

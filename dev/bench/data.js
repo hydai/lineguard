@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1772418466517,
+  "lastUpdate": 1773100666872,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -2008,6 +2008,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07901635329222224,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "85133f87618be6814b9c345dd8681d00e45b1628",
+          "message": "chore(deps): bump toml from 1.0.3+spec-1.1.0 to 1.0.6+spec-1.1.0 (#90)\n\nBumps [toml](https://github.com/toml-rs/toml) from 1.0.3+spec-1.1.0 to 1.0.6+spec-1.1.0.\n- [Commits](https://github.com/toml-rs/toml/compare/toml-v1.0.3...toml-v1.0.6)\n\n---\nupdated-dependencies:\n- dependency-name: toml\n  dependency-version: 1.0.6+spec-1.1.0\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-03-10T07:56:31+08:00",
+          "tree_id": "7659cd7537807c64fb630703386546c36f1cfcda",
+          "url": "https://github.com/hydai/lineguard/commit/85133f87618be6814b9c345dd8681d00e45b1628"
+        },
+        "date": 1773100666274,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.002087657934902363,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005953027042222228,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05465687682000001,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06942475639560976,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07816668283666665,
             "unit": "seconds"
           }
         ]

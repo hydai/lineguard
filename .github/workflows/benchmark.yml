@@ -133,7 +133,7 @@ jobs:
 
     # Setup Pages deployment
     - name: Setup Pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@v6
       if: github.event_name != 'pull_request'
 
     - name: Setup gh-pages branch

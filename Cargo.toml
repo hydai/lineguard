@@ -22,7 +22,7 @@ indicatif = "0.18"
 toml = "1.1"
 
 [dev-dependencies]
-assert_cmd = "2.2.1"
+assert_cmd = "2.2.2"
 predicates = "3.1"
 tempfile = "3.27"
 gag = "1.0"

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1779115946393,
+  "lastUpdate": 1779874573547,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -2449,6 +2449,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.05823598683384615,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "46a4306416f843d7f1192962e46eb7f0a0a1d062",
+          "message": "chore(deps): bump serde_json from 1.0.149 to 1.0.150 (#106)\n\nBumps [serde_json](https://github.com/serde-rs/json) from 1.0.149 to 1.0.150.\n- [Release notes](https://github.com/serde-rs/json/releases)\n- [Commits](https://github.com/serde-rs/json/compare/v1.0.149...v1.0.150)\n\n---\nupdated-dependencies:\n- dependency-name: serde_json\n  dependency-version: 1.0.150\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-05-27T17:35:01+08:00",
+          "tree_id": "6737a94adc0710db0c3460f3c40bab8abcaa6806",
+          "url": "https://github.com/hydai/lineguard/commit/46a4306416f843d7f1192962e46eb7f0a0a1d062"
+        },
+        "date": 1779874572805,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0019451358793673127,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006042368073554087,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05398859918137931,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06766162212749999,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07491786965621623,
             "unit": "seconds"
           }
         ]

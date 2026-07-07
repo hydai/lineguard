@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1782716858929,
+  "lastUpdate": 1783440879063,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -2596,6 +2596,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07614865490777777,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b11653591795d717cc6f69248ba88f69511989cc",
+          "message": "chore(deps): bump indicatif from 0.18.4 to 0.18.6 (#111)\n\nBumps [indicatif](https://github.com/console-rs/indicatif) from 0.18.4 to 0.18.6.\n- [Release notes](https://github.com/console-rs/indicatif/releases)\n- [Commits](https://github.com/console-rs/indicatif/compare/0.18.4...0.18.6)\n\n---\nupdated-dependencies:\n- dependency-name: indicatif\n  dependency-version: 0.18.6\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-07-08T00:13:26+08:00",
+          "tree_id": "01af404b85ad28921a6bbac05860ba391554ad32",
+          "url": "https://github.com/hydai/lineguard/commit/b11653591795d717cc6f69248ba88f69511989cc"
+        },
+        "date": 1783440878569,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0019174195718235823,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.005885414111973971,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05594540295061225,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06217447415584905,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07796419304162164,
             "unit": "seconds"
           }
         ]

@@ -1,10 +1,13 @@
+//! Shared test utilities compiled into multiple integration test binaries;
+//! each binary uses only a subset of these helpers.
+#![allow(dead_code)]
+
 use lineguard::checker::{CheckResult, Issue, IssueType};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tempfile::TempDir;
 
 /// Utility for capturing stdout and stderr output during test execution
-#[allow(dead_code)]
 pub struct OutputCapture {
     stdout: Arc<Mutex<Vec<u8>>>,
     stderr: Arc<Mutex<Vec<u8>>>,
@@ -18,7 +21,6 @@ impl Default for OutputCapture {
 
 impl OutputCapture {
     /// Create a new output capture instance
-    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             stdout: Arc::new(Mutex::new(Vec::new())),
@@ -27,7 +29,6 @@ impl OutputCapture {
     }
 
     /// Capture stdout and stderr from a closure and return both as strings
-    #[allow(dead_code)]
     pub fn capture<F>(&self, f: F) -> (String, String)
     where
         F: FnOnce(),
@@ -49,7 +50,6 @@ impl OutputCapture {
 
 /// Capture stdout output from a closure by redirecting println! calls
 /// This works by temporarily replacing stdout with a buffer
-#[allow(dead_code)]
 pub fn capture_stdout<F>(f: F) -> String
 where
     F: FnOnce(),
@@ -65,7 +65,6 @@ where
 }
 
 /// Capture stderr output from a closure
-#[allow(dead_code)]
 pub fn capture_stderr<F>(f: F) -> String
 where
     F: FnOnce(),
@@ -75,7 +74,6 @@ where
 }
 
 /// Capture both stdout and stderr from a closure
-#[allow(dead_code)]
 pub fn capture_both<F>(f: F) -> (String, String)
 where
     F: FnOnce(),
@@ -180,7 +178,6 @@ impl TestableReporter for TestableGitHubReporter {
 
 /// Testable Human Reporter that returns output as string
 pub struct TestableHumanReporter {
-    #[allow(dead_code)]
     pub use_color: bool,
 }
 
@@ -254,7 +251,6 @@ impl TestFile {
 }
 
 /// Create a test file with specific issues in a temporary directory
-#[allow(dead_code)]
 pub fn create_test_file_with_issues(dir: &TempDir, name: &str, content: &str) -> PathBuf {
     let file_path = dir.path().join(name);
     std::fs::write(&file_path, content).unwrap();
@@ -262,7 +258,6 @@ pub fn create_test_file_with_issues(dir: &TempDir, name: &str, content: &str) ->
 }
 
 /// Create multiple test files in a temporary directory
-#[allow(dead_code)]
 pub fn create_test_files(dir: &TempDir, files: &[TestFile]) -> Vec<PathBuf> {
     files
         .iter()
@@ -275,7 +270,6 @@ pub fn create_test_files(dir: &TempDir, files: &[TestFile]) -> Vec<PathBuf> {
 }
 
 /// Create stdin input string from file paths
-#[allow(dead_code)]
 pub fn create_test_stdin_input(files: &[PathBuf]) -> String {
     files
         .iter()
@@ -285,7 +279,6 @@ pub fn create_test_stdin_input(files: &[PathBuf]) -> String {
 }
 
 /// Setup a complete integration test environment with temporary directory and files
-#[allow(dead_code)]
 pub fn setup_integration_test_environment(files: &[TestFile]) -> (TempDir, Vec<PathBuf>) {
     let temp_dir = TempDir::new().unwrap();
     let file_paths = create_test_files(&temp_dir, files);
@@ -319,7 +312,6 @@ pub fn create_sample_check_result(file_path: &str, issues: Vec<Issue>) -> CheckR
 }
 
 /// Create sample CheckResult with error for testing
-#[allow(dead_code)]
 pub fn create_check_result_with_error(file_path: &str, error: &str) -> CheckResult {
     CheckResult {
         file_path: PathBuf::from(file_path),

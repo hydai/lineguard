@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1783440879063,
+  "lastUpdate": 1784565118191,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -2645,6 +2645,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07796419304162164,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "98f10d60af85db43b1cc8804468683f25060ba90",
+          "message": "chore: update dependencies (#117)\n\n* fix(tests): allow dead_code on OutputCapture::new\n\nNewer rustc dead-code analysis flags OutputCapture::new as unused\nsince its only caller is the equally unused Default impl, breaking\ncargo clippy -D warnings.\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\n* chore: update dependencies\n\nUpdate Cargo.lock to latest compatible versions, including anyhow\n1.0.104, clap 4.6.3, serde 1.0.229, serde_json 1.0.151, thiserror\n2.0.19, and toml 1.1.3. No Cargo.toml changes needed.\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\n* refactor(tests): use module-level allow(dead_code) in test_utils\n\nReplace scattered per-item #[allow(dead_code)] attributes with a\nsingle module-level #![allow(dead_code)], as suggested in review.\nThese shared helpers are compiled per integration test binary, so\nunused-helper warnings are expected.\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\n---------\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+          "timestamp": "2026-07-21T00:30:49+08:00",
+          "tree_id": "ad587e43f0c70c59173981eaa35ded140379ea25",
+          "url": "https://github.com/hydai/lineguard/commit/98f10d60af85db43b1cc8804468683f25060ba90"
+        },
+        "date": 1784565117990,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001903989280139614,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006160232553793103,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05824784557636362,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.07848020625428573,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.0802854694257143,
             "unit": "seconds"
           }
         ]

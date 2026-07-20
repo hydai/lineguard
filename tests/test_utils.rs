@@ -18,6 +18,7 @@ impl Default for OutputCapture {
 
 impl OutputCapture {
     /// Create a new output capture instance
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             stdout: Arc::new(Mutex::new(Vec::new())),

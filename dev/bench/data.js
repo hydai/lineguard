@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784565118191,
+  "lastUpdate": 1785135724272,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -2694,6 +2694,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.0802854694257143,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "38bf9b7be85746c1e643752a85128530450af459",
+          "message": "chore(deps): bump glob from 0.3.3 to 0.3.4 (#118)\n\nBumps [glob](https://github.com/rust-lang/glob) from 0.3.3 to 0.3.4.\n- [Release notes](https://github.com/rust-lang/glob/releases)\n- [Changelog](https://github.com/rust-lang/glob/blob/master/CHANGELOG.md)\n- [Commits](https://github.com/rust-lang/glob/compare/v0.3.3...v0.3.4)\n\n---\nupdated-dependencies:\n- dependency-name: glob\n  dependency-version: 0.3.4\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-07-27T15:00:57+08:00",
+          "tree_id": "9b70718521966f074eb90a0c546febc43306ef7a",
+          "url": "https://github.com/hydai/lineguard/commit/38bf9b7be85746c1e643752a85128530450af459"
+        },
+        "date": 1785135723645,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0018837764948648678,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.00613099267545455,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05894310270075471,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06342885994818181,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07970868195894737,
             "unit": "seconds"
           }
         ]

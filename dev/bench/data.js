@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1786384219023,
+  "lastUpdate": 1787041433566,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -2890,6 +2890,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.05960759957234046,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "77ab8ef76d55228319c22b873b3082a2738b02ae",
+          "message": "chore(deps): bump thiserror from 2.0.19 to 2.0.20 (#122)\n\nBumps [thiserror](https://github.com/dtolnay/thiserror) from 2.0.19 to 2.0.20.\n- [Release notes](https://github.com/dtolnay/thiserror/releases)\n- [Commits](https://github.com/dtolnay/thiserror/compare/2.0.19...2.0.20)\n\n---\nupdated-dependencies:\n- dependency-name: thiserror\n  dependency-version: 2.0.20\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-08-18T16:22:10+08:00",
+          "tree_id": "1a8b4d611f3aa17ba7f80a95d3b19cacd0ffd940",
+          "url": "https://github.com/hydai/lineguard/commit/77ab8ef76d55228319c22b873b3082a2738b02ae"
+        },
+        "date": 1787041433183,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0019965139802749776,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006169398402171947,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05408940108769229,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.05707801506431372,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07638014095500001,
             "unit": "seconds"
           }
         ]

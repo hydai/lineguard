@@ -153,20 +153,20 @@ lineguard --from abc123 --to def456 .
 lineguard --from v1.0.0 src/
 
 # Combine with other options
-lineguard --from main --fix --format json .
+lineguard --from main --fix .
 ```
 
 ### Output Examples
 
 **Human-Readable Format (Default)**
 ```
+Checking 3 files...
 ✗ src/main.rs
-  - Missing newline at end of file
   - Line 45: Trailing spaces found
+  - Missing newline at end of file
 
-✓ src/lib.rs
-
-Summary: 1 file with issues, 2 total issues found
+✗ Found 2 issues in 1 files
+  Files checked: 3
 ```
 
 **JSON Format**
@@ -184,14 +184,14 @@ lineguard --format json src/
       "file": "src/main.rs",
       "issues": [
         {
-          "type": "missing_newline",
-          "line": null,
-          "message": "Missing newline at end of file"
-        },
-        {
           "type": "trailing_space",
           "line": 45,
           "message": "Trailing spaces found"
+        },
+        {
+          "type": "missing_newline",
+          "line": null,
+          "message": "Missing newline at end of file"
         }
       ]
     }

@@ -16,7 +16,7 @@ LineGuard follows strict Test-Driven Development (TDD) practices. Every feature 
 
 ### Prerequisites
 
-- Rust 1.70+ (install via [rustup](https://rustup.rs/))
+- Rust 1.88 or newer (the code uses edition 2024 and let chains), installed via [rustup](https://rustup.rs/)
 - Git
 - cargo-tarpaulin (for coverage): `cargo install cargo-tarpaulin`
 
@@ -242,12 +242,13 @@ cargo tarpaulin --lib --out html
 /// # Examples
 ///
 /// ```
-/// use lineguard::check_file;
+/// use lineguard::{Config, check_file};
+/// use std::path::Path;
 ///
-/// let result = check_file(&PathBuf::from("test.txt"));
+/// let result = check_file(Path::new("test.txt"), &Config::default());
 /// assert!(result.issues.is_empty());
 /// ```
-pub fn check_file(path: &Path) -> CheckResult {
+pub fn check_file(path: &Path, config: &Config) -> CheckResult {
     // Implementation
 }
 ```

@@ -308,22 +308,11 @@ Current coverage targets:
 
 #### Test Architecture
 
-The codebase uses dependency injection and mock implementations:
-
-```rust
-// Using MockFileSystem for testing file operations
-use lineguard::testing::mocks::MockFileSystem;
-
-let mut fs = MockFileSystem::new();
-fs.add_file("test.txt", "content\n");
-
-// Using MockOutput for testing output operations
-use lineguard::testing::mocks::MockOutput;
-
-let mut output = MockOutput::new();
-reporter.report_to(&results, &mut output)?;
-assert_eq!(output.buffer, vec!["expected output\n"]);
-```
+Unit tests live next to the code and use the helpers in `src/testing`, which
+exist only in test builds (`#[cfg(test)]`): `MockFileSystem` implements the
+`FileReader` trait so `FileChecker` runs without disk I/O, `MockOutput`
+captures reporter output, and `TestFileBuilder` assembles file contents.
+Integration tests under `tests/` run the built binary with `assert_cmd`.
 
 ### Code Quality
 

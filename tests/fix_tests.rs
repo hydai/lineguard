@@ -203,3 +203,21 @@ fn test_fix_preserves_crlf_line_endings() {
     let content = std::fs::read_to_string(&file_path).unwrap();
     assert_eq!(content, "line 1\r\nline 2\r\nline 3\r\n");
 }
+
+#[test]
+fn test_fix_removes_trailing_blank_line_in_crlf_file() {
+    let temp_dir = TempDir::new().unwrap();
+    let file_path = temp_dir.path().join("windows.txt");
+
+    std::fs::write(&file_path, "a\r\nb\r\n\r\n").unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.arg("windows.txt");
+    cmd.arg("--fix");
+
+    cmd.assert().success();
+
+    let content = std::fs::read_to_string(&file_path).unwrap();
+    assert_eq!(content, "a\r\nb\r\n");
+}

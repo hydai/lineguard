@@ -13,14 +13,5 @@ This directory contains planning documents, specifications, and historical recor
   - 6-phase implementation roadmap
   - Milestones and deliverables
 
-- **[GITHUB_WORKFLOWS_PLAN.md](GITHUB_WORKFLOWS_PLAN.md)** - GitHub Actions design *(NOT IMPLEMENTED)*
-  - Planned CI/CD workflow architecture
-  - Job definitions and triggers
-
-- **[GITHUB_WORKFLOWS_GUIDE.md](GITHUB_WORKFLOWS_GUIDE.md)** - GitHub Actions user guide *(NOT IMPLEMENTED)*
-  - Instructions for using workflows
-  - Setup and configuration
-
-## Status Notes
-
-Documents marked as "NOT IMPLEMENTED" contain plans for future features that have not yet been built.
+The GitHub Actions workflows are documented next to them in
+[.github/workflows/README.md](../../.github/workflows/README.md).

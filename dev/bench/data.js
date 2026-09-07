@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1787041433566,
+  "lastUpdate": 1788784758535,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -2939,6 +2939,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07638014095500001,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0cd7a74fe940e286aa1ad84cf8a3d1809b46c672",
+          "message": "fix(deps): update dependencies to address RUSTSEC-2026-0204 (#124)\n\nUpdate Cargo.lock to the latest compatible versions. Relative to the\nv0.1.7 release lockfile, the dependency set now clears two RustSec\nfindings that are statically linked into the prebuilt binaries:\n\n- RUSTSEC-2026-0204: crossbeam-epoch 0.9.18 -> 0.9.21 (via rayon)\n- RUSTSEC-2026-0190: anyhow 1.0.101 -> 1.0.104 (unsound downcast_mut)\n\nNeither code path is reachable from lineguard, so this is release\nhygiene rather than an exploitable issue. Marked as a fix so that a\npatch release is cut with the updated dependencies. No Cargo.toml\nchanges needed; all direct dependencies already allow the latest\nreleases.\n\nCo-authored-by: Claude Fable 5.1 <noreply@anthropic.com>",
+          "timestamp": "2026-09-07T20:38:02+08:00",
+          "tree_id": "1a6820b4723e761d07bc5743029bc343b1b41f2d",
+          "url": "https://github.com/hydai/lineguard/commit/0cd7a74fe940e286aa1ad84cf8a3d1809b46c672"
+        },
+        "date": 1788784758211,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0019756806024354263,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006177467548095237,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.054457387675384626,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.058725164380754716,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07835493897666665,
             "unit": "seconds"
           }
         ]

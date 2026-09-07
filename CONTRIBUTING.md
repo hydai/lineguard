@@ -128,8 +128,7 @@ the binary through `assert_cmd`.
 
 ### Coverage Requirements
 
-- Overall project: 90%+
-- Core modules (checker, reporter): 85%+
+- Codecov enforces the thresholds in `codecov.yml`: 75% for the project and 70% for the lines a PR changes
 - New features: Must include tests
 - Bug fixes: Must include regression tests
 
@@ -261,7 +260,7 @@ All PRs must pass:
 2. **Full Tests** - All tests including integration
 3. **Code Quality** - Formatting and linting
 4. **Security Audit** - Dependency scanning
-5. **Coverage** - Must maintain 90%+ coverage
+5. **Coverage** - Codecov checks the thresholds in `codecov.yml` (75% project, 70% patch)
 
 ## Performance Considerations
 

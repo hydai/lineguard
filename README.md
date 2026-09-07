@@ -301,10 +301,8 @@ cargo tarpaulin --lib --print-summary
 cargo tarpaulin --all
 ```
 
-Current coverage targets:
-- Overall: 90%+
-- Core modules (checker, reporter): 85%+
-- Utility modules: 80%+
+Coverage is tracked on Codecov; `codecov.yml` requires 75% project coverage
+and 70% on the lines a pull request changes.
 
 #### Test Architecture
 

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788784892346,
+  "lastUpdate": 1788787120667,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3037,6 +3037,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07969994859142857,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "97c661f3e85d3275f1f4d0159f32b6472e5ed374",
+          "message": "chore(deps): remove unused thiserror and gag dependencies (#127)\n\nNothing in src/ uses thiserror (errors are built with anyhow), and no\ntest uses gag; it was only mentioned in a comment of a test helper.\n\nCo-authored-by: Claude Fable 5.1 <noreply@anthropic.com>",
+          "timestamp": "2026-09-07T21:17:27+08:00",
+          "tree_id": "96ff48b9ce8c945f277732bfcece82e1e1478e7f",
+          "url": "https://github.com/hydai/lineguard/commit/97c661f3e85d3275f1f4d0159f32b6472e5ed374"
+        },
+        "date": 1788787120038,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0018728883929411781,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.00616895063977827,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.058226581974782594,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06258479227333334,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07913626685578952,
             "unit": "seconds"
           }
         ]

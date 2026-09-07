@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788789930410,
+  "lastUpdate": 1788790835221,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3233,6 +3233,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.06067737416666668,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "048951ab8f2b3e85808c405eb390a45ab9158a41",
+          "message": "fix: preserve CRLF line endings when fixing files (#131)\n\n* fix: preserve CRLF line endings when fixing files\n\nBoth fixer paths rebuilt the file with \"\\n\": the in-memory path split\non lines() and rejoined with \"\\n\", so fixing trailing spaces turned a\nCRLF file into an LF file, and fixing a missing final newline appended\n\"\\n\" to an otherwise CRLF file. The streaming path did the same and,\nin addition, collected every line in memory before writing.\n\nLines now keep whatever ending they had. Fixing the final newline only\nremoves trailing blank lines, keeps the ending the last remaining line\nalready had, and adds the first line's ending only when that line has\nnone (\"\\n\" for a file without any line ending). The streaming path\nwrites each line as it is read, remembers only the byte offset where a\nrun of blank lines starts, and truncates the output at that offset when\nthe run reaches the end of the file, so it needs no per-line memory.\nfix_newline_ending also stops trimming trailing spaces, which is the\ntrailing-space fixer's job and was applied even when that check was\ndisabled.\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\n\n* test: cover --fix on a CRLF file with a trailing blank line end to end\n\nNeeds both the CRLF-aware detection (already on master) and the\nline-ending-preserving fixer; on master alone the file came back as\n\"a\\r\\nb\\n\".\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Fable 5.1 <noreply@anthropic.com>",
+          "timestamp": "2026-09-07T22:19:25+08:00",
+          "tree_id": "78ef7d941fe50370e983802a34eb02798b69c995",
+          "url": "https://github.com/hydai/lineguard/commit/048951ab8f2b3e85808c405eb390a45ab9158a41"
+        },
+        "date": 1788790834876,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001986031677497766,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006142367849614516,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05438031084842107,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.05803690544078432,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.0787717317431579,
             "unit": "seconds"
           }
         ]

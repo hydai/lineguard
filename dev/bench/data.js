@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788789113604,
+  "lastUpdate": 1788789930410,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3184,6 +3184,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07990748150571432,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f01ab80397d4012895fe81709d00bb8804324ce8",
+          "message": "refactor!: remove unused checker traits and test builders (#129)\n\n* refactor!: remove unused checker traits and test builders\n\nLineChecker and ContentChecker had no implementors apart from a mock in\ntheir own tests; CheckerCore and FileChecker never used them.\nTestScenario, TestIssue, TestResult and the fixtures constants had no\nusers outside their own tests, and TestResult was never constructed.\nThe MockMetadata alias was kept \"for backward compatibility\" but nothing\nreferenced it.\n\nBREAKING CHANGE: the `lineguard::checker::LineChecker` and\n`lineguard::checker::ContentChecker` traits are removed from the public\nAPI. Nothing in the library accepted or returned them, so an implementor\ngained nothing from them; define your own trait if you relied on the\nnames.\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\n\n* docs: replace leftover LineLint name in testing module comments\n\nCo-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>\n\n---------\n\nCo-authored-by: Claude Fable 5.1 <noreply@anthropic.com>",
+          "timestamp": "2026-09-07T22:04:20+08:00",
+          "tree_id": "851d2b719e82b334c9559a72ca6c36b881b10d49",
+          "url": "https://github.com/hydai/lineguard/commit/f01ab80397d4012895fe81709d00bb8804324ce8"
+        },
+        "date": 1788789929722,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001534003777227723,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.004655442679577464,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.04171578452631578,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.04476734866666667,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.06067737416666668,
             "unit": "seconds"
           }
         ]

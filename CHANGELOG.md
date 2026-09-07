@@ -3,7 +3,7 @@
 
 ### Breaking Changes
 
-- the `lineguard::checker::LineChecker` and
+- remove the `lineguard::checker::LineChecker` and `lineguard::checker::ContentChecker` traits from the public API; nothing in the library accepted or returned them, so implementors gained nothing from them (#129)
 
 ### Fixes
 

@@ -1,226 +1,80 @@
-# Code Coverage Report
+# Code Coverage
 
-This document tracks the code coverage progress for LineGuard.
+Coverage is measured with [cargo-tarpaulin](https://github.com/xd009642/tarpaulin)
+and tracked on [Codecov](https://codecov.io/gh/hydai/lineguard). The
+`coverage.yml` workflow uploads two reports for every push to `master` and
+every pull request that touches `src/**` or `Cargo.*`: unit tests only
+(`--lib`, flag `unit-tests`) and the full suite (`--all`, flag `all-tests`).
 
-## Current Coverage Status
+## Thresholds
 
-As of the latest measurement:
+`codecov.yml` is the source of truth:
 
-### Overall Coverage
-- **Total Coverage**: ~85%
-- **Unit Test Coverage**: ~82%
-- **Integration Test Coverage**: ~88%
+| Check | Target | Tolerance |
+|-------|--------|-----------|
+| Project (whole codebase) | 75% | 2% |
+| Patch (lines changed by a PR) | 70% | 3% |
 
-### Module Breakdown
+Test code (`tests/`, `**/tests.rs`, `**/*test*`) is excluded from the
+measurement. Treat the thresholds as a floor: the core modules (`checker`,
+`reporter`, `fixer`, `discovery`) should stay well above them.
 
-#### Checker Module (78.23%)
-- `core.rs`: 100% ✅
-- `file_checker.rs`: 63.01%
-- `mod.rs`: 100% ✅
+## Running Coverage Locally
 
-**Note**: The `file_checker.rs` coverage is limited due to the `check_final_newline_streaming` function using `std::fs::File` directly, which cannot be mocked in unit tests.
+Install the tool once:
 
-#### Reporter Module (91.89%)
-- `traits.rs`: 100% ✅
-- `human.rs`: 89.06% ✅
-- `json.rs`: 91.89% ✅
-- `github.rs`: 88.89% ✅
-
-#### Other Modules
-- `cli.rs`: ~95%
-- `config.rs`: ~90%
-- `discovery.rs`: ~85%
-- `testing/`: 100% ✅
-
-## Running Coverage Analysis
-
-### Prerequisites
-
-Install cargo-tarpaulin:
 ```bash
 cargo install cargo-tarpaulin
 ```
 
-### Generate Coverage Reports
+Then:
 
-#### Quick Summary
 ```bash
 # Unit tests only (fast)
 cargo tarpaulin --lib --print-summary
 
 # All tests
 cargo tarpaulin --all --print-summary
-```
 
-#### Detailed HTML Report
-```bash
-# Generate HTML report
+# HTML report (written to tarpaulin-report.html)
 cargo tarpaulin --lib --out html
 
-# Open in browser
-open tarpaulin-report.html  # macOS
-xdg-open tarpaulin-report.html  # Linux
+# Cobertura XML, as produced in CI
+cargo tarpaulin --all --out xml --avoid-cfg-tarpaulin
 ```
 
-#### Module-Specific Coverage
-```bash
-# Check specific module
-cargo tarpaulin --lib --print-summary -- checker::
+`make coverage` runs the HTML variant.
 
-# Exclude tests from coverage
-cargo tarpaulin --lib --exclude-tests
-```
+## What to Test
 
-#### CI Integration
-```bash
-# Generate Cobertura XML for CI
-cargo tarpaulin --lib --out xml
-
-# With line-by-line coverage
-cargo tarpaulin --lib --out lcov
-```
-
-## Coverage Guidelines
-
-### Minimum Requirements
-- New features: 90%+ coverage
-- Bug fixes: Must include regression tests
-- Core modules: 85%+ coverage
-- Utility modules: 80%+ coverage
-
-### What to Test
-
-#### Must Test
-- All public API functions
+**Must test**
+- Public API functions
 - Error handling paths
-- Edge cases and boundaries
+- Edge cases and boundaries (empty files, files without a final newline, CRLF)
 - Configuration parsing
-- File I/O operations (with mocks)
+- File I/O through the `FileReader` mock
 
-#### Can Skip
-- Simple getter/setter methods
-- Derived trait implementations
-- Panic branches (unreachable code)
-- External tool integration (e.g., terminal color detection)
+**Can skip**
+- Simple getters and derived trait implementations
+- Panic branches for unreachable states
+- Terminal capability detection inside third-party crates
 
-### Writing Testable Code
+## Writing Testable Code
 
-#### Use Dependency Injection
-```rust
-// Bad: Hard to test
-fn check_file(path: &Path) -> Result<CheckResult> {
-    let content = std::fs::read_to_string(path)?;
-    // ...
-}
+The codebase separates I/O from logic so both can be covered by unit tests:
 
-// Good: Testable with mocks
-fn check_file<R: FileReader>(path: &Path, reader: &R) -> Result<CheckResult> {
-    let content = reader.read_to_string(path)?;
-    // ...
-}
-```
+- `CheckerCore` works on `&str` content and has no I/O.
+- `FileChecker<R: FileReader>` takes the file access as a type parameter;
+  `MockFileSystem` implements `FileReader` for tests and can fake the file
+  size to exercise the streaming path.
+- Reporters implement `ReporterWithOutput::report_to(&self, results, &mut dyn Output)`;
+  `MockOutput` captures the text in tests.
 
-#### Separate I/O from Logic
-```rust
-// Bad: Mixed concerns
-fn process_file(path: &Path) -> Result<()> {
-    let content = std::fs::read_to_string(path)?;
-    let processed = content.trim();
-    std::fs::write(path, processed)?;
-    Ok(())
-}
+When adding code, keep that split: put the decision in a function that takes
+plain data, and keep the file or terminal access in a thin wrapper around it.
 
-// Good: Separated concerns
-fn process_content(content: &str) -> String {
-    content.trim().to_string()
-}
+## Known Gap
 
-fn process_file<R: FileReader>(path: &Path, reader: &R) -> Result<String> {
-    let content = reader.read_to_string(path)?;
-    let processed = process_content(&content);
-    Ok(processed)
-}
-```
-
-## Improving Coverage
-
-### Current Gaps
-
-1. **file_checker.rs streaming function**
-   - Issue: Direct `std::fs::File` usage
-   - Solution: Refactor to use trait-based approach
-   - Impact: ~15% improvement potential
-
-2. **Error handling paths**
-   - Some error branches in reporters
-   - Rare error conditions in CLI
-
-3. **Platform-specific code**
-   - Windows-specific path handling
-   - Color detection on different terminals
-
-### Action Items
-
-- [ ] Refactor streaming functions to use traits
-- [ ] Add more error case tests
-- [ ] Mock platform-specific behavior
-- [ ] Test concurrent file access scenarios
-- [ ] Add fuzzing for parser functions
-
-## Historical Progress
-
-| Date | Total | Checker | Reporter | Notes |
-|------|-------|---------|----------|-------|
-| Initial | 56% | 45% | 60% | Baseline |
-| Phase 1 | 65% | 55% | 70% | Added mocks |
-| Phase 2 | 78% | 78% | 77% | DI refactor |
-| Current | 85% | 78% | 92% | Added tests |
-| Target | 95% | 90% | 95% | Goal |
-
-## Tools and Resources
-
-### Coverage Tools
-- **cargo-tarpaulin**: Main coverage tool
-- **grcov**: Alternative with more features
-- **cargo-llvm-cov**: LLVM-based coverage
-
-### Visualization
-- **Codecov**: Cloud-based reporting
-- **Coveralls**: Alternative service
-- **HTML reports**: Local visualization
-
-### IDE Integration
-- VS Code: Coverage Gutters extension
-- IntelliJ: Built-in coverage support
-- Vim: vim-coverage plugin
-
-## Best Practices
-
-1. **Run coverage locally before pushing**
-   ```bash
-   cargo tarpaulin --lib --print-summary
-   ```
-
-2. **Focus on meaningful coverage**
-   - Test behavior, not implementation
-   - Cover error paths
-   - Test edge cases
-
-3. **Keep tests fast**
-   - Use mocks for I/O
-   - Minimize test data size
-   - Run unit tests separately
-
-4. **Document untestable code**
-   ```rust
-   // COVERAGE: This function requires real filesystem
-   // access and is tested in integration tests
-   fn system_specific_operation() {
-       // ...
-   }
-   ```
-
-5. **Regular coverage reviews**
-   - Check coverage in PR reviews
-   - Address gaps incrementally
-   - Maintain coverage over time
+`FileChecker::check_final_newline_streaming` opens the file with `std::fs`
+directly instead of going through `FileReader`, so the streaming final-newline
+check is only covered by tests that write real temporary files.

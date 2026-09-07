@@ -1,277 +1,161 @@
-# LineGuard Technical Architecture
+# LineGuard Architecture
 
 ## Overview
-LineGuard follows a modular architecture with clear separation of concerns, making it easy to test, maintain, and extend.
 
-## Core Components
+LineGuard is one crate that produces a library (`lineguard`) and a binary of
+the same name. `src/main.rs` is a thin driver: it parses the command line,
+loads the configuration, discovers files, checks or fixes them in parallel and
+prints a report. Everything reusable lives in the library modules under `src/`.
 
-### 1. CLI Module (`cli.rs`)
-- **Responsibility**: Command-line argument parsing and validation
-- **Key Features**:
-  - Uses `clap` crate for argument parsing
-  - Validates input parameters
-  - Handles help and version display
-- **Interfaces**:
-  - `parse_args() -> CliArgs`
-  - `validate_args(args: &CliArgs) -> Result<(), Error>`
+## Module Layout
 
-### 2. File Discovery Module (`discovery.rs`)
-- **Responsibility**: Finding files to check based on input patterns
-- **Key Features**:
-  - Glob pattern expansion
-  - Recursive directory traversal
-  - Stdin file list processing
-  - Ignore pattern filtering
-- **Interfaces**:
-  - `discover_files(args: &CliArgs) -> Result<Vec<PathBuf>, Error>`
-  - `should_check_file(path: &Path, config: &Config) -> bool`
-
-### 3. Checker Module (`checker.rs`)
-- **Responsibility**: Core lint checking logic
-- **Key Features**:
-  - Newline ending validation
-  - Trailing space detection
-  - Parallel file processing
-  - Streaming support for large files (>10MB)
-  - Permission error handling
-- **Interfaces**:
-  - `check_file(path: &Path, config: &Config) -> CheckResult`
-  - `check_file_streaming(path: &Path, config: &Config) -> CheckResult`
-  - `check_newline_ending(content: &str) -> Option<Issue>`
-  - `check_trailing_spaces(content: &str) -> Vec<Issue>`
-
-### 4. Reporter Module (`reporter.rs`)
-- **Responsibility**: Formatting and outputting results
-- **Key Features**:
-  - Multiple output formats (human, JSON, GitHub)
-  - Colored output support
-  - Progress indication
-- **Interfaces**:
-  - `trait Reporter { fn report(&self, results: &[CheckResult]); }`
-  - `create_reporter(format: OutputFormat) -> Box<dyn Reporter>`
-
-### 5. Configuration Module (`config.rs`)
-- **Responsibility**: Loading and managing configuration
-- **Key Features**:
-  - Config file parsing (`.lineguardrc`)
-  - Default configuration
-  - Auto-discovery in parent directories
-  - CLI override support
-- **Interfaces**:
-  - `load_config(path: Option<&Path>) -> Result<Config, Error>`
-  - `find_config_file() -> Option<PathBuf>`
-  - `Config::default() -> Config`
-
-### 6. Fixer Module (`fixer.rs`)
-- **Responsibility**: Automatically fixing detected issues
-- **Key Features**:
-  - Fix trailing spaces
-  - Fix newline endings
-  - Dry-run mode support
-  - Streaming support for large files
-- **Interfaces**:
-  - `fix_file(path: &Path, issues: &[Issue], config: &Config, dry_run: bool) -> Result<FixResult, Error>`
-  - `fix_file_streaming(path: &Path, issues: &[Issue], config: &Config, dry_run: bool) -> Result<FixResult, Error>`
-
-### 7. Git Module (`git.rs`)
-- **Responsibility**: Git repository operations and commit range filtering
-- **Key Features**:
-  - Detect if current directory is a Git repository
-  - Validate commit hashes
-  - Get list of files changed between commits
-  - Support for commit ranges (from..to)
-- **Interfaces**:
-  - `is_git_repository(path: &Path) -> Result<bool>`
-  - `get_changed_files(from: &str, to: Option<&str>, repo_path: &Path) -> Result<Vec<PathBuf>>`
-
-## Data Structures
-
-### Core Types
-```rust
-pub struct CliArgs {
-    pub files: Vec<String>,
-    pub stdin: bool,
-    pub recursive: bool,
-    pub format: OutputFormat,
-    pub quiet: bool,
-    pub verbose: bool,
-    pub no_color: bool,
-    pub config: Option<PathBuf>,
-    pub ignore: Vec<String>,
-    pub extensions: Option<Vec<String>>,
-    pub no_newline_check: bool,
-    pub no_trailing_space: bool,
-    pub fix: bool,
-    pub dry_run: bool,
-    pub from: Option<String>,
-    pub to: Option<String>,
-}
-
-pub struct Config {
-    pub checks: CheckConfig,
-    pub ignore_patterns: Vec<String>,
-    pub file_extensions: Vec<String>,
-}
-
-pub struct CheckConfig {
-    pub newline_ending: bool,
-    pub trailing_spaces: bool,
-}
-
-pub struct CheckResult {
-    pub file_path: PathBuf,
-    pub issues: Vec<Issue>,
-    pub error: Option<String>,
-}
-
-pub struct FixResult {
-    pub file_path: PathBuf,
-    pub fixed: bool,
-    pub issues_fixed: Vec<Issue>,
-}
-
-pub struct Issue {
-    pub issue_type: IssueType,
-    pub line: Option<usize>,
-    pub message: String,
-}
-
-pub enum IssueType {
-    MissingNewline,
-    MultipleNewlines,
-    TrailingSpace,
-}
-
-pub enum OutputFormat {
-    Human,
-    Json,
-    GitHub,
-}
 ```
+src/
+├── main.rs              Binary entry point: wiring, progress bar, exit codes
+├── lib.rs               Module declarations and re-exports
+├── cli/mod.rs           clap definition of CliArgs and OutputFormat
+├── config/mod.rs        Config, CheckConfig, .lineguardrc lookup and parsing
+├── discovery/mod.rs     Turns paths, globs, directories and stdin into a file list
+├── checker/
+│   ├── mod.rs           CheckResult, Issue, IssueType and the check_file entry point
+│   ├── core.rs          CheckerCore: pure content checks (trailing whitespace, final newline)
+│   ├── file_checker.rs  FileChecker<R: FileReader>: in-memory and streaming file checks
+│   └── io_trait.rs      FileReader trait and FileMetadata (I/O abstraction for tests)
+├── fixer/mod.rs         fix_file: rewrites a file to remove the reported issues
+├── git/mod.rs           git wrapper for --from/--to (changed-file listing)
+├── reporter/
+│   ├── mod.rs           Reporter trait and re-exports
+│   ├── traits.rs        Output and ColoredOutput traits, StdOutput, ReporterWithOutput
+│   ├── human.rs         HumanReporter (default format, optional colors)
+│   ├── json.rs          JsonReporter
+│   └── github.rs        GitHubReporter (::error annotations)
+└── testing/             #[cfg(test)] only: MockFileSystem, MockOutput, TestFileBuilder
+```
+
+## Data Flow
+
+1. `cli::parse_args` builds a `CliArgs` (clap derive).
+2. `config::load_config` reads the file given with `--config`; without it, the
+   first `.lineguardrc` found while walking up from the current directory;
+   without one, `Config::default()`. `--no-newline-check` and
+   `--no-trailing-space` are then applied on top of the loaded config.
+3. `discovery::discover_files` merges `--ignore` and `--extensions` over the
+   config (CLI wins), expands each argument (directory, glob, literal path) or
+   reads paths from stdin with `--stdin`, drops files with binary extensions,
+   ignored paths and, with `--no-hidden`, dotfiles. With `--from`, only files
+   that `git::get_changed_files` lists as changed between the two commits are
+   kept. The result is a `DiscoveryResult` with the file list and an optional
+   `GitRangeInfo` that `--verbose` prints.
+4. `main` maps `checker::check_file` over the files with rayon's `par_iter`.
+   Files larger than 10MB go through `FileChecker::check_file_streaming`;
+   everything else is read into memory and handed to
+   `CheckerCore::check_content`.
+5. In `--fix` mode every file with issues goes to `fixer::fix_file`
+   (`--dry-run` only reports). Otherwise the results go to the reporter
+   selected by `--format`.
+6. The exit code is derived from the results (see Exit Codes).
+
+## Core Types
+
+```rust
+// cli
+pub struct CliArgs {
+    files, stdin, recursive, format, quiet, verbose, no_color, config,
+    ignore, extensions, no_newline_check, no_trailing_space, fix, dry_run,
+    from, to, no_hidden,
+}
+pub enum OutputFormat { Human, Json, GitHub }
+
+// config
+pub struct Config { checks: CheckConfig, ignore_patterns: Vec<String>, file_extensions: Vec<String> }
+pub struct CheckConfig { newline_ending: bool, trailing_spaces: bool } // both default to true
+
+// discovery
+pub struct DiscoveryResult { files: Vec<PathBuf>, git_range: Option<GitRangeInfo> }
+pub struct GitRangeInfo { from: String, to: String, changed_files: Vec<PathBuf> }
+
+// checker
+pub struct CheckResult { file_path: PathBuf, issues: Vec<Issue>, error: Option<String> }
+pub struct Issue { issue_type: IssueType, line: Option<usize>, message: String }
+pub enum IssueType { MissingNewline, MultipleNewlines, TrailingSpace }
+
+// fixer
+pub struct FixResult { file_path: PathBuf, fixed: bool, issues_fixed: Vec<Issue> }
+```
+
+## Checking Rules
+
+- **Trailing whitespace**: a line is reported when `line.trim_end()` is shorter
+  than the line, so spaces, tabs and other Unicode whitespace all count. Line
+  numbers are 1-based.
+- **Final newline**: an empty file is accepted. Any other file must end with
+  exactly one line ending: no `\n` at the end is `MissingNewline`, a blank line
+  at the end is `MultipleNewlines`.
+- Each rule can be switched off in the `[checks]` table of `.lineguardrc` or
+  with the matching CLI flag.
+
+## Large Files
+
+Files larger than 10MB (10 × 1024 × 1024 bytes) are never loaded whole. The
+checker reads them line by line and inspects the last bytes of the file for
+the final-newline rule. The fixer writes the corrected content to `<file>.tmp`
+next to the original and renames it over the original when done.
+
+## Reporters
+
+`Reporter::report(&[CheckResult])` prints to stdout and is what `main` calls.
+Every reporter also implements `ReporterWithOutput::report_to`, which writes
+to any `Output`; the unit tests pass a `MockOutput` to capture the text.
+
+- **human**: one block per file with issues, then `✓ All files passed lint
+  checks!` or `✗ Found N issues in M files`, followed by `Files checked: X`.
+  Colors come from the `colored` crate unless `--no-color` is given.
+- **json**: `files_checked`, `files_with_issues`, `total_issues`, `issues`
+  (per file: `type`, `line`, `message`) and `errors` when some file could not
+  be read.
+- **github**: `::error file=<path>[,line=<n>]::<message>` for each issue and
+  for each read error.
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | No issues (also when no files matched) |
+| 1 | Issues found, or in `--fix` mode a file could not be fixed |
+| 2 | Invalid command-line usage (reported by clap) |
+| 3 | File discovery failed: stdin could not be read, or `--from`/`--to` could not be resolved |
+| 4 | Configuration file missing or not valid TOML |
+
+Files that cannot be read are reported on stderr, in the JSON `errors` array
+and as GitHub annotations, but they do not change the exit code.
 
 ## Dependencies
 
-### External Crates
-- `clap` (v4) - Command-line argument parsing
-- `glob` - File pattern matching
-- `serde` / `serde_json` - JSON serialization
-- `colored` - Terminal color output
-- `rayon` - Parallel processing
-- `anyhow` - Error handling
-- `thiserror` - Error type definitions
-- `indicatif` - Progress bars
-- `toml` - Configuration file parsing
+| Crate | Role |
+|-------|------|
+| clap | Command-line parsing |
+| glob | Pattern expansion and ignore matching |
+| rayon | Parallel file checking |
+| indicatif | Progress bar (human format, more than 10 files) |
+| colored | Terminal colors |
+| serde, toml | `.lineguardrc` parsing |
+| serde_json | JSON output |
+| anyhow | Error propagation |
 
-### Testing Dependencies
-- `assert_cmd` - CLI testing
-- `predicates` - Test assertions
-- `tempfile` - Temporary test files
+Development: `assert_cmd` and `predicates` drive the binary in integration
+tests, `tempfile` provides scratch directories.
 
-## Error Handling
+## Testing
 
-### Error Types
-```rust
-#[derive(Debug, thiserror::Error)]
-pub enum LineGuardError {
-    #[error("IO error: {0}")]
-    Io(#[from] std::io::Error),
+Unit tests sit next to the code in `#[cfg(test)] mod tests` blocks and use
+the helpers in `src/testing`, which only exist in test builds:
 
-    #[error("Pattern error: {0}")]
-    Pattern(#[from] glob::PatternError),
+- `MockFileSystem` implements `FileReader`, so `FileChecker` can be exercised
+  without touching the disk. Faking the file size selects the streaming path.
+- `MockOutput` implements `Output` and `ColoredOutput` and records what a
+  reporter wrote.
+- `TestFileBuilder` assembles file contents with trailing spaces, tabs, CRLF
+  endings or a missing final newline.
 
-    #[error("Configuration error: {0}")]
-    Config(String),
-
-    #[error("No files found matching pattern")]
-    NoFilesFound,
-
-    #[error("Permission denied: {0}")]
-    PermissionDenied(String),
-}
-```
-
-## Performance Considerations
-
-### Parallel Processing
-- Use `rayon` for parallel file checking
-- Configurable thread pool size
-- Batch processing for small files
-
-### Memory Efficiency
-- Stream large files line-by-line
-- Avoid loading entire file content when possible
-- Use `BufReader` for file operations
-
-### Optimization Strategies
-- Skip binary file detection
-- Cache compiled regex patterns
-- Early exit on first issue (when appropriate)
-
-## Testing Strategy
-
-### Unit Tests
-- Each module has corresponding test module
-- Test individual functions in isolation
-- Mock file system operations where needed
-
-### Integration Tests
-- Test CLI with actual file operations
-- Test different output formats
-- Test error scenarios
-
-### Test Organization
-```
-tests/
-├── cli_tests.rs             # CLI argument handling
-├── checker_tests.rs         # Core checking logic
-├── reporter_tests.rs        # Output formatting
-├── integration_tests.rs     # End-to-end scenarios
-├── fix_tests.rs            # Auto-fix functionality
-├── config_file_tests.rs    # Configuration loading
-├── permission_tests.rs     # Permission error handling
-├── large_file_tests.rs     # Streaming for large files
-├── check_options_tests.rs  # CLI check flags
-├── git_range_tests.rs      # Git commit range filtering
-└── ...                     # Other feature-specific tests
-```
-
-## Build Configuration
-
-### Cargo.toml Structure
-```toml
-[package]
-name = "lineguard"
-version = "0.1.0"
-edition = "2024"
-license = "Apache-2.0"
-repository = "https://github.com/hydai/lineguard"
-
-[dependencies]
-# Listed above
-
-[dev-dependencies]
-# Testing dependencies
-
-[profile.release]
-lto = true
-codegen-units = 1
-opt-level = 3
-```
-
-## Module Dependency Graph
-```
-main.rs
-   ├── cli.rs
-   ├── config.rs
-   ├── discovery.rs
-   │     ├── config.rs
-   │     └── git.rs
-   ├── checker.rs
-   │     └── config.rs
-   ├── fixer.rs
-   │     ├── checker.rs (for types)
-   │     └── config.rs
-   ├── reporter.rs
-   │     └── checker.rs (for types)
-   └── git.rs
-```
+Integration tests under `tests/` run the built binary with `assert_cmd`
+against temporary directories and check exit codes and output.

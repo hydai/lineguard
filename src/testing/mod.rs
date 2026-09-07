@@ -1,4 +1,4 @@
-//! Testing utilities for LineLint
+//! Testing utilities for LineGuard
 //!
 //! This module provides mock implementations and test builders
 //! to support comprehensive unit testing across the codebase.

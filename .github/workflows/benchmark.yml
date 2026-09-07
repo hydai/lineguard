@@ -193,11 +193,8 @@ jobs:
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
 
-    - name: Build binaries
-      run: |
-        # Build different configurations
-        cargo build --release
-        cargo build --release --no-default-features
+    - name: Build binary
+      run: cargo build --release
 
     - name: Check binary sizes
       run: |

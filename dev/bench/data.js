@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788787237787,
+  "lastUpdate": 1788789113604,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3135,6 +3135,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07663892842888889,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2afbd48aeae63ffe103dd31cb9cf2afb152d7ff6",
+          "message": "fix: detect multiple trailing newlines in CRLF files (#130)\n\nThe newline check only looked for \"\\n\\n\" at the end of the content, so\na Windows-style file ending in \"\\r\\n\\r\\n\" passed even though it ends\nwith a blank line. The check now strips one line ending (\"\\n\" or\n\"\\r\\n\") and reports MultipleNewlines when another one precedes it,\nwhich also covers a mixed \"\\n\\r\\n\" tail.\n\nThe streaming path for files over 10MB reads the last four bytes and\nruns the same byte-level check instead of its own two-byte comparison,\nso both paths agree.\n\nCo-authored-by: Claude Fable 5.1 <noreply@anthropic.com>",
+          "timestamp": "2026-09-07T21:50:39+08:00",
+          "tree_id": "2e9952c018f273718988056f39f3467e05d3e863",
+          "url": "https://github.com/hydai/lineguard/commit/2afbd48aeae63ffe103dd31cb9cf2afb152d7ff6"
+        },
+        "date": 1788789112979,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.001903245851960463,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006073802859285714,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.057090270705185166,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06229728656054053,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07990748150571432,
             "unit": "seconds"
           }
         ]

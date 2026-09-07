@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788787120667,
+  "lastUpdate": 1788787237787,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3086,6 +3086,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.07913626685578952,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e4107a6463d46461767dafa5276bd626031cd21b",
+          "message": "ci: drop the no-op --no-default-features build from the size check (#133)\n\nThe crate defines no features, so the second build produced the same\nbinary as the first and only cost CI time.\n\nCo-authored-by: Claude Fable 5.1 <noreply@anthropic.com>",
+          "timestamp": "2026-09-07T21:19:25+08:00",
+          "tree_id": "4c7e116ce3901fd36cd538cf2a50cdd570a5a871",
+          "url": "https://github.com/hydai/lineguard/commit/e4107a6463d46461767dafa5276bd626031cd21b"
+        },
+        "date": 1788787237344,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.00199448767298338,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006187126800368658,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05445060390206899,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.05871805248230767,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.07663892842888889,
             "unit": "seconds"
           }
         ]

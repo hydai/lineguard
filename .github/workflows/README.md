@@ -41,8 +41,9 @@ Tracks performance over time (existing workflow).
 ### release.yml - Release Automation
 Handles releases when tags are pushed (existing workflow).
 
-### dependencies.yml - Dependency Updates
-Automated dependency update checks (existing workflow).
+### audit.yml - Security Audit
+Weekly `cargo audit` run through rustsec/audit-check, so new advisories surface without a code change.
+Dependency updates come from Dependabot (`.github/dependabot.yml`).
 
 ## Test Strategy
 

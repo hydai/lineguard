@@ -1,4 +1,4 @@
-# LineLint configuration for the lineguard project
+# LineGuard configuration for the lineguard project
 
 # Check Rust source files and documentation
 file_extensions = ["rs", "toml", "md", "yml", "yaml"]

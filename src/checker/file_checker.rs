@@ -127,67 +127,21 @@ impl<R: FileReader> FileChecker<R> {
     fn check_final_newline_streaming(&self, path: &Path) -> Option<Issue> {
         // For real filesystem, we need to use standard File operations
         // This is a limitation of the current design that we accept for now
-        if let Ok(mut file) = File::open(path) {
-            // Get file metadata first to check file size
-            if let Ok(metadata) = file.metadata() {
-                let file_size = metadata.len();
+        let mut file = File::open(path).ok()?;
+        let file_size = file.metadata().ok()?.len();
 
-                // Empty file is considered valid (no issues)
-                if file_size == 0 {
-                    return None;
-                }
-
-                // For very small files, read the entire content
-                if file_size == 1 {
-                    let mut buffer = [0u8; 1];
-                    if let Ok(bytes_read) = file.read(&mut buffer)
-                        && bytes_read == 1
-                    {
-                        let ends_with_newline = buffer[0] == b'\n';
-                        if !ends_with_newline {
-                            return Some(Issue {
-                                issue_type: crate::IssueType::MissingNewline,
-                                line: None,
-                                message: "Missing newline at end of file".to_string(),
-                            });
-                        }
-                    }
-                    return None;
-                }
-
-                // For files with 2+ bytes, seek to read last 2 bytes
-                let seek_pos = if file_size >= 2 {
-                    -2
-                } else {
-                    -(file_size as i64)
-                };
-                if file.seek(SeekFrom::End(seek_pos)).is_ok() {
-                    let mut buffer = [0u8; 2];
-                    if let Ok(bytes_read) = file.read(&mut buffer) {
-                        let end_bytes = &buffer[..bytes_read];
-
-                        // Check if file ends with newline
-                        let ends_with_newline = end_bytes.last() == Some(&b'\n');
-                        let ends_with_double_newline = bytes_read == 2 && end_bytes == b"\n\n";
-
-                        if !ends_with_newline {
-                            return Some(Issue {
-                                issue_type: crate::IssueType::MissingNewline,
-                                line: None,
-                                message: "Missing newline at end of file".to_string(),
-                            });
-                        } else if ends_with_double_newline {
-                            return Some(Issue {
-                                issue_type: crate::IssueType::MultipleNewlines,
-                                line: None,
-                                message: "Multiple newlines at end of file".to_string(),
-                            });
-                        }
-                    }
-                }
-            }
+        // Empty file is considered valid (no issues)
+        if file_size == 0 {
+            return None;
         }
-        None
+
+        // Three bytes are enough to see a `\n\r\n` ending; read up to four.
+        let tail_len = file_size.min(4) as usize;
+        file.seek(SeekFrom::End(-(tail_len as i64))).ok()?;
+        let mut tail = [0u8; 4];
+        file.read_exact(&mut tail[..tail_len]).ok()?;
+
+        CheckerCore::new(self.config.clone()).check_newline_ending_bytes(&tail[..tail_len])
     }
 }
 
@@ -930,5 +884,31 @@ mod tests {
         let checker = FileChecker::new(StdFileReader, Config::default());
         let result = checker.check_final_newline_streaming(temp_file.path());
         assert!(result.is_none()); // Single newline is OK
+    }
+
+    #[test]
+    fn test_check_final_newline_streaming_crlf() {
+        use std::io::Write;
+        use tempfile::NamedTempFile;
+
+        let checker = FileChecker::new(StdFileReader, Config::default());
+
+        let mut single = NamedTempFile::new().unwrap();
+        write!(single, "a\r\nb\r\n").unwrap();
+        single.flush().unwrap();
+        assert!(
+            checker
+                .check_final_newline_streaming(single.path())
+                .is_none()
+        );
+
+        let mut multiple = NamedTempFile::new().unwrap();
+        write!(multiple, "a\r\nb\r\n\r\n").unwrap();
+        multiple.flush().unwrap();
+        let result = checker.check_final_newline_streaming(multiple.path());
+        assert_eq!(
+            result.map(|i| i.issue_type),
+            Some(crate::IssueType::MultipleNewlines)
+        );
     }
 }

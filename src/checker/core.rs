@@ -24,27 +24,35 @@ impl CheckerCore {
 
     /// Check if content has proper newline ending
     pub fn check_newline_ending(&self, content: &str) -> Option<Issue> {
-        if !self.config.checks.newline_ending {
+        self.check_newline_ending_bytes(content.as_bytes())
+    }
+
+    /// Check the end of a file's raw bytes for newline issues.
+    ///
+    /// `tail` only needs to hold the last few bytes of the file (three are
+    /// enough to see a `\n\r\n` ending); passing the whole content also works.
+    pub(crate) fn check_newline_ending_bytes(&self, tail: &[u8]) -> Option<Issue> {
+        if !self.config.checks.newline_ending || tail.is_empty() {
             return None;
         }
 
-        if content.is_empty() {
-            None
-        } else if !content.ends_with('\n') {
-            Some(Issue {
+        if tail.last() != Some(&b'\n') {
+            return Some(Issue {
                 issue_type: IssueType::MissingNewline,
                 line: None,
                 message: "Missing newline at end of file".to_string(),
-            })
-        } else if content.ends_with("\n\n") {
-            Some(Issue {
+            });
+        }
+
+        if strip_line_ending(tail).last() == Some(&b'\n') {
+            return Some(Issue {
                 issue_type: IssueType::MultipleNewlines,
                 line: None,
                 message: "Multiple newlines at end of file".to_string(),
-            })
-        } else {
-            None
+            });
         }
+
+        None
     }
 
     /// Check a single line for trailing whitespace
@@ -96,6 +104,12 @@ impl CheckerCore {
 
         issues
     }
+}
+
+/// Remove one trailing line ending (`\n` or `\r\n`) from `bytes`.
+fn strip_line_ending(bytes: &[u8]) -> &[u8] {
+    let bytes = bytes.strip_suffix(b"\n").unwrap_or(bytes);
+    bytes.strip_suffix(b"\r").unwrap_or(bytes)
 }
 
 #[cfg(test)]
@@ -237,5 +251,34 @@ mod tests {
             checker.config().checks.newline_ending,
             config.checks.newline_ending
         );
+    }
+
+    #[test]
+    fn test_check_newline_ending_crlf_single_is_ok() {
+        let checker = CheckerCore::new(Config::default());
+        assert!(checker.check_newline_ending("a\r\nb\r\n").is_none());
+    }
+
+    #[test]
+    fn test_check_newline_ending_crlf_multiple() {
+        let checker = CheckerCore::new(Config::default());
+        let issue = checker.check_newline_ending("a\r\nb\r\n\r\n");
+        assert_eq!(
+            issue.map(|i| i.issue_type),
+            Some(IssueType::MultipleNewlines)
+        );
+    }
+
+    #[test]
+    fn test_check_newline_ending_mixed_terminators_at_end() {
+        let checker = CheckerCore::new(Config::default());
+        for content in ["a\n\r\n", "a\r\n\n"] {
+            let issue = checker.check_newline_ending(content);
+            assert_eq!(
+                issue.map(|i| i.issue_type),
+                Some(IssueType::MultipleNewlines),
+                "content {content:?} should be flagged"
+            );
+        }
     }
 }

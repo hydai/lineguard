@@ -75,3 +75,27 @@ fn test_memory_efficient_processing() {
     // Should complete successfully without running out of memory
     cmd.assert().success();
 }
+
+#[test]
+fn test_large_crlf_file_with_trailing_blank_line() {
+    let temp_dir = TempDir::new().unwrap();
+    let file_path = temp_dir.path().join("large_crlf.txt");
+
+    // More than 10MB so the streaming checker is used
+    let mut content = String::new();
+    let mut i = 0;
+    while content.len() <= 11 * 1024 * 1024 {
+        content.push_str(&format!("Line {i} of a Windows-style file\r\n"));
+        i += 1;
+    }
+    content.push_str("\r\n");
+    std::fs::write(&file_path, content).unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.arg("large_crlf.txt");
+
+    cmd.assert()
+        .code(1)
+        .stdout(predicate::str::contains("Multiple newlines"));
+}

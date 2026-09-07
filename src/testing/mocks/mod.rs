@@ -7,7 +7,7 @@ pub mod filesystem;
 pub mod output;
 
 // Re-export commonly used mocks
-pub use filesystem::{MockFileSystem, MockMetadata};
+pub use filesystem::MockFileSystem;
 pub use output::MockOutput;
 
 // Re-export reporter traits from the reporter module

@@ -10,9 +10,6 @@ use std::path::{Path, PathBuf};
 // Import the FileReader trait from checker module
 use crate::checker::{FileMetadata, FileReader};
 
-/// Re-export MockMetadata as alias for FileMetadata for backward compatibility
-pub type MockMetadata = FileMetadata;
-
 /// Helper functions for creating metadata
 pub fn file_metadata(len: u64) -> FileMetadata {
     FileMetadata {

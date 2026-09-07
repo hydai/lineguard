@@ -1,7 +1,6 @@
 pub mod core;
 pub mod file_checker;
 pub mod io_trait;
-pub mod traits;
 
 #[cfg(test)]
 mod tests;
@@ -13,7 +12,6 @@ use std::path::Path;
 pub use core::CheckerCore;
 pub use file_checker::{FileChecker, StdFileReader};
 pub use io_trait::{FileMetadata, FileReader};
-pub use traits::{ContentChecker, LineChecker};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CheckResult {

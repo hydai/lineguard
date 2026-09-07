@@ -153,20 +153,20 @@ lineguard --from abc123 --to def456 .
 lineguard --from v1.0.0 src/
 
 # Combine with other options
-lineguard --from main --fix --format json .
+lineguard --from main --fix .
 ```
 
 ### Output Examples
 
 **Human-Readable Format (Default)**
 ```
+Checking 3 files...
 ✗ src/main.rs
-  - Missing newline at end of file
   - Line 45: Trailing spaces found
+  - Missing newline at end of file
 
-✓ src/lib.rs
-
-Summary: 1 file with issues, 2 total issues found
+✗ Found 2 issues in 1 files
+  Files checked: 3
 ```
 
 **JSON Format**
@@ -184,14 +184,14 @@ lineguard --format json src/
       "file": "src/main.rs",
       "issues": [
         {
-          "type": "missing_newline",
-          "line": null,
-          "message": "Missing newline at end of file"
-        },
-        {
           "type": "trailing_space",
           "line": 45,
           "message": "Trailing spaces found"
+        },
+        {
+          "type": "missing_newline",
+          "line": null,
+          "message": "Missing newline at end of file"
         }
       ]
     }
@@ -301,29 +301,16 @@ cargo tarpaulin --lib --print-summary
 cargo tarpaulin --all
 ```
 
-Current coverage targets:
-- Overall: 90%+
-- Core modules (checker, reporter): 85%+
-- Utility modules: 80%+
+Coverage is tracked on Codecov; `codecov.yml` requires 75% project coverage
+and 70% on the lines a pull request changes.
 
 #### Test Architecture
 
-The codebase uses dependency injection and mock implementations:
-
-```rust
-// Using MockFileSystem for testing file operations
-use lineguard::testing::mocks::MockFileSystem;
-
-let mut fs = MockFileSystem::new();
-fs.add_file("test.txt", "content\n");
-
-// Using MockOutput for testing output operations
-use lineguard::testing::mocks::MockOutput;
-
-let mut output = MockOutput::new();
-reporter.report_to(&results, &mut output)?;
-assert_eq!(output.buffer, vec!["expected output\n"]);
-```
+Unit tests live next to the code and use the helpers in `src/testing`, which
+exist only in test builds (`#[cfg(test)]`): `MockFileSystem` implements the
+`FileReader` trait so `FileChecker` runs without disk I/O, `MockOutput`
+captures reporter output, and `TestFileBuilder` assembles file contents.
+Integration tests under `tests/` run the built binary with `assert_cmd`.
 
 ### Code Quality
 

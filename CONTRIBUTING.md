@@ -16,7 +16,7 @@ LineGuard follows strict Test-Driven Development (TDD) practices. Every feature 
 
 ### Prerequisites
 
-- Rust 1.70+ (install via [rustup](https://rustup.rs/))
+- Rust 1.88 or newer (the code uses edition 2024 and let chains), installed via [rustup](https://rustup.rs/)
 - Git
 - cargo-tarpaulin (for coverage): `cargo install cargo-tarpaulin`
 
@@ -108,85 +108,27 @@ fn test_cli_behavior() {
 }
 ```
 
-### Using Mock Implementations
+### Test Helpers
 
-LineGuard provides mock implementations for testing without real I/O:
+The helpers in `src/testing` exist only in test builds (`#[cfg(test)]`), so
+they are available to unit tests inside the crate but not to the integration
+tests under `tests/` or to other crates.
 
-#### MockFileSystem
+- `MockFileSystem` implements the `FileReader` trait: add files with
+  `add_file`, override their size with `set_metadata` (a size above 10MB
+  selects the streaming path) and inject failures with `add_error`.
+- `MockOutput` implements `Output` and `ColoredOutput`; `get_output()` returns
+  everything a reporter wrote and `contains_colored` checks color usage.
+- `TestFileBuilder` assembles file contents (`with_line`,
+  `with_trailing_spaces`, `with_crlf_endings`, `without_final_newline`).
 
-```rust
-use lineguard::testing::mocks::{MockFileSystem, file_metadata};
-
-#[test]
-fn test_file_operations() {
-    let mut fs = MockFileSystem::new();
-
-    // Add a file with content (metadata is set automatically)
-    fs.add_file("test.txt", "Hello\n");
-
-    // Optionally set custom metadata
-    fs.set_metadata("test.txt", file_metadata(6));
-
-    // Simulate errors
-    fs.add_error("error.txt", std::io::Error::new(
-        std::io::ErrorKind::PermissionDenied,
-        "Access denied"
-    ));
-
-    // Use in tests
-    let content = fs.read_to_string(Path::new("test.txt")).unwrap();
-    assert_eq!(content, "Hello\n");
-}
-```
-
-#### MockOutput
-
-```rust
-#[test]
-fn test_output_operations() {
-    use lineguard::reporter::Color;
-    use lineguard::testing::mocks::MockOutput;
-
-    let mut output = MockOutput::new();
-
-    // Write content
-    output.write_line("Hello").unwrap();
-
-    // Check buffer
-    assert_eq!(output.get_output(), "Hello\n");
-
-    // Test colored output
-    output.write_colored("Error", Color::Red).unwrap();
-    assert!(output.contains_colored("Error", Color::Red));
-}
-```
-
-#### Test Builders
-
-```rust
-use lineguard::testing::builders::{TestFileBuilder, TestScenario};
-
-#[test]
-fn test_with_builders() {
-    // Build test file content
-    let (path, content) = TestFileBuilder::new("test.txt")
-        .with_line("First line")
-        .with_trailing_spaces()
-        .without_final_newline()
-        .build();
-
-    // Build test scenario
-    let scenario = TestScenario::new()
-        .with_file("src/main.rs", "valid content\n")
-        .with_file("src/bad.rs", "trailing spaces  \n")
-        .build();
-}
-```
+See the tests in `src/checker/file_checker.rs` and `src/reporter/*.rs` for
+usage. Integration tests write real files into a `tempfile::TempDir` and run
+the binary through `assert_cmd`.
 
 ### Coverage Requirements
 
-- Overall project: 90%+
-- Core modules (checker, reporter): 85%+
+- Codecov enforces the thresholds in `codecov.yml`: 75% for the project and 70% for the lines a PR changes
 - New features: Must include tests
 - Bug fixes: Must include regression tests
 
@@ -242,12 +184,13 @@ cargo tarpaulin --lib --out html
 /// # Examples
 ///
 /// ```
-/// use lineguard::check_file;
+/// use lineguard::{Config, check_file};
+/// use std::path::Path;
 ///
-/// let result = check_file(&PathBuf::from("test.txt"));
+/// let result = check_file(Path::new("test.txt"), &Config::default());
 /// assert!(result.issues.is_empty());
 /// ```
-pub fn check_file(path: &Path) -> CheckResult {
+pub fn check_file(path: &Path, config: &Config) -> CheckResult {
     // Implementation
 }
 ```
@@ -317,7 +260,7 @@ All PRs must pass:
 2. **Full Tests** - All tests including integration
 3. **Code Quality** - Formatting and linting
 4. **Security Audit** - Dependency scanning
-5. **Coverage** - Must maintain 90%+ coverage
+5. **Coverage** - Codecov checks the thresholds in `codecov.yml` (75% project, 70% patch)
 
 ## Performance Considerations
 

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788975325612,
+  "lastUpdate": 1788975582393,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3380,6 +3380,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.0803381938736842,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "41898282+github-actions[bot]@users.noreply.github.com",
+            "name": "github-actions[bot]",
+            "username": "github-actions[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4545b256db761fe18e55e9c0a44ad07f806add42",
+          "message": "chore: prepare release 0.2.1 (#144)\n\nCo-authored-by: GitHub Actions <[email protected]>",
+          "timestamp": "2026-09-10T01:38:20+08:00",
+          "tree_id": "0bd5a641290d4cfbdcdd57a556bf9be5e1094ba5",
+          "url": "https://github.com/hydai/lineguard/commit/4545b256db761fe18e55e9c0a44ad07f806add42"
+        },
+        "date": 1788975581751,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0022769486602484492,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006168835677880192,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.05284048083333335,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.05677776367755103,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.075602445625,
             "unit": "seconds"
           }
         ]

@@ -11,6 +11,9 @@ ignore_patterns = [
     "*.tmp"
 ]
 
+# Respect .gitignore files inside git repositories (default: true)
+respect_gitignore = true
+
 # Enable all checks
 [checks]
 newline_ending = true

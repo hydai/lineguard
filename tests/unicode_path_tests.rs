@@ -47,6 +47,7 @@ fn test_unicode_file_names() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -104,6 +105,7 @@ fn test_unicode_directory_names() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -146,6 +148,7 @@ fn test_unicode_glob_patterns() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -213,6 +216,7 @@ fn test_unicode_in_ignore_patterns() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -266,6 +270,7 @@ fn test_mixed_unicode_and_ascii_paths() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();

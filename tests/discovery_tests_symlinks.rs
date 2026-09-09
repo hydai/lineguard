@@ -33,6 +33,7 @@ fn test_discover_files_with_symlink() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -74,6 +75,7 @@ fn test_discover_files_with_symlink_directory() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -111,6 +113,7 @@ fn test_discover_files_with_broken_symlink() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -152,6 +155,7 @@ fn test_discover_files_with_circular_symlink() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -195,6 +199,7 @@ fn test_discover_symlink_in_recursive_mode() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();

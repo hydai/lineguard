@@ -294,6 +294,7 @@ mod tests {
             from: None,
             to: None,
             no_hidden: false,
+            no_gitignore: false,
         }
     }
 

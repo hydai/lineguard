@@ -296,6 +296,7 @@ fn test_concurrent_directory_traversal() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let result = discover_files(&args, &Config::default()).unwrap();

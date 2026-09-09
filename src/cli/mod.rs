@@ -76,6 +76,12 @@ pub struct CliArgs {
 
     #[arg(long, help = "Skip hidden files (files starting with .)")]
     pub no_hidden: bool,
+
+    #[arg(
+        long,
+        help = "Do not respect .gitignore files when discovering files in directories"
+    )]
+    pub no_gitignore: bool,
 }
 
 pub fn parse_args() -> CliArgs {

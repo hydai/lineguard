@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Config {
     #[serde(default)]
@@ -11,6 +11,19 @@ pub struct Config {
     pub ignore_patterns: Vec<String>,
     #[serde(default)]
     pub file_extensions: Vec<String>,
+    #[serde(default = "default_true")]
+    pub respect_gitignore: bool,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            checks: CheckConfig::default(),
+            ignore_patterns: Vec::new(),
+            file_extensions: Vec::new(),
+            respect_gitignore: true,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

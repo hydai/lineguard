@@ -21,6 +21,7 @@ A fast and reliable file linter that ensures proper line endings and clean forma
 - 🛡️ **Robust Error Handling**: Graceful handling of permission errors
 - 🔍 **Binary File Detection**: Automatically skips binary files
 - 👁️ **Hidden Files**: Checks hidden files by default (use `--no-hidden` to skip)
+- 🙈 **`.gitignore` Aware**: Skips git-ignored files in git repositories by default (use `--no-gitignore` to disable)
 - 🚫 **Ignore Patterns**: Skip files/directories with glob patterns
 - 📝 **File Extension Filtering**: Check only specific file types
 - 🔀 **Git Integration**: Check only files changed between commits
@@ -108,6 +109,7 @@ Options:
       --ignore <IGNORE>        Ignore files matching pattern (can be used multiple times)
       --extensions <EXTENSIONS> File extensions to check (comma-separated)
       --no-hidden              Skip hidden files (files starting with .)
+      --no-gitignore           Do not respect .gitignore files when discovering files in directories
       --no-newline-check       Disable newline ending check
       --no-trailing-space      Disable trailing space check
       --fix                    Automatically fix issues
@@ -227,6 +229,10 @@ ignore_patterns = [
     "**/node_modules/**",
     "*.generated.*",
 ]
+
+# Respect .gitignore files when scanning directories inside a git repository
+# (default: true; .git directories encountered while scanning are skipped too)
+respect_gitignore = true
 
 # File extensions to check (default: all text files)
 file_extensions = [

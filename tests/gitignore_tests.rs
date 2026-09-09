@@ -150,3 +150,110 @@ fn test_git_dir_contents_are_skipped() {
         .success()
         .stdout(predicate::str::is_match(r"Files checked: 2(\r?\n|$)").unwrap());
 }
+
+#[test]
+fn test_parent_gitignore_applies_when_scanning_subdirectory() {
+    let temp_dir = TempDir::new().unwrap();
+    init_git_repo(temp_dir.path());
+
+    // .gitignore at the repository root, scan root is a subdirectory
+    std::fs::write(temp_dir.path().join(".gitignore"), "ignored.txt\n").unwrap();
+    let sub = temp_dir.path().join("sub");
+    std::fs::create_dir(&sub).unwrap();
+    std::fs::write(sub.join("ignored.txt"), BAD_CONTENT).unwrap();
+    std::fs::write(sub.join("checked.txt"), BAD_CONTENT).unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.arg("-r").arg("sub");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("checked.txt"))
+        .stdout(predicate::str::contains("ignored.txt").not());
+}
+
+#[test]
+fn test_git_info_exclude_is_respected() {
+    let temp_dir = TempDir::new().unwrap();
+    init_git_repo(temp_dir.path());
+
+    std::fs::create_dir_all(temp_dir.path().join(".git/info")).unwrap();
+    std::fs::write(temp_dir.path().join(".git/info/exclude"), "excluded.txt\n").unwrap();
+    std::fs::write(temp_dir.path().join("excluded.txt"), BAD_CONTENT).unwrap();
+    std::fs::write(temp_dir.path().join("checked.txt"), BAD_CONTENT).unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.arg("-r").arg(".");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("checked.txt"))
+        .stdout(predicate::str::contains("excluded.txt").not());
+}
+
+#[test]
+fn test_global_gitignore_is_not_respected() {
+    // Results must not depend on per-machine global git configuration.
+    let temp_dir = TempDir::new().unwrap();
+    init_git_repo(temp_dir.path());
+
+    // Fake home directory with a global gitignore via core.excludesFile
+    let home = TempDir::new().unwrap();
+    let global_ignore = home.path().join("global-ignore");
+    std::fs::write(&global_ignore, "globally_ignored.txt\n").unwrap();
+    std::fs::write(
+        home.path().join(".gitconfig"),
+        format!("[core]\n\texcludesFile = {}\n", global_ignore.display()),
+    )
+    .unwrap();
+
+    std::fs::write(temp_dir.path().join("globally_ignored.txt"), BAD_CONTENT).unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.env("HOME", home.path());
+    cmd.env("XDG_CONFIG_HOME", home.path().join(".config"));
+    cmd.arg("-r").arg(".");
+
+    // The globally ignored file is still checked and reported
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("globally_ignored.txt"));
+}
+
+#[test]
+#[cfg(unix)]
+fn test_custom_ignore_pattern_prunes_directory_traversal() {
+    use std::os::unix::fs::PermissionsExt;
+
+    // A directory excluded via --ignore must not be traversed at all:
+    // walking into it would stat every file and surface errors (like this
+    // unreadable directory) from a subtree the user asked to skip.
+    let temp_dir = TempDir::new().unwrap();
+
+    let pruned = temp_dir.path().join("pruned");
+    std::fs::create_dir(&pruned).unwrap();
+    std::fs::write(pruned.join("file.txt"), BAD_CONTENT).unwrap();
+    let mut perms = std::fs::metadata(&pruned).unwrap().permissions();
+    perms.set_mode(0o000);
+    std::fs::set_permissions(&pruned, perms).unwrap();
+
+    std::fs::write(temp_dir.path().join("checked.txt"), "clean\n").unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.arg("--ignore").arg("pruned").arg("-r").arg(".");
+
+    let assert = cmd.assert().success();
+
+    // Restore permissions so TempDir cleanup works even if assertions fail
+    let mut perms = std::fs::metadata(&pruned).unwrap().permissions();
+    perms.set_mode(0o755);
+    std::fs::set_permissions(&pruned, perms).unwrap();
+
+    assert
+        .stdout(predicate::str::contains("file.txt").not())
+        .stderr(predicate::str::contains("pruned").not());
+}

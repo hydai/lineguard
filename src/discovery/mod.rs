@@ -202,10 +202,17 @@ fn discover_files_in_dir(
         builder.max_depth(Some(1));
     }
 
-    if respect_gitignore {
+    // Prune entries during traversal instead of filtering afterwards, so an
+    // ignored directory (or .git) is never descended into: walking it would
+    // stat every file and surface errors from subtrees the user opted out of.
+    let filter_patterns = ignore_patterns.to_vec();
+    builder.filter_entry(move |entry| {
         // git itself never tracks the .git directory; skip its contents too
-        builder.filter_entry(|entry| entry.file_name() != std::ffi::OsStr::new(".git"));
-    }
+        if respect_gitignore && entry.file_name() == std::ffi::OsStr::new(".git") {
+            return false;
+        }
+        !is_ignored(entry.path(), &filter_patterns)
+    });
 
     for result in builder.build() {
         let entry = match result {

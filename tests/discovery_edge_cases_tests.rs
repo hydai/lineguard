@@ -37,6 +37,7 @@ fn test_discover_files_from_args() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -70,6 +71,7 @@ fn test_discover_files_with_extensions_from_cli() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -107,6 +109,7 @@ fn test_discover_files_with_ignore_patterns_from_cli() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -142,6 +145,7 @@ fn test_discover_files_with_invalid_glob_pattern() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -177,6 +181,7 @@ fn test_discover_files_glob_no_matches_then_literal() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -312,6 +317,7 @@ fn test_discover_directory_read_error() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -356,6 +362,7 @@ fn test_discover_files_recursive_with_ignored_directory() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -392,6 +399,7 @@ fn test_is_ignored_with_parent_directory_pattern() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -432,6 +440,7 @@ fn test_is_ignored_with_relative_path_pattern() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();

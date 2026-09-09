@@ -99,6 +99,7 @@ lineguard --verbose --from HEAD~5 --to HEAD .
 - `--ignore <PATTERN>` - Ignore files matching pattern
 - `--extensions <EXT>` - File extensions to check (comma-separated)
 - `--no-hidden` - Skip hidden files (files starting with .)
+- `--no-gitignore` - Do not respect `.gitignore` files when discovering files in directories
 
 ### General Options
 - `-h, --help` - Show help information

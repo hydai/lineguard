@@ -47,7 +47,7 @@ cargo run -- --from HEAD~1 .             # Only files changed since a commit
 src/main.rs      parse args -> load config -> discover files -> rayon par_iter check/fix -> report -> exit code
 src/cli/         CliArgs (clap derive), OutputFormat
 src/config/      Config and CheckConfig; .lineguardrc is found by walking up from the current directory
-src/discovery/   paths, globs, directories, --stdin, --ignore/--extensions, --no-hidden, git range filter
+src/discovery/   paths, globs, directories, --stdin, --ignore/--extensions, --no-hidden, .gitignore via the ignore crate (--no-gitignore / respect_gitignore opt out), git range filter
 src/checker/     CheckerCore (pure checks on &str), FileChecker<R: FileReader> (in-memory vs streaming), result types
 src/fixer/       fix_file: rewrites files, via a temp file plus rename for large files
 src/git/         git diff --name-only wrapper behind --from/--to

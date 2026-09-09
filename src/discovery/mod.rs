@@ -1,7 +1,7 @@
 use crate::git;
 use crate::{CliArgs, Config};
 use glob::{Pattern, glob};
-use std::fs;
+use ignore::WalkBuilder;
 use std::io::{self, BufRead, BufReader};
 use std::path::{Component, Path, PathBuf};
 
@@ -47,6 +47,9 @@ pub fn discover_files(
     // Pre-compile ignore patterns once for performance
     let ignore_patterns = compile_ignore_patterns(&config.ignore_patterns);
 
+    // CLI flag disables .gitignore support configured in the config file
+    let respect_gitignore = config.respect_gitignore && !args.no_gitignore;
+
     if args.stdin {
         // Read file paths from stdin
         let stdin = io::stdin();
@@ -81,6 +84,7 @@ pub fn discover_files(
                     &config,
                     args.no_hidden,
                     &ignore_patterns,
+                    respect_gitignore,
                 )?;
             } else {
                 // Try glob pattern first
@@ -174,39 +178,49 @@ fn discover_files_in_dir(
     config: &Config,
     no_hidden: bool,
     ignore_patterns: &[Pattern],
+    respect_gitignore: bool,
 ) -> Result<(), anyhow::Error> {
-    let entries = match fs::read_dir(dir) {
-        Ok(entries) => entries,
-        Err(e) => {
-            eprintln!("{}: {}", dir.display(), e);
-            return Ok(()); // Continue with other directories
-        },
-    };
+    let mut builder = WalkBuilder::new(dir);
+    builder
+        // Opt out of all default filters, then enable only what lineguard needs
+        .standard_filters(false)
+        // WalkBuilder's hidden(true) means "skip hidden entries"
+        .hidden(no_hidden)
+        // Match previous behavior: symlinked files and directories are followed
+        .follow_links(true)
+        // .gitignore in the walked tree and in parent directories of the root
+        .git_ignore(respect_gitignore)
+        .parents(respect_gitignore)
+        // .git/info/exclude
+        .git_exclude(respect_gitignore)
+        // Only apply git ignore rules inside an actual git repository,
+        // and keep results machine-independent (no global gitignore)
+        .require_git(true)
+        .git_global(false);
 
-    for entry in entries {
-        let entry = match entry {
+    if !recursive {
+        builder.max_depth(Some(1));
+    }
+
+    if respect_gitignore {
+        // git itself never tracks the .git directory; skip its contents too
+        builder.filter_entry(|entry| entry.file_name() != std::ffi::OsStr::new(".git"));
+    }
+
+    for result in builder.build() {
+        let entry = match result {
             Ok(entry) => entry,
             Err(e) => {
-                eprintln!("Error reading directory entry: {e}");
+                eprintln!("{e}");
                 continue;
             },
         };
         let path = entry.path();
 
-        // Skip hidden files if no_hidden is true
-        if no_hidden
-            && let Some(file_name) = path.file_name()
-            && let Some(name_str) = file_name.to_str()
-            && name_str.starts_with('.')
-        {
-            continue;
-        }
-
-        if path.is_file() && should_check_file(&path, config) && !is_ignored(&path, ignore_patterns)
-        {
-            files.push(path);
-        } else if path.is_dir() && recursive && !is_ignored(&path, ignore_patterns) {
-            discover_files_in_dir(&path, recursive, files, config, no_hidden, ignore_patterns)?;
+        // is_ignored also matches ancestor directories, so files inside
+        // ignored directories are excluded just like before
+        if path.is_file() && should_check_file(path, config) && !is_ignored(path, ignore_patterns) {
+            files.push(path.to_path_buf());
         }
     }
 
@@ -293,17 +307,22 @@ fn is_ignored(path: &Path, ignore_patterns: &[Pattern]) -> bool {
             return true;
         }
 
-        // For filename-only patterns (no path separator), also check against just the filename.
-        // Use matches_path with filename as a Path to maintain proper path semantics.
+        // For filename-only patterns (no path separator), check every path
+        // component (the file name and each ancestor directory name), so that
+        // e.g. `--ignore target` excludes files inside any `target` directory
+        // whether the discovered path is relative or absolute.
+        // Use matches_path with the component as a Path to maintain proper path semantics.
         // Check both '/' and '\\' explicitly since glob patterns may use either separator
         // regardless of platform, and users might write patterns with either style.
         let pattern_str = pattern.as_str();
-        if !pattern_str.contains('/')
-            && !pattern_str.contains('\\')
-            && let Some(file_name) = normalized_path.file_name()
-            && pattern.matches_path(Path::new(file_name))
-        {
-            return true;
+        if !pattern_str.contains('/') && !pattern_str.contains('\\') {
+            for component in normalized_path.components() {
+                if let Component::Normal(name) = component
+                    && pattern.matches_path(Path::new(name))
+                {
+                    return true;
+                }
+            }
         }
 
         // Skip the path itself (already checked above) and check its parent directories.

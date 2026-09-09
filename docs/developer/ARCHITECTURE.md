@@ -42,7 +42,12 @@ src/
 3. `discovery::discover_files` merges `--ignore` and `--extensions` over the
    config (CLI wins), expands each argument (directory, glob, literal path) or
    reads paths from stdin with `--stdin`, drops files with binary extensions,
-   ignored paths and, with `--no-hidden`, dotfiles. With `--from`, only files
+   ignored paths and, with `--no-hidden`, dotfiles. Directories are walked with
+   the `ignore` crate: inside a git repository, `.gitignore`,
+   `.git/info/exclude` and the `.git` directory itself are respected/skipped
+   unless `--no-gitignore` (or `respect_gitignore = false` in the config)
+   disables it; explicitly named files, globs and stdin paths are never
+   gitignore-filtered. With `--from`, only files
    that `git::get_changed_files` lists as changed between the two commits are
    kept. The result is a `DiscoveryResult` with the file list and an optional
    `GitRangeInfo` that `--verbose` prints.
@@ -62,12 +67,12 @@ src/
 pub struct CliArgs {
     files, stdin, recursive, format, quiet, verbose, no_color, config,
     ignore, extensions, no_newline_check, no_trailing_space, fix, dry_run,
-    from, to, no_hidden,
+    from, to, no_hidden, no_gitignore,
 }
 pub enum OutputFormat { Human, Json, GitHub }
 
 // config
-pub struct Config { checks: CheckConfig, ignore_patterns: Vec<String>, file_extensions: Vec<String> }
+pub struct Config { checks: CheckConfig, ignore_patterns: Vec<String>, file_extensions: Vec<String>, respect_gitignore: bool }
 pub struct CheckConfig { newline_ending: bool, trailing_spaces: bool } // both default to true
 
 // discovery

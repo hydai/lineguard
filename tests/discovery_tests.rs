@@ -27,6 +27,7 @@ fn test_discover_single_file() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -68,6 +69,7 @@ fn test_discover_multiple_files() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -108,6 +110,7 @@ fn test_discover_files_with_glob_pattern() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -160,6 +163,7 @@ fn test_discover_files_in_directory() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();
@@ -201,6 +205,7 @@ fn test_discover_files_recursive() {
         from: None,
         to: None,
         no_hidden: false,
+        no_gitignore: false,
     };
 
     let config = Config::default();

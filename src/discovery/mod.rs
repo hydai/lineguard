@@ -207,6 +207,11 @@ fn discover_files_in_dir(
     // stat every file and surface errors from subtrees the user opted out of.
     let filter_patterns = ignore_patterns.to_vec();
     builder.filter_entry(move |entry| {
+        // Never filter the requested scan root itself: explicitly passed
+        // roots (even .git or an ignored directory) are honored
+        if entry.depth() == 0 {
+            return true;
+        }
         // git itself never tracks the .git directory; skip its contents too
         if respect_gitignore && entry.file_name() == std::ffi::OsStr::new(".git") {
             return false;

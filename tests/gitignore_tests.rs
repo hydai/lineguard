@@ -224,6 +224,45 @@ fn test_global_gitignore_is_not_respected() {
 }
 
 #[test]
+fn test_explicit_git_dir_root_is_scanned() {
+    // Explicitly passing .git as the scan root is honored, mirroring
+    // explicitly named files: only .git directories encountered while
+    // traversing are skipped.
+    let temp_dir = TempDir::new().unwrap();
+    init_git_repo(temp_dir.path());
+
+    std::fs::write(temp_dir.path().join(".git/description"), BAD_CONTENT).unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.arg("-r").arg(".git");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("description"));
+}
+
+#[test]
+fn test_explicit_gitignored_dir_root_is_scanned() {
+    // Same explicit-intent rule for a gitignored directory passed as root
+    let temp_dir = TempDir::new().unwrap();
+    init_git_repo(temp_dir.path());
+
+    std::fs::write(temp_dir.path().join(".gitignore"), "build/\n").unwrap();
+    let build = temp_dir.path().join("build");
+    std::fs::create_dir(&build).unwrap();
+    std::fs::write(build.join("generated.txt"), BAD_CONTENT).unwrap();
+
+    let mut cmd = cargo_bin_cmd!("lineguard");
+    cmd.current_dir(&temp_dir);
+    cmd.arg("-r").arg("build");
+
+    cmd.assert()
+        .failure()
+        .stdout(predicate::str::contains("generated.txt"));
+}
+
+#[test]
 #[cfg(unix)]
 fn test_custom_ignore_pattern_prunes_directory_traversal() {
     use std::os::unix::fs::PermissionsExt;

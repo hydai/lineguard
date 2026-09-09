@@ -231,7 +231,7 @@ ignore_patterns = [
 ]
 
 # Respect .gitignore files when scanning directories inside a git repository
-# (default: true; the .git directory itself is also skipped)
+# (default: true; .git directories encountered while scanning are skipped too)
 respect_gitignore = true
 
 # File extensions to check (default: all text files)

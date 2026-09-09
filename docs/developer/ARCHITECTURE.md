@@ -44,10 +44,11 @@ src/
    reads paths from stdin with `--stdin`, drops files with binary extensions,
    ignored paths and, with `--no-hidden`, dotfiles. Directories are walked with
    the `ignore` crate: inside a git repository, `.gitignore`,
-   `.git/info/exclude` and the `.git` directory itself are respected/skipped
-   unless `--no-gitignore` (or `respect_gitignore = false` in the config)
-   disables it; explicitly named files, globs and stdin paths are never
-   gitignore-filtered. With `--from`, only files
+   `.git/info/exclude` and `.git` directories encountered during the walk are
+   respected/skipped unless `--no-gitignore` (or `respect_gitignore = false`
+   in the config) disables it; explicitly named files, globs, stdin paths and
+   explicitly passed scan roots (even `.git` or a gitignored directory) are
+   never gitignore-filtered. With `--from`, only files
    that `git::get_changed_files` lists as changed between the two commits are
    kept. The result is a `DiscoveryResult` with the file list and an optional
    `GitRangeInfo` that `--verbose` prints.

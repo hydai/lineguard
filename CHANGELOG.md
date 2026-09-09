@@ -1,4 +1,10 @@
 # Changelog
+## 0.2.1 (2026-09-09)
+
+### Features
+
+- respect .gitignore by default when scanning directories (#143)
+
 ## 0.2.0 (2026-09-07)
 
 ### Breaking Changes

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788792066884,
+  "lastUpdate": 1788975325612,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3331,6 +3331,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.03747102604839506,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d90536529a9e4ed3328e4a2d84b2cd1c01317451",
+          "message": "feat: respect .gitignore by default when scanning directories (#143)\n\n* feat: respect .gitignore by default when scanning directories\n\nDirectory discovery now uses the ignore crate: inside a git repository,\n.gitignore files (including nested ones and parent directories),\n.git/info/exclude and the .git directory itself are skipped by default.\n\n- Add --no-gitignore CLI flag and respect_gitignore config option\n  (default: true) to opt out\n- Explicitly named files, glob patterns and --stdin paths are never\n  gitignore-filtered\n- Global gitignore is intentionally not read to keep results\n  machine-independent; outside a git repository .gitignore has no effect\n- Filename-only --ignore patterns now match any path component, so\n  --ignore target also excludes files under absolute discovered paths\n\nCloses #142\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\n* fix: prune ignored directories during traversal and lock gitignore contract with tests\n\nAddress review feedback on #143:\n\n- Custom --ignore patterns (and .git) now prune directory traversal via\n  filter_entry instead of post-filtering walked files, so lineguard no\n  longer stats every file in, or reports traversal errors from, ignored\n  subtrees\n- Add regression tests for parent-directory .gitignore, .git/info/exclude,\n  and global gitignore staying unread (machine-independent results)\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\n* test: lock explicit scan-root behavior and clarify gitignore docs\n\nAn explicitly passed scan root is honored even if it is .git or a\ngitignored directory, mirroring how explicitly named files bypass\ngitignore filtering; only .git directories encountered during traversal\nare skipped. Lock both cases with regression tests and reword the docs\nto describe traversal-time skipping precisely.\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\n* refactor: make explicit-root passthrough in directory filter self-evident\n\nignore's walker never applies filter_entry to the depth-0 root\n(skip_entry short-circuits at depth 0), which\ntest_explicit_git_dir_root_is_scanned already locks. Spell the\nguarantee out in the filter itself so the behavior no longer relies\non crate internals.\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>\n\n---------\n\nCo-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>",
+          "timestamp": "2026-09-10T01:34:01+08:00",
+          "tree_id": "da1910ddfd805cf5c4dc28d96ace661db1f373ee",
+          "url": "https://github.com/hydai/lineguard/commit/d90536529a9e4ed3328e4a2d84b2cd1c01317451"
+        },
+        "date": 1788975325152,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0021658703005524903,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006387166415081206,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.058148118352830194,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06346298109999998,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.0803381938736842,
             "unit": "seconds"
           }
         ]

@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1789386332211,
+  "lastUpdate": 1790620028212,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3478,6 +3478,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.08296367478777779,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2ad338a8a3195e1e050ed77d0b28cd0fd218ed58",
+          "message": "chore(deps): bump clap from 4.6.6 to 4.6.7 (#146)\n\nBumps [clap](https://github.com/clap-rs/clap) from 4.6.6 to 4.6.7.\n- [Release notes](https://github.com/clap-rs/clap/releases)\n- [Changelog](https://github.com/clap-rs/clap/blob/main/CHANGELOG.md)\n- [Commits](https://github.com/clap-rs/clap/compare/clap_complete-v4.6.6...clap_complete-v4.6.7)\n\n---\nupdated-dependencies:\n- dependency-name: clap\n  dependency-version: 4.6.7\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-09-29T02:25:52+08:00",
+          "tree_id": "fd0b5855ee2f6432aceade13aa1481b12569130f",
+          "url": "https://github.com/hydai/lineguard/commit/2ad338a8a3195e1e050ed77d0b28cd0fd218ed58"
+        },
+        "date": 1790620027861,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0017572497620921145,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.004830963181071429,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.04140881927376625,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.0449964912164706,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.05988262524833335,
             "unit": "seconds"
           }
         ]

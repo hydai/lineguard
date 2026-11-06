@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1793041862607,
+  "lastUpdate": 1793976999900,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3625,6 +3625,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.0802002089247059,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b865d7bf6f6cbc91f9c8290614bf6c63eec99783",
+          "message": "chore(deps): bump ignore from 0.4.33 to 0.4.34 (#150)\n\nBumps [ignore](https://github.com/BurntSushi/ripgrep) from 0.4.33 to 0.4.34.\n- [Release notes](https://github.com/BurntSushi/ripgrep/releases)\n- [Changelog](https://github.com/BurntSushi/ripgrep/blob/master/CHANGELOG.md)\n- [Commits](https://github.com/BurntSushi/ripgrep/compare/ignore-0.4.33...ignore-0.4.34)\n\n---\nupdated-dependencies:\n- dependency-name: ignore\n  dependency-version: 0.4.34\n  dependency-type: direct:production\n  update-type: version-update:semver-patch\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-11-06T22:55:07+08:00",
+          "tree_id": "2ded815b7e8ace89db717e02960036f7a0bfce0d",
+          "url": "https://github.com/hydai/lineguard/commit/b865d7bf6f6cbc91f9c8290614bf6c63eec99783"
+        },
+        "date": 1793976998961,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.0022303850002357577,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006664512890784312,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.06324675925142857,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06946409675142859,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.08261660926333333,
             "unit": "seconds"
           }
         ]

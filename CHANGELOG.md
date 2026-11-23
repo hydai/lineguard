@@ -1,4 +1,10 @@
 # Changelog
+## 0.2.2 (2026-11-23)
+
+### Fixes
+
+- update dependencies for .gitignore, symlink and config parsing fixes (#154)
+
 ## 0.2.1 (2026-09-09)
 
 ### Features

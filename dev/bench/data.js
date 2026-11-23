@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1794232727450,
+  "lastUpdate": 1795457119004,
   "repoUrl": "https://github.com/hydai/lineguard",
   "entries": {
     "Benchmark": [
@@ -3723,6 +3723,55 @@ window.BENCHMARK_DATA = {
           {
             "name": "Glob pattern",
             "value": 0.08020703435435901,
+            "unit": "seconds"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "z54981220@gmail.com",
+            "name": "hydai",
+            "username": "hydai"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2f0bd0eedb1d2779765c8e8e515b5c78b142bb5a",
+          "message": "fix(deps): update dependencies for .gitignore, symlink and config parsing fixes (#154)\n\nUpdate Cargo.lock to the latest compatible versions: anyhow 1.0.105,\nclap 4.6.9, ignore 0.4.35 and toml 1.2.2, plus 33 transitive updates.\nNo Cargo.toml changes needed.\n\nNo lineguard code has changed since v0.2.1, but these versions fix\nbehaviour that the v0.2.1 release binaries still ship:\n\n- ignore 0.4.35: an invalid UTF-8 line in an ignore file no longer\n  drops every rule after it\n- ignore 0.4.35 and walkdir 2.5.1: a symlink to an ancestor of the\n  scan root is reported as a loop instead of being followed outside\n  the root\n- toml_parser 1.1.6: a malformed .lineguardrc that overflowed the\n  stack now fails with a configuration error (exit code 4)\n\nMarked as a fix so that knope prepares a patch release carrying the\nupdated dependencies. rustix 1.1.6 also clears RUSTSEC-2026-0486,\nwhich only affects the tempfile dev-dependency.\n\nCo-authored-by: Claude Opus 5.5 <noreply@anthropic.com>",
+          "timestamp": "2026-11-24T02:04:01+08:00",
+          "tree_id": "58372893cecbe0ccceab74f590d74bc88f2c670e",
+          "url": "https://github.com/hydai/lineguard/commit/2f0bd0eedb1d2779765c8e8e515b5c78b142bb5a"
+        },
+        "date": 1795457118447,
+        "tool": "customSmallerIsBetter",
+        "benches": [
+          {
+            "name": "Small files (100x1KB)",
+            "value": 0.002131019596573559,
+            "unit": "seconds"
+          },
+          {
+            "name": "Medium files (100x100KB)",
+            "value": 0.006237425248586385,
+            "unit": "seconds"
+          },
+          {
+            "name": "Large files (10x10MB)",
+            "value": 0.06128805333555557,
+            "unit": "seconds"
+          },
+          {
+            "name": "Recursive scan",
+            "value": 0.06544003542285716,
+            "unit": "seconds"
+          },
+          {
+            "name": "Glob pattern",
+            "value": 0.08116787978000001,
             "unit": "seconds"
           }
         ]
